@@ -18,6 +18,7 @@ export default function NewProjectPage() {
     name: "",
     address: "",
     area: "",
+    client_id: "",
     stage: ProjectStage.PREPROJECT,
     residents: "",
     demolition_info: "",
@@ -45,8 +46,8 @@ export default function NewProjectPage() {
       };
 
       await projectsService.createProject(projectData);
-      router.push("/projects");
-      router.refresh();
+      // Используем window.location для навигации вместо router.push
+      window.location.href = "/projects";
     } catch (error) {
       console.error("Ошибка при создании проекта:", error);
       alert("Произошла ошибка при создании проекта");
@@ -105,7 +106,7 @@ export default function NewProjectPage() {
                   onValueChange={(value) => handleSelectChange("stage", value)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Выберите стадию" />
+                    <SelectValue defaultValue={ProjectStage.PREPROJECT} placeholder="Выберите стадию" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value={ProjectStage.PREPROJECT}>Предпроектная</SelectItem>
@@ -119,31 +120,41 @@ export default function NewProjectPage() {
             </div>
             
             <div className="space-y-2">
+              <Label>Клиент</Label>
+              <div className="flex items-center space-x-2">
+                <Select
+                  value={formData.client_id || ""}
+                  onValueChange={(value) => {
+                    if (value === "new") {
+                      // TODO: open modal or redirect to create client
+                      alert("Создание нового клиента пока не реализовано");
+                    } else {
+                      handleSelectChange("clientId", value);
+                    }
+                  }}
+                >
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Выберите клиента или создайте нового" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem disabled value="none">
+                      Нет
+                    </SelectItem>
+                    {/* TODO: replace with actual clients list */}
+                    <SelectItem value="1">Иванов Иван</SelectItem>
+                    <SelectItem value="2">Петров Петр</SelectItem>
+                    <SelectItem value="new">+ Добавить клиента</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="residents">Информация о проживающих</Label>
               <Textarea 
                 id="residents" 
                 name="residents" 
                 value={formData.residents} 
-                onChange={handleChange} 
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="demolition_info">Информация о демонтаже</Label>
-              <Textarea 
-                id="demolition_info" 
-                name="demolition_info" 
-                value={formData.demolition_info} 
-                onChange={handleChange} 
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="construction_info">Информация о строительстве</Label>
-              <Textarea 
-                id="construction_info" 
-                name="construction_info" 
-                value={formData.construction_info} 
                 onChange={handleChange} 
               />
             </div>

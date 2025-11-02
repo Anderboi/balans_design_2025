@@ -96,7 +96,7 @@ export interface Contact {
   id: string;
   name: string;
   type: ContactType;
-  company: string;
+  company_id?: string; // ID компании, если контакт является представителем
   position: string;
   phone: string;
   email: string;
@@ -106,9 +106,26 @@ export interface Contact {
   updated_at: string;
 }
 
+export interface Company {
+  id: string;
+  name: string;
+  type: CompanyType;
+  website: string;
+  email: string;
+  phone: string;
+  address: string;
+  tags: string[];
+  notes: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export enum ContactType {
   CLIENT = 'Клиент',
-  CONTRACTOR = 'Подрядчик',
-  SUPPLIER = 'Поставщик',
-  OTHER = 'Другое'
+  SUPPLIER = 'Поставщик'
+}
+
+export enum CompanyType {
+  CLIENT = 'Клиент',
+  SUPPLIER = 'Поставщик'
 }

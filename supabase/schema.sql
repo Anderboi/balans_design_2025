@@ -84,12 +84,27 @@ CREATE TABLE IF NOT EXISTS specifications (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Создание таблицы компаний
+CREATE TABLE IF NOT EXISTS companies (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  type TEXT NOT NULL,
+  website TEXT,
+  email TEXT,
+  phone TEXT,
+  address TEXT,
+  tags TEXT[],
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Создание таблицы контактов
 CREATE TABLE IF NOT EXISTS contacts (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
   type TEXT NOT NULL,
-  company TEXT,
+  company_id UUID REFERENCES companies(id) ON DELETE SET NULL,
   position TEXT,
   phone TEXT,
   email TEXT,
@@ -110,7 +125,14 @@ ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE task_comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE materials ENABLE ROW LEVEL SECURITY;
 ALTER TABLE specifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE companies ENABLE ROW LEVEL SECURITY;
 ALTER TABLE contacts ENABLE ROW LEVEL SECURITY;
 
 -- Создание политик доступа (для примера)
 CREATE POLICY "Публичный доступ к материалам" ON materials FOR SELECT USING (true);
+CREATE POLICY "Публичный доступ к компаниям" ON companies FOR SELECT USING (true);
+CREATE POLICY "Публичный доступ к контактам" ON contacts FOR SELECT USING (true);
+
+-- Индексы для ускорения выборок
+CREATE INDEX IF NOT EXISTS idx_companies_type ON companies(type);
+CREATE INDEX IF NOT EXISTS idx_contacts_company_id ON contacts(company_id);
