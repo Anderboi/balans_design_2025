@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -12,19 +12,12 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-} from "@tanstack/react-table"
-import { ArrowUpDown, MoreHorizontal } from "lucide-react"
+} from "@tanstack/react-table";
+import { ArrowUpDown, Pen } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button";
+
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -32,19 +25,30 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Contact } from "@/types"
+} from "@/components/ui/table";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Contact } from "@/types";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "./ui/select";
+import { Label } from "./ui/label";
+import { useState } from "react";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "./ui/drawer";
+import { contactsService } from "@/lib/services/contacts";
+import { getInitials } from '@/lib/utils';
 
-// Функция для получения инициалов
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .map(word => word.charAt(0))
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
-}
+
 
 export const columns: ColumnDef<Contact>[] = [
   {
@@ -52,31 +56,31 @@ export const columns: ColumnDef<Contact>[] = [
     header: ({ column }) => {
       return (
         <Button
-          variant="ghost"
+          variant="ghost" className='text-xs'
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Name
+          Имя
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
-      )
+      );
     },
     cell: ({ row }) => {
-      const contact = row.original
+      const name = row.getValue("name") as string;
       return (
-        <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8">
+        <div className="flex items-center gap-2">
+          <Avatar className="h-6 w-6">
             <AvatarFallback className="text-xs">
-              {getInitials(contact.name)}
+              {getInitials(name)}
             </AvatarFallback>
           </Avatar>
-          <span className="font-medium">{contact.name}</span>
+          <span>{name}</span>
         </div>
-      )
+      );
     },
   },
   {
     accessorKey: "position",
-    header: "Role",
+    header: "Должность",
     cell: ({ row }) => (
       <div className="text-muted-foreground">
         {row.getValue("position") || "-"}
@@ -87,25 +91,25 @@ export const columns: ColumnDef<Contact>[] = [
     accessorKey: "email",
     header: "Email",
     cell: ({ row }) => {
-      const email = row.getValue("email") as string
-      return email ? (
-        <a 
-          href={`mailto:${email}`} 
+      const email = row.getValue("email") as string;
+      return (
+        <a
+          href={`mailto:${email}`}
           className="text-blue-600 hover:underline"
         >
           {email}
         </a>
-      ) : (
-        <span className="text-muted-foreground">-</span>
-      )
+      );
     },
   },
   {
     accessorKey: "phone",
-    header: "Phone",
+    header: "Телефон",
     cell: ({ row }) => (
       <div>
-        {row.getValue("phone") || <span className="text-muted-foreground">-</span>}
+        {row.getValue("phone") || (
+          <span className="text-muted-foreground">-</span>
+        )}
       </div>
     ),
   },
@@ -113,44 +117,169 @@ export const columns: ColumnDef<Contact>[] = [
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
-      const contact = row.original
+      const contact = row.original;
+      const [isOpen, setIsOpen] = useState(false);
+      const [isLoading, setIsLoading] = useState(false);
+      const [formData, setFormData] = useState({
+        name: contact.name,
+        position: contact.position || "",
+        email: contact.email,
+        phone: contact.phone || "",
+      });
+
+      // Определяем направление Drawer в зависимости от размера экрана
+      const [drawerDirection, setDrawerDirection] = useState<"right" | "bottom">("right");
+
+      React.useEffect(() => {
+        const checkScreenSize = () => {
+          if (window.innerWidth < 768) {
+            setDrawerDirection("bottom");
+          } else {
+            setDrawerDirection("right");
+          }
+        };
+
+        checkScreenSize();
+        window.addEventListener('resize', checkScreenSize);
+        return () => window.removeEventListener('resize', checkScreenSize);
+      }, []);
+
+      const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+      };
+
+      const handleSelectChange = (value: string) => {
+        setFormData(prev => ({ ...prev, position: value }));
+      };
+
+      const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
+        
+        try {
+          await contactsService.updateContact(contact.id, {
+            name: formData.name,
+            position: formData.position,
+            email: formData.email,
+            phone: formData.phone,
+          });
+          
+          // Обновляем данные в таблице
+          Object.assign(contact, formData);
+          setIsOpen(false);
+          
+          // Можно добавить toast уведомление об успешном обновлении
+          console.log('Контакт успешно обновлен');
+        } catch (error) {
+          console.error('Ошибка при обновлении контакта:', error);
+          // Можно добавить toast уведомление об ошибке
+        } finally {
+          setIsLoading(false);
+        }
+      };
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(contact.email)}
+        <Drawer open={isOpen} onOpenChange={setIsOpen} direction={drawerDirection}>
+          <DrawerTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon-sm"
+              className="rounded-full h-6 w-6 p-0 hover:cursor-pointer"
             >
-              Copy email
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Edit contact</DropdownMenuItem>
-            <DropdownMenuItem className="text-red-600">
-              Delete contact
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
+              <span className="sr-only">Open menu</span>
+              <Pen size={8} fontSize={8} className="text-neutral-400" />
+            </Button>
+          </DrawerTrigger>
+          <DrawerContent className="p-6 gap-4">
+            <DrawerHeader className="p-0">
+              <DrawerTitle>Изменить контакт</DrawerTitle>
+              <DrawerDescription>
+                Вы можете изменить имя, роль, email и телефон в полях ниже.
+              </DrawerDescription>
+            </DrawerHeader>
+
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="name">Имя</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  placeholder="Имя"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="position">Должность</Label>
+                <Select value={formData.position} onValueChange={handleSelectChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Выберите должность" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Менеджер">Менеджер</SelectItem>
+                    <SelectItem value="Директор">Директор</SelectItem>
+                    <SelectItem value="Главный инженер">Главный инженер</SelectItem>
+                    <SelectItem value="Архитектор">Архитектор</SelectItem>
+                    <SelectItem value="Дизайнер">Дизайнер</SelectItem>
+                    <SelectItem value="Прораб">Прораб</SelectItem>
+                    <SelectItem value="Снабженец">Снабженец</SelectItem>
+                    <SelectItem value="Бухгалтер">Бухгалтер</SelectItem>
+                    <SelectItem value="Секретарь">Секретарь</SelectItem>
+                    <SelectItem value="Другое">Другое</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="Email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="phone">Телефон</Label>
+                <Input
+                  id="phone"
+                  name="phone"
+                  placeholder="Телефон"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                />
+              </div>
+
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Сохранение..." : "Сохранить"}
+              </Button>
+            </form>
+          </DrawerContent>
+        </Drawer>
+      );
     },
   },
-]
+];
 
 interface ContactsDataTableProps {
-  data: Contact[]
+  data: Contact[];
 }
 
 export function ContactsDataTable({ data }: ContactsDataTableProps) {
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = React.useState({})
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  );
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = React.useState({});
 
   const table = useReactTable({
     data,
@@ -169,23 +298,22 @@ export function ContactsDataTable({ data }: ContactsDataTableProps) {
       columnVisibility,
       rowSelection,
     },
-  })
+  });
 
   return (
     <div className="w-full">
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter contacts..."
+          placeholder="Найти контакт..."
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn("name")?.setFilterValue(event.target.value)
           }
-          className="max-w-sm"
         />
       </div>
       <div className="rounded-md border">
         <Table>
-          <TableHeader>
+          <TableHeader className='bg-neutral-100 text-xs'>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
@@ -198,12 +326,12 @@ export function ContactsDataTable({ data }: ContactsDataTableProps) {
                             header.getContext()
                           )}
                     </TableHead>
-                  )
+                  );
                 })}
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
+          <TableBody className='text-xs'>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
@@ -233,7 +361,7 @@ export function ContactsDataTable({ data }: ContactsDataTableProps) {
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
+      {/* <div className="flex items-center justify-end space-x-2 py-4">
         <div className="space-x-2">
           <Button
             variant="outline"
@@ -241,7 +369,7 @@ export function ContactsDataTable({ data }: ContactsDataTableProps) {
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
-            Previous
+            Назад
           </Button>
           <Button
             variant="outline"
@@ -249,10 +377,10 @@ export function ContactsDataTable({ data }: ContactsDataTableProps) {
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
-            Next
+            Делее
           </Button>
         </div>
-      </div>
+      </div> */}
     </div>
-  )
+  );
 }

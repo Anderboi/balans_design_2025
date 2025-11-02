@@ -115,7 +115,12 @@ export default function CompanyDetailsPage() {
                 {company.website && (
                   <div className="flex items-center gap-3">
                     <Globe className="h-5 w-5 text-muted-foreground" />
-                    <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                    <a
+                      href={company.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
                       {company.website}
                     </a>
                   </div>
@@ -126,7 +131,10 @@ export default function CompanyDetailsPage() {
                 </div>
                 <div className="flex items-center gap-3">
                   <Mail className="h-5 w-5 text-muted-foreground" />
-                  <a href={`mailto:${company.email}`} className="text-primary hover:underline">
+                  <a
+                    href={`mailto:${company.email}`}
+                    className="text-primary hover:underline"
+                  >
                     {company.email}
                   </a>
                 </div>
@@ -141,7 +149,10 @@ export default function CompanyDetailsPage() {
                     <p className="text-sm font-medium mb-2">Теги:</p>
                     <div className="flex flex-wrap gap-2">
                       {company.tags.map((tag, index) => (
-                        <span key={index} className="bg-secondary text-secondary-foreground px-2 py-1 rounded-md text-sm">
+                        <span
+                          key={index}
+                          className="bg-secondary text-secondary-foreground px-2 py-1 rounded-md text-sm"
+                        >
                           {tag}
                         </span>
                       ))}
@@ -160,22 +171,24 @@ export default function CompanyDetailsPage() {
         </div>
 
         <div className="md:col-span-2">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
+          <>
+            <div className="flex flex-row items-center justify-between">
               <CardTitle>Контакты компании</CardTitle>
-              <Button onClick={() => setIsAddContactDialogOpen(true)} size="sm">
-                <Plus className="mr-2 h-4 w-4" />
-                Add new
-              </Button>
-            </CardHeader>
-            <CardContent>
+            </div>
+            <>
               {contacts.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">У этой компании пока нет контактов</p>
+                <p className="text-center text-muted-foreground py-8">
+                  У этой компании пока нет контактов
+                </p>
               ) : (
                 <ContactsDataTable data={contacts} />
               )}
-            </CardContent>
-          </Card>
+            </>
+            <Button onClick={() => setIsAddContactDialogOpen(true)} size="sm" variant={'outline'} className='w-full mt-4'>
+              <Plus className="mr-2 h-4 w-4" />
+              Добавить новый
+            </Button>
+          </>
         </div>
       </div>
 
