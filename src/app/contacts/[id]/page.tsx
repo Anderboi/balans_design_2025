@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Building, Phone, Mail, Globe, ArrowLeft, Plus } from 'lucide-react';
 import Link from 'next/link';
 import AddContactDialog from '../components/add-contact-dialog';
+import { ContactsDataTable } from '@/components/contacts-data-table';
 
 export default function CompanyDetailsPage() {
   const { id } = useParams();
@@ -171,59 +172,7 @@ export default function CompanyDetailsPage() {
               {contacts.length === 0 ? (
                 <p className="text-center text-muted-foreground py-8">У этой компании пока нет контактов</p>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-3 px-4 font-medium text-muted-foreground">Name</th>
-                        <th className="text-left py-3 px-4 font-medium text-muted-foreground">Role</th>
-                        <th className="text-left py-3 px-4 font-medium text-muted-foreground">Email</th>
-                        <th className="text-left py-3 px-4 font-medium text-muted-foreground">Phone</th>
-                        <th className="w-10"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {contacts.map((contact, index) => (
-                        <tr key={contact.id} className="border-b hover:bg-muted/50">
-                          <td className="py-3 px-4">
-                            <div className="flex items-center gap-3">
-                              <Avatar className="h-8 w-8">
-                                <AvatarFallback className="text-xs">
-                                  {getInitials(contact.name)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span className="font-medium">{contact.name}</span>
-                            </div>
-                          </td>
-                          <td className="py-3 px-4 text-muted-foreground">
-                            {contact.position || '-'}
-                          </td>
-                          <td className="py-3 px-4">
-                            {contact.email ? (
-                              <a 
-                                href={`mailto:${contact.email}`} 
-                                className="text-blue-600 hover:underline"
-                              >
-                                {contact.email}
-                              </a>
-                            ) : (
-                              <span className="text-muted-foreground">-</span>
-                            )}
-                          </td>
-                          <td className="py-3 px-4">
-                            {contact.phone || <span className="text-muted-foreground">-</span>}
-                          </td>
-                          <td className="py-3 px-4">
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                              <span className="sr-only">Редактировать</span>
-                              ✏️
-                            </Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <ContactsDataTable data={contacts} />
               )}
             </CardContent>
           </Card>
