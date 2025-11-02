@@ -5,6 +5,7 @@ export interface Project {
   address: string;
   area: number;
   client_id: string;
+  contacts: Contact[];
   residents: string;
   demolition_info: string;
   construction_info: string;

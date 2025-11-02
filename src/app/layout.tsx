@@ -3,11 +3,11 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/sidebar";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["cyrillic"] });
 
 export const metadata: Metadata = {
   title: "Balans Design",
-  description: "Приложение для управления проектами дизайнеров интерьера",
+  description: "Приложение для управления проектами для дизайнера интерьера",
 };
 
 export default function RootLayout({
