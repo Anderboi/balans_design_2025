@@ -76,7 +76,7 @@ const AppSidebar = () => {
             <SidebarMenu>
               {mainItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild size={"sm"}>
+                  <SidebarMenuButton asChild>
                     <a href={item.href}>
                       <item.icon />
                       <span>{item.title}</span>
@@ -93,7 +93,7 @@ const AppSidebar = () => {
             <SidebarMenu>
               {libraryItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild size={"sm"}>
+                  <SidebarMenuButton asChild>
                     <a href={item.href}>
                       <item.icon />
                       <span>{item.title}</span>
