@@ -193,10 +193,10 @@ export default function CompanyDetailsPage() {
       </div>
 
       <AddContactDialog
-        open={isAddContactDialogOpen}
+        isOpen={isAddContactDialogOpen}
         onOpenChange={setIsAddContactDialogOpen}
         onSubmit={handleAddContact}
-        companyId={company.id}
+        companyId={company?.id}
       />
     </div>
   );

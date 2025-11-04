@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronDownIcon, Plus, Upload, X } from "lucide-react";
 import {
   Dialog,
@@ -21,16 +21,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SelectSeparator } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { materialsService } from "@/lib/services/materials";
-import { Material, MaterialType } from "@/types";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from "../ui/input-group";
+import { Material, MaterialType, Contact, ContactType } from "@/types";
+import { CompanyType } from "@/types";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,6 +36,9 @@ import {
 } from "../ui/dropdown-menu";
 import { FileDropzone } from '../ui/dropzone';
 import { storageService } from '@/lib/services/storage';
+import { contactsService } from '@/lib/services/contacts';
+import { companiesService } from '@/lib/services/companies';
+import AddContactDialog from '@/app/contacts/components/add-contact-dialog';
 
 interface AddMaterialDialogProps {
   open: boolean;
@@ -56,6 +56,10 @@ export function AddMaterialDialog({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [suppliers, setSuppliers] = useState<Contact[]>([]);
+  const [isAddSupplierOpen, setIsAddSupplierOpen] = useState(false);
+  const [supplierQuery, setSupplierQuery] = useState("");
+  const [supplierCompaniesMap, setSupplierCompaniesMap] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -119,7 +123,7 @@ export function AddMaterialDialog({
       // Если выбрано изображение, загружаем в Storage и подставляем URL
       if (imageFile) {
         const publicUrl = await storageService.uploadMaterialImage(imageFile);
-        handleInputChange('image_url', publicUrl);
+        handleInputChange("image_url", publicUrl);
       }
       await materialsService.createMaterial(formData);
       onMaterialAdded();
@@ -154,8 +158,62 @@ export function AddMaterialDialog({
     }
   };
 
+  // Загрузка списка поставщиков
+  useEffect(() => {
+    const loadSuppliers = async () => {
+      try {
+        const data = await contactsService.getContactsByType(
+          ContactType.SUPPLIER
+        );
+        setSuppliers(data);
+      } catch (error) {
+        console.error("Ошибка при загрузке поставщиков:", error);
+      }
+    };
+    loadSuppliers();
+  }, []);
+
+  // Загрузка компаний (для отображения названия рядом с контактом)
+  useEffect(() => {
+    const loadCompanies = async () => {
+      try {
+        const companies = await companiesService.getCompaniesByType(CompanyType.SUPPLIER);
+        const map: Record<string, string> = {};
+        (companies as any[]).forEach((c) => {
+          if (c && c.id) map[c.id] = c.name;
+        });
+        setSupplierCompaniesMap(map);
+      } catch (error) {
+        console.error("Ошибка при загрузке компаний:", error);
+      }
+    };
+    loadCompanies();
+  }, []);
+
+  const handleCreateSupplier = async (
+    contact: Omit<Contact, "id" | "created_at" | "updated_at">
+  ) => {
+    try {
+      const created = await contactsService.createContact({
+        ...contact,
+        type: ContactType.SUPPLIER,
+      });
+      setSuppliers((prev) => [created, ...prev]);
+      handleInputChange("supplier", created.name);
+      setIsAddSupplierOpen(false);
+    } catch (error) {
+      console.error("Ошибка при создании поставщика:", error);
+    }
+  };
+
+  const filteredSuppliers = suppliers.filter((s) => {
+    const companyName = s.company_id ? supplierCompaniesMap[s.company_id] || "" : "";
+    const hay = `${s.name} ${companyName}`.toLowerCase();
+    return hay.includes(supplierQuery.toLowerCase());
+  });
+
   const materialTypes = Object.values(MaterialType);
-  const commonUnits = ["шт", "м", "м²", "м³", "кг", "л", "упак", "комплект"];
+  const commonUnits = ["шт", "м.п.", "м²", "м³", "кг", "л", "упак", "комплект"];
   const commonCategories = [
     "Напольные покрытия",
     "Настенные покрытия",
@@ -168,7 +226,6 @@ export function AddMaterialDialog({
     "Клеи и герметики",
     "Инструменты",
   ];
-
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -199,7 +256,7 @@ export function AddMaterialDialog({
                   onClick={() => {
                     setImageFile(null);
                     setImagePreview(null);
-                    handleInputChange('image_url', '');
+                    handleInputChange("image_url", "");
                   }}
                 >
                   Удалить изображение
@@ -217,14 +274,14 @@ export function AddMaterialDialog({
                   const files = e.dataTransfer.files;
                   if (!files || files.length === 0) return;
                   const file = files[0];
-                  if (!file.type.startsWith('image/')) return;
+                  if (!file.type.startsWith("image/")) return;
                   setImageFile(file);
                   setImagePreview(URL.createObjectURL(file));
                 }}
                 handleFileSelect={(files) => {
                   if (!files || files.length === 0) return;
                   const file = files[0];
-                  if (!file.type.startsWith('image/')) return;
+                  if (!file.type.startsWith("image/")) return;
                   setImageFile(file);
                   setImagePreview(URL.createObjectURL(file));
                 }}
@@ -287,6 +344,49 @@ export function AddMaterialDialog({
               />
             </div>
 
+            {/* Поставщик */}
+            <div className="space-y-2">
+              <Label htmlFor="supplier">Поставщик</Label>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-full justify-between">
+                    <span>{formData.supplier || "Выберите поставщика"}</span>
+                    <ChevronDownIcon className="h-4 w-4 opacity-50" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]">
+                  <div className="p-2">
+                    <Input
+                      placeholder="Поиск или создание..."
+                      value={supplierQuery}
+                      onChange={(e) => setSupplierQuery(e.target.value)}
+                    />
+                  </div>
+                  {filteredSuppliers.map((s) => {
+                    const companyName = s.company_id ? supplierCompaniesMap[s.company_id] : undefined;
+                    return (
+                      <DropdownMenuItem
+                        key={s.id}
+                        onSelect={() => handleInputChange("supplier", companyName ? `${s.name} — ${companyName}` : s.name)}
+                      >
+                        {companyName ? `${s.name} — ${companyName}` : s.name}
+                      </DropdownMenuItem>
+                    );
+                  })}
+                  {filteredSuppliers.length === 0 && supplierQuery && (
+                    <DropdownMenuItem
+                      onSelect={() => {
+                        setIsAddSupplierOpen(true);
+                      }}
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      Добавить '{supplierQuery}'
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="article">Артикул</Label>
               <Input
@@ -343,6 +443,7 @@ export function AddMaterialDialog({
             <div className="space-y-2">
               <Label htmlFor="unit">Единица измерения</Label>
               <Select
+                defaultValue={commonUnits[0]}
                 value={formData.unit}
                 onValueChange={(value) => handleInputChange("unit", value)}
               >
@@ -402,7 +503,7 @@ export function AddMaterialDialog({
           </div>
 
           {/* Описание */}
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <Label htmlFor="description">Описание</Label>
             <Textarea
               id="description"
@@ -411,7 +512,7 @@ export function AddMaterialDialog({
               placeholder="Подробное описание материала"
               rows={3}
             />
-          </div>
+          </div> */}
 
           {/* URL изображения */}
           <div className="space-y-2">
@@ -480,6 +581,13 @@ export function AddMaterialDialog({
             </Button>
           </DialogFooter>
         </form>
+        <AddContactDialog
+          isOpen={isAddSupplierOpen}
+          onOpenChange={setIsAddSupplierOpen}
+          onSubmit={handleCreateSupplier}
+          defaultCompanyName={supplierQuery}
+          defaultType={ContactType.SUPPLIER}
+        />
       </DialogContent>
     </Dialog>
   );

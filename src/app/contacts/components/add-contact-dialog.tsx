@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Contact, ContactType } from "@/types";
+import { Contact, ContactType, CompanyType } from "@/types";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,24 +20,34 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { companiesService } from "@/lib/services/companies";
 
 interface AddContactDialogProps {
-  open: boolean;
+  isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (contact: Omit<Contact, "id" | "created_at" | "updated_at">) => void;
   companyId?: string;
+  defaultName?: string; // deprecated: used for contact name (backward compatibility)
+  defaultCompanyName?: string;
+  defaultType?: ContactType;
 }
 
 export default function AddContactDialog({
-  open,
+  isOpen,
   onOpenChange,
   onSubmit,
   companyId,
+  defaultName,
+  defaultCompanyName,
+  defaultType,
 }: AddContactDialogProps) {
-  const [formData, setFormData] = useState<Omit<Contact, "id" | "created_at" | "updated_at">>({
-    name: "",
-    type: ContactType.CLIENT,
-    company_id: companyId || "",
+  const [companyName, setCompanyName] = useState<string>(defaultCompanyName || "");
+  const [formData, setFormData] = useState<
+    Omit<Contact, "id" | "created_at" | "updated_at">
+  >({
+    name: defaultName || "",
+    type: defaultType || ContactType.SUPPLIER,
+    ...(companyId ? { company_id: companyId } : {}),
     position: "",
     phone: "",
     email: "",
@@ -45,12 +55,19 @@ export default function AddContactDialog({
     notes: "",
   });
 
-  // Обновляем company_id при изменении companyId
+  // Обновляем company_id и name при изменении props
   useEffect(() => {
-    if (companyId) {
-      setFormData(prev => ({ ...prev, company_id: companyId }));
-    }
-  }, [companyId]);
+    setFormData(prev => {
+      const base = { ...prev, name: defaultName || prev.name, type: defaultType || prev.type } as any;
+      if (companyId) {
+        return { ...base, company_id: companyId };
+      }
+      // удаляем company_id, если companyId не передан
+      const { company_id, ...rest } = base;
+      return rest;
+    });
+    setCompanyName(defaultCompanyName || companyName);
+  }, [companyId, defaultName, defaultCompanyName, defaultType]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -63,27 +80,51 @@ export default function AddContactDialog({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    const payload: any = { ...formData };
+    // если company_id не указан, но заполнено название компании — создаем компанию
+    if (!payload.company_id && companyName && companyName.trim().length > 0) {
+      try {
+        const company = await companiesService.createCompany({
+          name: companyName.trim(),
+          type: payload.type === ContactType.SUPPLIER ? CompanyType.SUPPLIER : CompanyType.CLIENT,
+          website: "",
+          email: payload.email || "",
+          phone: payload.phone || "",
+          address: payload.address || "",
+          tags: [],
+          notes: "",
+        });
+        payload.company_id = company.id;
+      } catch (err) {
+        console.error("Ошибка при создании компании:", err);
+      }
+    }
+    // не отправляем пустой company_id
+    if (!payload.company_id) {
+      delete payload.company_id;
+    }
+    onSubmit(payload);
     resetForm();
   };
 
   const resetForm = () => {
     setFormData({
       name: "",
-      type: ContactType.CLIENT,
-      company_id: companyId || "",
+      type: defaultType || ContactType.SUPPLIER,
+      ...(companyId ? { company_id: companyId } : {}),
       position: "",
       phone: "",
       email: "",
       address: "",
       notes: "",
     });
+    setCompanyName("");
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
@@ -92,6 +133,20 @@ export default function AddContactDialog({
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
+            {!companyId && (
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="company_name" className="text-right">
+                  Название компании
+                </Label>
+                <Input
+                  id="company_name"
+                  name="company_name"
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  className="col-span-3"
+                />
+              </div>
+            )}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="name" className="text-right">
                 Имя
@@ -150,7 +205,7 @@ export default function AddContactDialog({
                 value={formData.phone}
                 onChange={handleChange}
                 className="col-span-3"
-                required
+                
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
@@ -164,7 +219,7 @@ export default function AddContactDialog({
                 value={formData.email}
                 onChange={handleChange}
                 className="col-span-3"
-                required
+                
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">

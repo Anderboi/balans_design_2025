@@ -149,7 +149,7 @@ export default function ContactsPage() {
             {filteredCompanies.map((company) => (
               <Card 
                 key={company.id} 
-                className="cursor-pointer hover:shadow-md transition-shadow"
+                className="cursor-pointer hover:shadow-md transition-shadow min-h-66 min-w-66 justify-between"
                 onClick={() => handleCompanyClick(company.id)}
               >
                 <CardHeader className="flex flex-row items-center gap-4 pb-2">
