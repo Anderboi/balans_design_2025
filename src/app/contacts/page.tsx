@@ -7,10 +7,8 @@ import { companiesService } from "@/lib/services/companies";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PlusCircle, Search, X, Building, Phone, Mail, Globe } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-// import { useToast } from "@/components/ui/use-toast";
+import { PlusCircle, Search, X } from "lucide-react";
+import { CompanyCard } from "./components/company-card";
 import { toast } from "sonner";
 import { AddCompanyDialog } from './components/add-company-dialog';
 
@@ -147,54 +145,7 @@ export default function ContactsPage() {
         <TabsContent value="all" className="mt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredCompanies.map((company) => (
-              <Card 
-                key={company.id} 
-                className="cursor-pointer hover:shadow-md transition-shadow min-h-66 min-w-66 justify-between"
-                onClick={() => handleCompanyClick(company.id)}
-              >
-                <CardHeader className="flex flex-row items-center gap-4 pb-2">
-                  <Avatar className="h-12 w-12">
-                    <AvatarFallback>{getInitials(company.name)}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <CardTitle className="text-xl">{company.name}</CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      {company.type === CompanyType.CLIENT ? "Клиент" : "Поставщик"}
-                    </p>
-                  </div>
-                </CardHeader>
-                <CardContent className="pb-2">
-                  {company.website && (
-                    <div className="flex items-center gap-2 mb-2">
-                      <Globe className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">{company.website}</span>
-                    </div>
-                  )}
-                  {company.phone && (
-                    <div className="flex items-center gap-2 mb-2">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">{company.phone}</span>
-                    </div>
-                  )}
-                  {company.email && (
-                    <div className="flex items-center gap-2 mb-2">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">{company.email}</span>
-                    </div>
-                  )}
-                  {company.address && (
-                    <div className="flex items-center gap-2">
-                      <Building className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">{company.address}</span>
-                    </div>
-                  )}
-                </CardContent>
-                <CardFooter>
-                  <Button variant="ghost" size="sm" className="ml-auto">
-                    Подробнее
-                  </Button>
-                </CardFooter>
-              </Card>
+              <CompanyCard company={company}></CompanyCard>
             ))}
             {filteredCompanies.length === 0 && (
               <div className="col-span-full text-center py-10">
@@ -218,13 +169,9 @@ export default function ContactsPage() {
         </TabsContent>
         <TabsContent value={CompanyType.SUPPLIER} className="mt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredCompanies.length === 0 && (
-              <div className="col-span-full text-center py-10">
-                <p className="text-muted-foreground">
-                  Поставщики не найдены. Попробуйте изменить параметры поиска или добавьте нового поставщика.
-                </p>
-              </div>
-            )}
+            {filteredCompanies.map((company) => (
+              <CompanyCard key={company.id} company={company} />
+            ))}
           </div>
         </TabsContent>
       </Tabs>
