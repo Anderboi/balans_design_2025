@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import { Material, Specification } from '@/types';
+import { Material, Specification, MaterialType } from '@/types';
 
 export const materialsService = {
   // Получение всех материалов
@@ -7,7 +7,7 @@ export const materialsService = {
     const { data, error } = await supabase
       .from('materials')
       .select('*')
-      .order('name');
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Ошибка при получении материалов:', error);
@@ -15,6 +15,116 @@ export const materialsService = {
     }
 
     return data || [];
+  },
+
+  // Получить материалы по типу
+  async getMaterialsByType(type: MaterialType): Promise<Material[]> {
+    const { data, error } = await supabase
+      .from('materials')
+      .select('*')
+      .eq('type', type)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Ошибка при получении материалов по типу:', error);
+      throw error;
+    }
+
+    return data || [];
+  },
+
+  // Поиск материалов
+  async searchMaterials(query: string): Promise<Material[]> {
+    const { data, error } = await supabase
+      .from('materials')
+      .select('*')
+      .or(`name.ilike.%${query}%,description.ilike.%${query}%,manufacturer.ilike.%${query}%`)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Ошибка при поиске материалов:', error);
+      throw error;
+    }
+
+    return data || [];
+  },
+
+  // Получить материал по ID
+  async getMaterialById(id: string): Promise<Material | null> {
+    const { data, error } = await supabase
+      .from('materials')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      console.error('Ошибка при получении материала по ID:', error);
+      throw error;
+    }
+
+    return data;
+  },
+
+  // Создать новый материал
+  async createMaterial(material: Omit<Material, 'id' | 'created_at' | 'updated_at'>): Promise<Material> {
+    const { data, error } = await supabase
+      .from('materials')
+      .insert([material])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Ошибка при создании материала:', error);
+      throw error;
+    }
+
+    return data;
+  },
+
+  // Обновить материал
+  async updateMaterial(id: string, updates: Partial<Omit<Material, 'id' | 'created_at' | 'updated_at'>>): Promise<Material> {
+    const { data, error } = await supabase
+      .from('materials')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Ошибка при обновлении материала:', error);
+      throw error;
+    }
+
+    return data;
+  },
+
+  // Удалить материал
+  async deleteMaterial(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('materials')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Ошибка при удалении материала:', error);
+      throw error;
+    }
+  },
+
+  // Получить уникальные категории
+  async getCategories(): Promise<string[]> {
+    const { data, error } = await supabase
+      .from('materials')
+      .select('category')
+      .not('category', 'is', null);
+
+    if (error) {
+      console.error('Ошибка при получении категорий:', error);
+      throw error;
+    }
+
+    const categories = [...new Set(data?.map(item => item.category) || [])];
+    return categories.filter(Boolean);
   },
 
   // Получение спецификаций для проекта
@@ -46,5 +156,51 @@ export const materialsService = {
     }
 
     return data;
+  },
+
+  // Обновление спецификации
+  async updateSpecification(id: string, updates: Partial<Omit<Specification, 'id' | 'created_at' | 'updated_at'>>): Promise<Specification> {
+    const { data, error } = await supabase
+      .from('specifications')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Ошибка при обновлении спецификации:', error);
+      throw error;
+    }
+
+    return data;
+  },
+
+  // Удаление спецификации
+  async deleteSpecification(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('specifications')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Ошибка при удалении спецификации:', error);
+      throw error;
+    }
+  },
+
+  // Получение спецификаций для конкретного помещения
+  async getSpecificationsByRoom(projectId: string, roomId: string): Promise<Specification[]> {
+    const { data, error } = await supabase
+      .from('specifications')
+      .select('*, materials(*), rooms(name)')
+      .eq('project_id', projectId)
+      .eq('room_id', roomId);
+
+    if (error) {
+      console.error(`Ошибка при получении спецификаций для помещения ${roomId}:`, error);
+      throw error;
+    }
+
+    return data || [];
   }
 };

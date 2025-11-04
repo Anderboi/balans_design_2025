@@ -63,13 +63,23 @@ export interface TaskComment {
 export interface Material {
   id: string;
   name: string;
+  description?: string;
+  manufacturer?: string;
+  article?: string;
+  lead_time?: number;
+  product_url?: string;
+  size?: string;
+  color?: string;
+  finish?: string;
+  material?: string;
+  //category?: string;
   type: MaterialType;
-  manufacturer: string;
-  supplier: string;
-  price: number;
-  unit: string;
-  description: string;
-  image_url: string;
+  supplier?: string;
+  price?: number;
+  unit?: string;
+  image_url?: string;
+  in_stock?: boolean;
+  tags?: string[];
   created_at: string;
   updated_at: string;
 }
@@ -77,7 +87,13 @@ export interface Material {
 export enum MaterialType {
   FINISH = 'Отделка',
   FURNITURE = 'Мебель',
-  EQUIPMENT = 'Оборудование'
+  EQUIPMENT = 'Оборудование',
+  BATHROOM = 'Сантехника',
+  LIGHTING = 'Освещение',
+  TEXTILE = 'Текстиль',
+  FIXTURES = 'Инженерное оборудование',
+  DECOR = 'Декор',
+  OUTDOOR = 'Уличная мебель'
 }
 
 export interface Specification {

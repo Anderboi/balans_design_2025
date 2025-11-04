@@ -136,3 +136,16 @@ CREATE POLICY "Публичный доступ к контактам" ON contact
 -- Индексы для ускорения выборок
 CREATE INDEX IF NOT EXISTS idx_companies_type ON companies(type);
 CREATE INDEX IF NOT EXISTS idx_contacts_company_id ON contacts(company_id);
+
+-- Политики для Supabase Storage (bucket: materials)
+-- Разрешить чтение объектов из bucket `materials`
+CREATE POLICY IF NOT EXISTS "Публичное чтение материалов (Storage)" ON storage.objects
+FOR SELECT
+USING (bucket_id = 'materials');
+
+-- Разрешить загрузку (insert) в bucket `materials` для анонимных клиентов
+-- Внимание: это откроет возможность загрузки без аутентификации.
+-- Для более строгой безопасности замените на: auth.role() = 'authenticated'
+CREATE POLICY IF NOT EXISTS "Анонимная загрузка материалов (Storage)" ON storage.objects
+FOR INSERT
+WITH CHECK (bucket_id = 'materials');
