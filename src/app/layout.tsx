@@ -4,6 +4,7 @@ import "./globals.css";
 import { Sidebar } from "@/components/sidebar";
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import AppSidebar from '@/components/app-sidebar';
+import GlobalErrorBoundary from '@/components/global-error-boundary';
 
 const inter = Inter({ subsets: ["cyrillic"] });
 
@@ -20,14 +21,16 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <body className={inter.className}>
-        <div className="flex h-screen">
-          <SidebarProvider>
-            <AppSidebar/>
-            {/* <Sidebar /> */}
-            <SidebarTrigger />
-            <main className="flex-1 overflow-auto py-6 pr-6">{children}</main>
-          </SidebarProvider>
-        </div>
+        <GlobalErrorBoundary>
+          <div className="flex h-screen">
+            <SidebarProvider>
+              <AppSidebar/>
+              {/* <Sidebar /> */}
+              <SidebarTrigger />
+              <main className="flex-1 overflow-auto py-6 pr-6">{children}</main>
+            </SidebarProvider>
+          </div>
+        </GlobalErrorBoundary>
       </body>
     </html>
   );

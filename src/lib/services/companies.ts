@@ -3,7 +3,7 @@ import { Company, CompanyType, Contact } from '@/types';
 
 export const companiesService = {
   // Получение всех компаний
-  async getCompanies(): Promise<Company[]> {
+ async getCompanies(): Promise<Company[]> {
     const { data, error } = await supabase
       .from('companies')
       .select('*')

@@ -1,11 +1,10 @@
 // Типы для проектов
 export interface Project {
   id: string;
-  name: string;
-  address: string;
-  area: number;
-  client_id: string;
-  contacts: Contact[];
+ name: string;
+ address: string;
+ area: number;
+ client_id: string;
   residents: string;
   demolition_info: string;
   construction_info: string;

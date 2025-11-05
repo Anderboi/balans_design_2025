@@ -11,8 +11,9 @@ import { MaterialCard } from '@/components/materials/material-card';
 import { AddMaterialDialog } from '@/components/materials/add-material-dialog';
 import { materialsService } from '@/lib/services/materials';
 import { Material, MaterialType } from '@/types';
+import PageErrorBoundary from '@/components/page-error-boundary';
 
-export default function MaterialsPage() {
+function MaterialsPageContent() {
   const [materials, setMaterials] = useState<Material[]>([]);
   const [filteredMaterials, setFilteredMaterials] = useState<Material[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,7 +27,7 @@ export default function MaterialsPage() {
   useEffect(() => {
     loadMaterials();
     loadCategories();
-  }, []);
+ }, []);
 
   useEffect(() => {
     filterMaterials();
@@ -39,6 +40,7 @@ export default function MaterialsPage() {
       setMaterials(data);
     } catch (error) {
       console.error('Ошибка при загрузке материалов:', error);
+      throw error; // Бросаем ошибку для обработки error boundary
     } finally {
       setLoading(false);
     }
@@ -50,8 +52,9 @@ export default function MaterialsPage() {
       setCategories(data);
     } catch (error) {
       console.error('Ошибка при загрузке категорий:', error);
+      // Не бросаем ошибку для категорий, так как это не критично для основной функциональности
     }
-  };
+ };
 
   const filterMaterials = () => {
     let filtered = materials;
@@ -81,7 +84,7 @@ export default function MaterialsPage() {
   const handleMaterialAdded = () => {
     loadMaterials();
     setIsAddDialogOpen(false);
-  };
+ };
 
   const handleMaterialUpdated = () => {
     loadMaterials();
@@ -202,7 +205,7 @@ export default function MaterialsPage() {
         </div>
       ) : (
         <div className={
-          viewMode === 'grid' 
+          viewMode === 'grid'
             ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
             : 'space-y-4'
         }>
@@ -225,5 +228,13 @@ export default function MaterialsPage() {
         onMaterialAdded={handleMaterialAdded}
       />
     </div>
+ );
+}
+
+export default function MaterialsPage() {
+  return (
+    <PageErrorBoundary pageName="страница материалов">
+      <MaterialsPageContent />
+    </PageErrorBoundary>
   );
 }

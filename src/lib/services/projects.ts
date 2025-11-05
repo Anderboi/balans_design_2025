@@ -6,7 +6,7 @@ export const projectsService = {
   async getProjects(): Promise<Project[]> {
     const { data, error } = await supabase
       .from('projects')
-      .select('*, contacts(name)')
+      .select('*')
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -27,7 +27,7 @@ export const projectsService = {
     
     const { data, error } = await supabase
       .from('projects')
-      .select('*, contacts(name)')
+      .select('*')
       .eq('id', id)
       .single();
 

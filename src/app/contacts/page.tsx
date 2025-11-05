@@ -11,16 +11,16 @@ import { PlusCircle, Search, X } from "lucide-react";
 import { CompanyCard } from "./components/company-card";
 import { toast } from "sonner";
 import { AddCompanyDialog } from './components/add-company-dialog';
+import PageErrorBoundary from "@/components/page-error-boundary";
 
 
-export default function ContactsPage() {
+function ContactsPageContent() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all");
   const [isAddCompanyOpen, setIsAddCompanyOpen] = useState(false);
   const router = useRouter();
-  // const { toast } = useToast();
 
   useEffect(() => {
     loadCompanies();
@@ -33,9 +33,11 @@ export default function ContactsPage() {
       setFilteredCompanies(data);
     } catch (error) {
       console.error("Ошибка при загрузке компаний:", error);
-      toast.error("Не удалось загрузить компании");
+      // Не показываем тост, так как ошибка будет обработана error boundary
+      // toast.error("Не удалось загрузить компании");
+      throw error; // Бросаем ошибку для обработки error boundary
     }
-  };
+ };
 
   useEffect(() => {
     filterCompanies();
@@ -76,6 +78,7 @@ export default function ContactsPage() {
     } catch (error) {
       console.error("Ошибка при добавлении компании:", error);
       toast.error("Не удалось добавить компанию");
+      // Оставляем тост, так как это действие пользователя, а не загрузка данных
     }
   };
 
@@ -182,5 +185,13 @@ export default function ContactsPage() {
         onAddCompany={handleAddCompany}
       />
     </div>
+  );
+}
+
+export default function ContactsPage() {
+  return (
+    <PageErrorBoundary pageName="Страница контактов">
+      <ContactsPageContent />
+    </PageErrorBoundary>
   );
 }
