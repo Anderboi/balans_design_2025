@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { MoreHorizontal, Edit, Trash2, Plus, Package } from 'lucide-react';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { useState } from "react";
+import { MoreHorizontal, Edit, Trash2, Plus, Package } from "lucide-react";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,20 +21,25 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { EditMaterialDrawer } from './edit-material-drawer';
-import { AssignMaterialDialog } from './assign-material-dialog';
-import { materialsService } from '@/lib/services/materials';
-import { Material } from '@/types';
+} from "@/components/ui/alert-dialog";
+import { EditMaterialDrawer } from "./edit-material-drawer";
+import { AssignMaterialDialog } from "./assign-material-dialog";
+import { materialsService } from "@/lib/services/materials";
+import { Material } from "@/types";
 
 interface MaterialCardProps {
   material: Material;
-  viewMode: 'grid' | 'list';
+  viewMode: "grid" | "list";
   onMaterialUpdated: () => void;
   onMaterialDeleted: () => void;
 }
 
-export function MaterialCard({ material, viewMode, onMaterialUpdated, onMaterialDeleted }: MaterialCardProps) {
+export function MaterialCard({
+  material,
+  viewMode,
+  onMaterialUpdated,
+  onMaterialDeleted,
+}: MaterialCardProps) {
   const [showEditDrawer, setShowEditDrawer] = useState(false);
   const [showAssignDialog, setShowAssignDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -47,7 +52,7 @@ export function MaterialCard({ material, viewMode, onMaterialUpdated, onMaterial
       onMaterialDeleted();
       setShowDeleteDialog(false);
     } catch (error) {
-      console.error('Ошибка при удалении материала:', error);
+      console.error("Ошибка при удалении материала:", error);
     } finally {
       setIsDeleting(false);
     }
@@ -57,7 +62,7 @@ export function MaterialCard({ material, viewMode, onMaterialUpdated, onMaterial
     setShowAssignDialog(true);
   };
 
-  if (viewMode === 'list') {
+  if (viewMode === "list") {
     return (
       <>
         <Card className="w-full">
@@ -75,31 +80,38 @@ export function MaterialCard({ material, viewMode, onMaterialUpdated, onMaterial
                     <Package className="w-8 h-8 text-muted-foreground" />
                   </div>
                 )}
-                
+
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-lg truncate">{material.name}</h3>
-                  <p className="text-sm text-muted-foreground">{material.manufacturer}</p>
+                  <h3 className="font-semibold text-xl truncate ">
+                    {material.name}
+                  </h3>
+                  <p className="text-sm text-muted-foreground capitalize">
+                    {material.manufacturer}
+                  </p>
                   <div className="flex items-center space-x-2 mt-1">
                     <Badge variant="secondary">{material.type}</Badge>
-                    
+
                     {!material.in_stock && (
                       <Badge variant="destructive">Нет в наличии</Badge>
                     )}
                   </div>
                 </div>
-                
+
                 <div className="text-right">
                   {material.price && (
                     <p className="font-semibold text-lg">
-                      {material.price} ₽{material.unit ? `/${material.unit}` : ''}
+                      {material.price} ₽
+                      {material.unit ? `/${material.unit}` : ""}
                     </p>
                   )}
                   {material.article && (
-                    <p className="text-sm text-muted-foreground">Арт: {material.article}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Арт: {material.article}
+                    </p>
                   )}
                 </div>
               </div>
-              
+
               <div className="flex items-center space-x-2 ml-4">
                 <Button
                   variant="outline"
@@ -110,7 +122,7 @@ export function MaterialCard({ material, viewMode, onMaterialUpdated, onMaterial
                   <Plus className="w-4 h-4" />
                   <span>Присвоить</span>
                 </Button>
-                
+
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="sm">
@@ -123,7 +135,7 @@ export function MaterialCard({ material, viewMode, onMaterialUpdated, onMaterial
                       Редактировать
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem 
+                    <DropdownMenuItem
                       onClick={() => setShowDeleteDialog(true)}
                       className="text-destructive"
                     >
@@ -156,13 +168,14 @@ export function MaterialCard({ material, viewMode, onMaterialUpdated, onMaterial
             <AlertDialogHeader>
               <AlertDialogTitle>Удалить материал?</AlertDialogTitle>
               <AlertDialogDescription>
-                Вы уверены, что хотите удалить материал "{material.name}"? Это действие нельзя отменить.
+                Вы уверены, что хотите удалить материал "{material.name}"? Это
+                действие нельзя отменить.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Отмена</AlertDialogCancel>
               <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
-                {isDeleting ? 'Удаление...' : 'Удалить'}
+                {isDeleting ? "Удаление..." : "Удалить"}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -186,25 +199,29 @@ export function MaterialCard({ material, viewMode, onMaterialUpdated, onMaterial
               <Package className="w-16 h-16 text-muted-foreground" />
             </div>
           )}
-          
+
           <div className="space-y-2">
-            <h3 className="font-semibold text-lg line-clamp-2">{material.name}</h3>
-            <p className="text-sm text-muted-foreground">{material.manufacturer}</p>
-            
+            <h3 className="font-semibold text-lg line-clamp-2">
+              {material.name}
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {material.manufacturer}
+            </p>
+
             <div className="flex flex-wrap gap-1">
               <Badge variant="secondary">{material.type}</Badge>
-              
+
               {!material.in_stock && (
                 <Badge variant="destructive">Нет в наличии</Badge>
               )}
             </div>
-            
+
             {material.description && (
               <p className="text-sm text-muted-foreground line-clamp-3">
                 {material.description}
               </p>
             )}
-            
+
             {material.tags && material.tags.length > 0 && (
               <div className="flex flex-wrap gap-1">
                 {material.tags.slice(0, 3).map((tag, index) => (
@@ -221,24 +238,24 @@ export function MaterialCard({ material, viewMode, onMaterialUpdated, onMaterial
             )}
           </div>
         </CardContent>
-        
+
         <CardFooter className="p-4 pt-0 flex flex-col space-y-2">
           <div className="flex justify-between items-center w-full">
             {material.price ? (
               <span className="font-semibold">
-                {material.price} ₽{material.unit ? `/${material.unit}` : ''}
+                {material.price} ₽{material.unit ? `/${material.unit}` : ""}
               </span>
             ) : (
               <span className="text-muted-foreground">Цена не указана</span>
             )}
-            
+
             {material.article && (
               <span className="text-sm text-muted-foreground">
                 Арт: {material.article}
               </span>
             )}
           </div>
-          
+
           <div className="flex space-x-2 w-full">
             <Button
               variant="outline"
@@ -249,7 +266,7 @@ export function MaterialCard({ material, viewMode, onMaterialUpdated, onMaterial
               <Plus className="w-4 h-4 mr-1" />
               Присвоить
             </Button>
-            
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm">
@@ -262,7 +279,7 @@ export function MaterialCard({ material, viewMode, onMaterialUpdated, onMaterial
                   Редактировать
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={() => setShowDeleteDialog(true)}
                   className="text-destructive"
                 >
@@ -294,13 +311,14 @@ export function MaterialCard({ material, viewMode, onMaterialUpdated, onMaterial
           <AlertDialogHeader>
             <AlertDialogTitle>Удалить материал?</AlertDialogTitle>
             <AlertDialogDescription>
-              Вы уверены, что хотите удалить материал "{material.name}"? Это действие нельзя отменить.
+              Вы уверены, что хотите удалить материал "{material.name}"? Это
+              действие нельзя отменить.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Отмена</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
-              {isDeleting ? 'Удаление...' : 'Удалить'}
+              {isDeleting ? "Удаление..." : "Удалить"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
