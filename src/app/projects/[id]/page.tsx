@@ -80,34 +80,37 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         </div>
       </div>
 
-      <Card>
+      <Card className="py-6">
         <CardHeader>
           <CardTitle>Информация о проекте</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+            <div className="text-sm">
               <p>
-                <span className="font-medium">Адрес:</span>{" "}
+                <span className="text-muted-foreground">Адрес:</span>{" "}
                 {project?.address || "Не указано"}
               </p>
               <p>
-                <span className="font-medium">Площадь:</span>{" "}
+                <span className="text-muted-foreground">Площадь:</span>{" "}
                 {project?.area || "Не указано"} м²
               </p>
               <p>
-                <span className="font-medium">Стадия:</span> {project?.stage}
+                <span className="text-muted-foreground">Стадия:</span>{" "}
+                {project?.stage}
               </p>
             </div>
             <div>
               {project?.contacts && (
                 <p>
                   <span className="font-medium">Клиент:</span>{" "}
-                  {project.contacts.length > 0 ? project.contacts[0].name : "Не указано"}
+                  {project.contacts.length > 0
+                    ? project.contacts[0].name
+                    : "Не указано"}
                 </p>
               )}
-              <p>
-                <span className="font-medium">Проживающие:</span>{" "}
+              <p className='text-sm'>
+                <span className="text-muted-foreground">Проживающие:</span>{" "}
                 {project?.residents}
               </p>
             </div>
@@ -127,9 +130,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold">Помещения</h2>
             <Button asChild>
-              <Link href={`/projects/${id}/rooms/new`}>
-                Добавить помещение
-              </Link>
+              <Link href={`/projects/${id}/rooms/new`}>Добавить помещение</Link>
             </Button>
           </div>
 
@@ -164,9 +165,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold">Задачи</h2>
             <Button asChild>
-              <Link href={`/projects/${id}/tasks/new`}>
-                Добавить задачу
-              </Link>
+              <Link href={`/projects/${id}/tasks/new`}>Добавить задачу</Link>
             </Button>
           </div>
 

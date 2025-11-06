@@ -79,21 +79,37 @@ export default function ProjectsList({ initialProjects = [] }: ProjectsListProps
           <Link href="/projects/new">Создать проект</Link>
         </Button>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {projects.length > 0 ? (
           projects.map((project) => (
             <Link href={`/projects/${project.id}`} key={project.id}>
-              <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
+              <Card className="h-full py-6 hover:shadow-md transition-shadow cursor-pointer">
                 <CardHeader>
                   <CardTitle>{project.name}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-2">
-                    <p><span className="font-medium">Адрес:</span> {project.address}</p>
-                    <p><span className="font-medium">Площадь:</span> {project.area} м²</p>
-                    <p><span className="font-medium">Стадия:</span> {project.stage}</p>
-                    <p><span className="font-medium">Клиент:</span> {project.client_id ? 'Загружается на странице проекта' : '—'}</p>
+                  <div className="space-y-2 text-sm">
+                    <p>
+                      <span className="//font-medium text-muted-foreground">
+                        Адрес:
+                      </span>{" "}
+                      {project.address}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Площадь:</span>{" "}
+                      {project.area} м²
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Стадия:</span>{" "}
+                      {project.stage}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Клиент:</span>{" "}
+                      {project.client_id
+                        ? "Загружается на странице проекта"
+                        : "—"}
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -101,7 +117,9 @@ export default function ProjectsList({ initialProjects = [] }: ProjectsListProps
           ))
         ) : (
           <div className="col-span-3 text-center py-10">
-            <p className="text-muted-foreground">Проекты не найдены. Создайте новый проект.</p>
+            <p className="text-muted-foreground">
+              Проекты не найдены. Создайте новый проект.
+            </p>
           </div>
         )}
       </div>
