@@ -8,16 +8,18 @@ import { Company, Contact } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Building, Phone, Mail, Globe, ArrowLeft, Plus } from 'lucide-react';
+import { Building, Phone, Mail, Globe, ArrowLeft, Plus, Pencil } from 'lucide-react';
 import Link from 'next/link';
 import AddContactDialog from '../components/add-contact-dialog';
 import { ContactsDataTable } from '@/components/contacts-data-table';
+import { EditCompanyDialog } from '../components/edit-company-dialog';
 
 export default function CompanyDetailsPage() {
   const { id } = useParams();
   const [company, setCompany] = useState<Company | null>(null);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [isAddContactDialogOpen, setIsAddContactDialogOpen] = useState(false);
+  const [isEditCompanyDialogOpen, setIsEditCompanyDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -58,6 +60,19 @@ export default function CompanyDetailsPage() {
     }
   };
 
+  const handleUpdateCompany = async (updatedCompany: Partial<Company>) => {
+    try {
+      if (company) {
+        const result = await companiesService.updateCompany(company.id, updatedCompany);
+        setCompany(result);
+        setIsEditCompanyDialogOpen(false);
+      }
+    } catch (error) {
+      console.error('Ошибка при обновлении компании:', error);
+    }
+  };
+
+
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -86,27 +101,39 @@ export default function CompanyDetailsPage() {
   }
 
   return (
-    <div className="container mx-auto py-6">
-      <div className="mb-6">
+    <div className="//container mx-auto py-6">
+      <div className="mb-6 justify-between flex">
         <Link href="/contacts">
           <Button variant="outline">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Назад к списку
           </Button>
         </Link>
+        <Button
+          variant="outline"
+          size="icon"
+
+          onClick={() => setIsEditCompanyDialogOpen(true)}
+        >
+          <Pencil className="h-5 w-5 text-muted-foreground" />
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-1">
-          <Card>
+          <Card className="py-6">
             <CardHeader>
-              <div className="flex items-center gap-4">
-                <Avatar className="h-16 w-16">
-                  <AvatarFallback>{getInitials(company.name)}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <CardTitle className="text-2xl">{company.name}</CardTitle>
-                  <p className="text-muted-foreground">{company.type}</p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-16 w-16">
+                    <AvatarFallback>{getInitials(company.name)}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <CardTitle className="text-xl">{company.name}</CardTitle>
+                    <p className="text-muted-foreground text-xs">
+                      {company.type}
+                    </p>
+                  </div>
                 </div>
               </div>
             </CardHeader>
@@ -119,7 +146,7 @@ export default function CompanyDetailsPage() {
                       href={company.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-primary hover:underline"
+                      className="text-primary text-sm hover:underline"
                     >
                       {company.website}
                     </a>
@@ -127,13 +154,13 @@ export default function CompanyDetailsPage() {
                 )}
                 <div className="flex items-center gap-3">
                   <Phone className="h-5 w-5 text-muted-foreground" />
-                  <span>{company.phone}</span>
+                  <span className="text-sm">{company.phone}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <Mail className="h-5 w-5 text-muted-foreground" />
                   <a
                     href={`mailto:${company.email}`}
-                    className="text-primary hover:underline"
+                    className="text-primary text-sm hover:underline"
                   >
                     {company.email}
                   </a>
@@ -141,7 +168,7 @@ export default function CompanyDetailsPage() {
                 {company.address && (
                   <div className="flex items-center gap-3">
                     <Building className="h-5 w-5 text-muted-foreground" />
-                    <span>{company.address}</span>
+                    <span className="text-sm">{company.address}</span>
                   </div>
                 )}
                 {company.tags && company.tags.length > 0 && (
@@ -184,7 +211,12 @@ export default function CompanyDetailsPage() {
                 <ContactsDataTable data={contacts} />
               )}
             </>
-            <Button onClick={() => setIsAddContactDialogOpen(true)} size="sm" variant={'outline'} className='w-full mt-4'>
+            <Button
+              onClick={() => setIsAddContactDialogOpen(true)}
+              size="sm"
+              variant={"outline"}
+              className="w-full mt-4"
+            >
               <Plus className="mr-2 h-4 w-4" />
               Добавить новый
             </Button>
@@ -197,6 +229,13 @@ export default function CompanyDetailsPage() {
         onOpenChange={setIsAddContactDialogOpen}
         onSubmit={handleAddContact}
         companyId={company?.id}
+      />
+
+      <EditCompanyDialog
+        open={isEditCompanyDialogOpen}
+        onOpenChange={setIsEditCompanyDialogOpen}
+        onUpdateCompany={handleUpdateCompany}
+        company={company}
       />
     </div>
   );
