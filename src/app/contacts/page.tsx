@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Company, CompanyType } from "@/types";
+import { Company, CompanyType, Contact, ContactType } from "@/types";
 import { companiesService } from "@/lib/services/companies";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,61 +10,92 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PlusCircle, Search, X } from "lucide-react";
 import { CompanyCard } from "./components/company-card";
 import { toast } from "sonner";
-import { AddCompanyDialog } from './components/add-company-dialog';
+import { AddCompanyDialog } from "./components/add-company-dialog";
 import PageErrorBoundary from "@/components/page-error-boundary";
-
+import { contactsService } from "@/lib/services/contacts";
+import { ContactCard } from "./components/contact-card";
 
 function ContactsPageContent() {
   const [companies, setCompanies] = useState<Company[]>([]);
+
+  const [clients, setClients] = useState<Contact[]>([]);
+
   const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
+
+  const [filteredClients, setFilteredClients] = useState<Contact[]>([]);
+
+  const [filteredAll, setFilteredAll] = useState<(Company | Contact)[]>([]);
+
   const [searchQuery, setSearchQuery] = useState("");
+
   const [activeTab, setActiveTab] = useState("all");
+
   const [isAddCompanyOpen, setIsAddCompanyOpen] = useState(false);
+
   const router = useRouter();
 
   useEffect(() => {
     loadCompanies();
+
+    loadContacts();
   }, []);
+
+  const loadContacts = async () => {
+    try {
+      const data = await contactsService.getContactsByType(ContactType.CLIENT);
+
+      setClients(data);
+
+      setFilteredClients(data);
+    } catch (error) {
+      console.error("Ошибка при загрузке контактов:", error);
+
+      throw error;
+    }
+  };
 
   const loadCompanies = async () => {
     try {
       const data = await companiesService.getCompanies();
+
       setCompanies(data);
+
       setFilteredCompanies(data);
     } catch (error) {
       console.error("Ошибка при загрузке компаний:", error);
-      // Не показываем тост, так как ошибка будет обработана error boundary
-      // toast.error("Не удалось загрузить компании");
-      throw error; // Бросаем ошибку для обработки error boundary
+
+      throw error;
     }
- };
+  };
 
   useEffect(() => {
-    filterCompanies();
-  }, [searchQuery, activeTab, companies]);
+    filterData();
+  }, [searchQuery, companies, clients]);
 
-  const filterCompanies = () => {
-    let filtered = [...companies];
+  useEffect(() => {
+    setFilteredAll([...filteredCompanies, ...filteredClients]);
+  }, [filteredCompanies, filteredClients]);
 
-    // Фильтрация по типу
-    if (activeTab !== "all") {
-      filtered = filtered.filter(
-        (company) => company.type === (activeTab as CompanyType)
-      );
-    }
+  const filterData = () => {
+    const query = searchQuery.toLowerCase();
 
-    // Фильтрация по поисковому запросу
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (company) =>
-          company.name.toLowerCase().includes(query) ||
-          (company.email && company.email.toLowerCase().includes(query)) ||
-          (company.phone && company.phone.toLowerCase().includes(query))
-      );
-    }
+    const filteredCompanies = companies.filter(
+      (company) =>
+        company.name.toLowerCase().includes(query) ||
+        (company.email && company.email.toLowerCase().includes(query)) ||
+        (company.phone && company.phone.toLowerCase().includes(query))
+    );
 
-    setFilteredCompanies(filtered);
+    setFilteredCompanies(filteredCompanies);
+
+    const filteredClients = clients.filter(
+      (client) =>
+        client.name.toLowerCase().includes(query) ||
+        (client.email && client.email.toLowerCase().includes(query)) ||
+        (client.phone && client.phone.toLowerCase().includes(query))
+    );
+
+    setFilteredClients(filteredClients);
   };
 
   const handleAddCompany = async (
@@ -72,37 +103,16 @@ function ContactsPageContent() {
   ) => {
     try {
       await companiesService.createCompany(company);
+
       toast.success("Компания успешно добавлена");
+
       loadCompanies();
+
       setIsAddCompanyOpen(false);
     } catch (error) {
       console.error("Ошибка при добавлении компании:", error);
+
       toast.error("Не удалось добавить компанию");
-      // Оставляем тост, так как это действие пользователя, а не загрузка данных
-    }
-  };
-
-  const handleCompanyClick = (id: string) => {
-    router.push(`/contacts/${id}`);
-  };
-
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .substring(0, 2);
-  };
-
-  const getAvatarColor = (type: CompanyType) => {
-    switch (type) {
-      case CompanyType.CLIENT:
-        return "bg-blue-500";
-      case CompanyType.SUPPLIER:
-        return "bg-green-500";
-      default:
-        return "bg-gray-500";
     }
   };
 
@@ -110,6 +120,7 @@ function ContactsPageContent() {
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Адресная книга</h1>
+
         <Button onClick={() => setIsAddCompanyOpen(true)}>
           <PlusCircle className="mr-2 h-4 w-4" />
           Добавить новый
@@ -119,13 +130,15 @@ function ContactsPageContent() {
       <div className="flex items-center space-x-2">
         <div className="relative flex-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+
           <Input
             type="search"
-            placeholder="Поиск компаний..."
+            placeholder="Поиск..."
             className="pl-8"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
+
           {searchQuery && (
             <Button
               variant="ghost"
@@ -142,39 +155,55 @@ function ContactsPageContent() {
       <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="all">Все</TabsTrigger>
-          <TabsTrigger value={CompanyType.CLIENT}>Клиенты</TabsTrigger>
-          <TabsTrigger value={CompanyType.SUPPLIER}>Поставщики</TabsTrigger>
+
+          <TabsTrigger value="companies">Компании</TabsTrigger>
+
+          <TabsTrigger value="clients">Клиенты</TabsTrigger>
         </TabsList>
+
         <TabsContent value="all" className="mt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredCompanies.map((company) => (
-              <CompanyCard company={company}></CompanyCard>
-            ))}
-            {filteredCompanies.length === 0 && (
+            {filteredAll.map((item) =>
+              "company_id" in item ? (
+                <ContactCard key={item.id} contact={item} />
+              ) : (
+                <CompanyCard key={item.id} company={item} />
+              )
+            )}
+
+            {filteredAll.length === 0 && (
               <div className="col-span-full text-center py-10">
-                <p className="text-muted-foreground">
-                  Компании не найдены. Попробуйте изменить параметры поиска или добавьте новую компанию.
-                </p>
+                <p className="text-muted-foreground">Ничего не найдено.</p>
               </div>
             )}
           </div>
         </TabsContent>
-        <TabsContent value={CompanyType.CLIENT} className="mt-6">
+
+        <TabsContent value="companies" className="mt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredCompanies.map((company) => (
+              <CompanyCard key={company.id} company={company}></CompanyCard>
+            ))}
+
             {filteredCompanies.length === 0 && (
               <div className="col-span-full text-center py-10">
-                <p className="text-muted-foreground">
-                  Клиенты не найдены. Попробуйте изменить параметры поиска или добавьте нового клиента.
-                </p>
+                <p className="text-muted-foreground">Компании не найдены.</p>
               </div>
             )}
           </div>
         </TabsContent>
-        <TabsContent value={CompanyType.SUPPLIER} className="mt-6">
+
+        <TabsContent value="clients" className="mt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredCompanies.map((company) => (
-              <CompanyCard key={company.id} company={company} />
+            {filteredClients.map((client) => (
+              <ContactCard key={client.id} contact={client} />
             ))}
+
+            {filteredClients.length === 0 && (
+              <div className="col-span-full text-center py-10">
+                <p className="text-muted-foreground">Клиенты не найдены.</p>
+              </div>
+            )}
           </div>
         </TabsContent>
       </Tabs>

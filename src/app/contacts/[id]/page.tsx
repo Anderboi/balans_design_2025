@@ -166,7 +166,7 @@ export default function CompanyDetailsPage() {
                   </a>
                 </div>
                 {company.address && (
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-start gap-3">
                     <Building className="h-5 w-5 text-muted-foreground" />
                     <span className="text-sm">{company.address}</span>
                   </div>

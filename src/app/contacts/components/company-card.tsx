@@ -1,17 +1,14 @@
 "use client";
 
 import { Company, Contact } from "@/types";
-
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-
-
 import { useRouter } from "next/navigation";
-
 import { Button } from "@/components/ui/button";
-import { Pencil, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { CompanyType } from "@/types";
 import { useEffect, useState } from "react";
 import { contactsService } from "@/lib/services/contacts";
+
 
 interface CompanyCardProps {
   company: Company;
@@ -42,28 +39,34 @@ export function CompanyCard({ company }: CompanyCardProps) {
   };
 
   return (
-    <div onKeyDown={(e) => e.key === 'Enter' && router.push(`/contacts/${company.id}`)} tabIndex={0} className="cursor-pointer hover:shadow-lg transition-shadow duration-200 rounded-2xl justify-between border p-6">
+    <div
+      onKeyDown={(e) =>
+        e.key === "Enter" && router.push(`/contacts/${company.id}`)
+      }
+      tabIndex={0}
+      className="cursor-pointer hover:shadow-lg transition-shadow duration-200 rounded-2xl justify-between border p-6"
+    >
       <div onClick={() => router.push(`/contacts/${company.id}`)}>
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16 rounded-lg bg-black text-white flex items-center justify-center">
+        {/* <div className="flex items-start justify-between"> */}
+          <div className="flex items-start gap-4">
+            <Avatar className="h-16 w-16 rounded-lg bg-sky-600 text-white flex items-center justify-center">
               <AvatarFallback className="bg-transparent text-2xl font-bold">
                 {getInitials(company.name)}
               </AvatarFallback>
             </Avatar>
-            <div>
-              <div className="text-2xl font-bold">{company.name}</div>
-              <p className="text-base text-gray-500">
+            <div className="flex-1 ">
+              <div className="text-xl font-bold leading-6 line-clamp-2">
+                {company.name}
+              </div>
+              {/* <p className="text-base text-gray-500">
                 {company.address || "Москва"}
-              </p>
-              <p className="text-sm text-gray-400 mt-1">
-                {company.type === CompanyType.SUPPLIER
-                  ? "Поставщик"
-                  : "Клиент"}
+              </p> */}
+              <p className="text-sm text-gray-400">
+                {company.type === CompanyType.SUPPLIER ? "Поставщик" : "Клиент"}
               </p>
             </div>
           </div>
-          <Button
+          {/* <Button
             variant="ghost"
             size="icon"
             className="rounded-full h-10 w-10"
@@ -73,8 +76,8 @@ export function CompanyCard({ company }: CompanyCardProps) {
             }}
           >
             <Pencil className="h-5 w-5 text-gray-400" />
-          </Button>
-        </div>
+          </Button> */}
+        {/* </div> */}
       </div>
       <div className="pt-0">
         <div className="border-t border-gray-200 my-4"></div>
@@ -107,7 +110,6 @@ export function CompanyCard({ company }: CompanyCardProps) {
             </Button>
           )}
         </div>
-        
       </div>
     </div>
   );
