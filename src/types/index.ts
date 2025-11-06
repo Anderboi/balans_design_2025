@@ -12,6 +12,7 @@ export interface Project {
   stage: ProjectStage;
   created_at: string;
   updated_at: string;
+  contacts: Contact[];
 }
 
 export enum ProjectStage {

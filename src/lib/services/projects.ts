@@ -27,7 +27,7 @@ export const projectsService = {
     
     const { data, error } = await supabase
       .from('projects')
-      .select('*')
+      .select('*, contacts(*)')
       .eq('id', id)
       .single();
 
