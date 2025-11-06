@@ -117,5 +117,25 @@ export const projectsService = {
     }
 
     return data || [];
+  },
+
+  // Получение проектов по ID клиента
+  async getProjectsByClientId(clientId: string): Promise<Project[]> {
+    if (!clientId) {
+      console.error('Попытка получить проекты с пустым ID клиента');
+      return [];
+    }
+
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('client_id', clientId);
+
+    if (error) {
+      console.error(`Ошибка при получении проектов для клиента с ID ${clientId}:`, error);
+      throw error;
+    }
+
+    return data || [];
   }
 };

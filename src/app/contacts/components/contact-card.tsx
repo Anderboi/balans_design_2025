@@ -6,29 +6,29 @@ import { useRouter } from "next/navigation";
 
 interface ContactCardProps {
   contact: Contact;
+  onClick: () => void;
 }
 
-export function ContactCard({ contact }: ContactCardProps) {
+export function ContactCard({ contact, onClick }: ContactCardProps) {
   const router = useRouter();
 
   const getInitials = (name: string) => {
     return name
-      .split(" ")
+      .split(' ')
       .map((n) => n[0])
-      .join("")
+      .join('')
       .toUpperCase()
       .substring(0, 2);
   };
 
   return (
     <div
-      onKeyDown={(e) =>
-        e.key === "Enter" && router.push(`/contacts/${contact.company_id}`)
-      }
+      onClick={onClick}
+      onKeyDown={(e) => e.key === 'Enter' && onClick()}
       tabIndex={0}
       className="cursor-pointer hover:shadow-lg transition-shadow duration-200 rounded-2xl justify-between border p-6"
     >
-      <div onClick={() => router.push(`/contacts/${contact.company_id}`)}>
+      <div>
         <div className="flex items-start gap-4">
           <Avatar className="h-16 w-16 rounded-lg bg-teal-600 text-white flex items-center justify-center">
             <AvatarFallback className="bg-transparent text-2xl font-bold">
@@ -40,6 +40,7 @@ export function ContactCard({ contact }: ContactCardProps) {
               {contact.name}
             </div>
             <p className="text-sm text-gray-500">{contact.position}</p>
+            
           </div>
         </div>
       </div>

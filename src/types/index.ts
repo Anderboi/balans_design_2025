@@ -114,6 +114,7 @@ export interface Contact {
   type: ContactType;
   company_id?: string; // ID компании, если контакт является представителем
   position: string;
+
   phone: string;
   email: string;
   address: string;
