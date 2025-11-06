@@ -1,18 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { projectsService } from "@/lib/services/projects";
-import { ProjectStage } from "@/types";
+import { contactsService } from "@/lib/services/contacts";
+import { ProjectStage, Contact, ContactType } from "@/types";
 
 export default function NewProjectPage() {
   const router = useRouter();
+  const [clients, setClients] = useState<Contact[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -22,16 +30,37 @@ export default function NewProjectPage() {
     stage: ProjectStage.PREPROJECT,
     residents: "",
     demolition_info: "",
-    construction_info: ""
+    construction_info: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const clientData = await contactsService.getContactsByType(
+          ContactType.CLIENT
+        );
+        // Фильтруем менеджеров из списка клиентов
+        const filteredClients = clientData.filter(
+          client => client.position?.toLowerCase() !== 'менеджер'
+        );
+        setClients(filteredClients);
+      } catch (error) {
+        console.error("Ошибка при загрузке клиентов:", error);
+      }
+    };
+
+    fetchClients();
+  }, []);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -40,9 +69,11 @@ export default function NewProjectPage() {
 
     try {
       // Преобразуем площадь в число
+      const areaValue = parseFloat(formData.area);
       const projectData = {
         ...formData,
-        area: formData.area ? parseFloat(formData.area) : null,
+        area: !isNaN(areaValue) ? areaValue : null,
+        client_id: formData.client_id === "none" ? null : formData.client_id,
       };
 
       await projectsService.createProject(projectData);
@@ -59,7 +90,7 @@ export default function NewProjectPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Новый проект</h1>
-      
+
       <Card>
         <CardHeader>
           <CardTitle>Информация о проекте</CardTitle>
@@ -69,56 +100,69 @@ export default function NewProjectPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Название проекта</Label>
-                <Input 
-                  id="name" 
-                  name="name" 
-                  value={formData.name} 
-                  onChange={handleChange} 
-                  required 
+                <Input
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="address">Адрес</Label>
-                <Input 
-                  id="address" 
-                  name="address" 
-                  value={formData.address} 
-                  onChange={handleChange} 
+                <Input
+                  id="address"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="area">Площадь (м²)</Label>
-                <Input 
-                  id="area" 
-                  name="area" 
-                  type="number" 
-                  value={formData.area} 
-                  onChange={handleChange} 
+                <Input
+                  id="area"
+                  name="area"
+                  type="number"
+                  value={formData.area}
+                  onChange={handleChange}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="stage">Стадия проекта</Label>
-                <Select 
-                  value={formData.stage} 
+                <Select
+                  value={formData.stage}
                   onValueChange={(value) => handleSelectChange("stage", value)}
                 >
                   <SelectTrigger>
-                    <SelectValue defaultValue={ProjectStage.PREPROJECT} placeholder="Выберите стадию" />
+                    <SelectValue
+                      defaultValue={ProjectStage.PREPROJECT}
+                      placeholder="Выберите стадию"
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={ProjectStage.PREPROJECT}>Предпроектная</SelectItem>
-                    <SelectItem value={ProjectStage.CONCEPT}>Концепция</SelectItem>
-                    <SelectItem value={ProjectStage.WORKING}>Рабочая</SelectItem>
-                    <SelectItem value={ProjectStage.SUPERVISION}>Авторский контроль</SelectItem>
-                    <SelectItem value={ProjectStage.COMPLETION}>Комплектация</SelectItem>
+                    <SelectItem value={ProjectStage.PREPROJECT}>
+                      Предпроектная
+                    </SelectItem>
+                    <SelectItem value={ProjectStage.CONCEPT}>
+                      Концепция
+                    </SelectItem>
+                    <SelectItem value={ProjectStage.WORKING}>
+                      Рабочая
+                    </SelectItem>
+                    <SelectItem value={ProjectStage.SUPERVISION}>
+                      Авторский контроль
+                    </SelectItem>
+                    <SelectItem value={ProjectStage.COMPLETION}>
+                      Комплектация
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <Label>Клиент</Label>
               <div className="flex items-center space-x-2">
@@ -129,7 +173,7 @@ export default function NewProjectPage() {
                       // TODO: open modal or redirect to create client
                       alert("Создание нового клиента пока не реализовано");
                     } else {
-                      handleSelectChange("clientId", value);
+                      handleSelectChange("client_id", value);
                     }
                   }}
                 >
@@ -137,12 +181,12 @@ export default function NewProjectPage() {
                     <SelectValue placeholder="Выберите клиента или создайте нового" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem disabled value="none">
-                      Нет
-                    </SelectItem>
-                    {/* TODO: replace with actual clients list */}
-                    <SelectItem value="1">Иванов Иван</SelectItem>
-                    <SelectItem value="2">Петров Петр</SelectItem>
+                    <SelectItem value="none">-</SelectItem>
+                    {clients.map((client) => (
+                      <SelectItem key={client.id} value={client.id}>
+                        {client.name}
+                      </SelectItem>
+                    ))}
                     <SelectItem value="new">+ Добавить клиента</SelectItem>
                   </SelectContent>
                 </Select>
@@ -151,18 +195,18 @@ export default function NewProjectPage() {
 
             <div className="space-y-2">
               <Label htmlFor="residents">Информация о проживающих</Label>
-              <Textarea 
-                id="residents" 
-                name="residents" 
-                value={formData.residents} 
-                onChange={handleChange} 
+              <Textarea
+                id="residents"
+                name="residents"
+                value={formData.residents}
+                onChange={handleChange}
               />
             </div>
-            
+
             <div className="flex justify-end space-x-2">
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => router.back()}
                 disabled={isLoading}
               >

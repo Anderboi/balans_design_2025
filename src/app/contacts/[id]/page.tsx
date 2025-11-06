@@ -121,7 +121,7 @@ export default function CompanyDetailsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-1">
-          <Card className="py-6">
+          <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">

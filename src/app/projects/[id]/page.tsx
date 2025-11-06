@@ -38,6 +38,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
       area: id === "1" ? 120 : 250,
       stage: id === "1" ? "Концепция" : "Рабочая",
       client_id: null,
+      contacts: [],
       residents: "Семья из 4 человек",
       demolition_info: "Демонтаж перегородок в гостиной",
       construction_info: "Возведение новых перегородок в спальне",
@@ -66,7 +67,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center py-6">
         <h1 className="text-3xl font-bold">
           {project ? project.name : "Проект не найден"}
         </h1>
@@ -80,7 +81,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         </div>
       </div>
 
-      <Card className="py-6">
+      <Card>
         <CardHeader>
           <CardTitle>Информация о проекте</CardTitle>
         </CardHeader>
@@ -101,12 +102,34 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
               </p>
             </div>
             <div>
-              {project?.contacts && (
-                <p>
-                  <span className="font-medium">Клиент:</span>{" "}
-                  {project.contacts.length > 0
-                    ? project.contacts[0].name
-                    : "Не указано"}
+              {project?.contacts && project.contacts.length > 0 ? (
+                <div className="space-y-1 text-sm">
+                  <p>
+                    <span className="text-muted-foreground">Клиент:</span>{' '}
+                    <Link
+                      href={`/contacts/${project.contacts[0].id}`}
+                      className="font-medium text-blue-600 hover:underline"
+                    >
+                      {project.contacts[0].name}
+                    </Link>
+                  </p>
+                  {project.contacts[0].phone && (
+                    <p>
+                      <span className="text-muted-foreground">Телефон:</span>{' '}
+                      {project.contacts[0].phone}
+                    </p>
+                  )}
+                  {project.contacts[0].email && (
+                    <p>
+                      <span className="text-muted-foreground">Email:</span>{' '}
+                      {project.contacts[0].email}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm">
+                  <span className="text-muted-foreground">Клиент:</span> Не
+                  указано
                 </p>
               )}
               <p className='text-sm'>
