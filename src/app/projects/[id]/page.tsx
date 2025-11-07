@@ -5,8 +5,6 @@ import { projectsService } from "@/lib/services/projects";
 import { tasksService } from "@/lib/services/tasks";
 import { materialsService } from "@/lib/services/materials";
 import Link from "next/link";
-import { ChevronLeft, Pen, Trash } from "lucide-react";
-import router from 'next/router';
 import ProjectHeader from '../components/project-header';
 
 export const revalidate = 0; // Отключаем кэширование для этой страницы

@@ -1,20 +1,19 @@
-'use client'
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { ChevronLeft, Pen, Trash } from 'lucide-react';
-import Link from 'next/link';
-import { useRouter } from "next/navigation"; 
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, Pen, Trash } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-
-const ProjectHeader = ({ id, project }:{ id: string, project: any}) => {
-const router = useRouter();
+const ProjectHeader = ({ id, project }: { id: string; project: any }) => {
+  const router = useRouter();
 
   const back = () => {
-      router.back();
-    };
-  
+    router.back();
+  };
+
   return (
-    <div className="flex justify-between items-center pt-6">
+    <div className="flex justify-between items-center">
       <div className="flex gap-4">
         <Button variant={"ghost"} size={"icon-sm"} asChild onClick={back}>
           <ChevronLeft />
@@ -37,6 +36,6 @@ const router = useRouter();
       </div>
     </div>
   );
-}
+};
 
-export default ProjectHeader
+export default ProjectHeader;

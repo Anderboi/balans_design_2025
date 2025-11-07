@@ -1,71 +1,16 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import Link from 'next/link';
-import { projectsService } from '@/lib/services/projects';
-import { Project } from '@/types';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
+import { Project } from "@/types";
 
 interface ProjectsListProps {
   initialProjects?: Project[];
 }
 
-export default function ProjectsList({ initialProjects = [] }: ProjectsListProps) {
-  const [projects, setProjects] = useState<Project[]>(initialProjects);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const data = await projectsService.getProjects();
-        setProjects(data);
-      } catch (err) {
-        console.error('Ошибка при загрузке проектов:', err);
-        throw err; // Бросаем ошибку для обработки error boundary
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    // Only fetch if initialProjects is empty (for client-side navigation)
-    if (initialProjects.length === 0) {
-      fetchProjects();
-    } else {
-      setLoading(false);
-    }
-  }, [initialProjects.length]);
-
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Проекты</h1>
-          <Button asChild>
-            <Link href="/projects/new">Создать проект</Link>
-          </Button>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(3)].map((_, i) => (
-            <Card key={i} className="h-full animate-pulse">
-              <CardHeader>
-                <CardTitle className="h-6 bg-muted rounded w-3/4"></CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="h-4 bg-muted rounded w-full"></div>
-                  <div className="h-4 bg-muted rounded w-5/6"></div>
-                  <div className="h-4 bg-muted rounded w-2/3"></div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
+export default function ProjectsList({
+  initialProjects = [],
+}: ProjectsListProps) {
+  
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -76,8 +21,8 @@ export default function ProjectsList({ initialProjects = [] }: ProjectsListProps
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {projects.length > 0 ? (
-          projects.map((project) => (
+        {initialProjects.length > 0 ? (
+          initialProjects.map((project) => (
             <Link href={`/projects/${project.id}`} key={project.id}>
               <Card className="h-full py-6 hover:shadow-md transition-shadow cursor-pointer">
                 <CardHeader>
