@@ -14,7 +14,6 @@ interface ProjectsListProps {
 export default function ProjectsList({ initialProjects = [] }: ProjectsListProps) {
   const [projects, setProjects] = useState<Project[]>(initialProjects);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -65,10 +64,6 @@ export default function ProjectsList({ initialProjects = [] }: ProjectsListProps
         </div>
       </div>
     );
-  }
-
-  if (error) {
-    throw new Error(error); // This will be caught by the error boundary
   }
 
   return (

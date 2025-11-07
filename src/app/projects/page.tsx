@@ -1,20 +1,12 @@
-import { projectsService } from "@/lib/services/projects";
-import { Project } from "@/types";
 import PageErrorBoundary from "@/components/page-error-boundary";
-import ProjectsListClient from "@/components/projects/projects-list";
+import ProjectsListClient from "@/app/projects/components/projects-list";
+import { getProjects } from './actions';
 
 export const revalidate = 0; // Отключаем кэширование для этой страницы
 
 export default async function ProjectsPage() {
   // Получаем проекты из Supabase
-  let projects: Project[] = [];
-  
-  try {
-    projects = await projectsService.getProjects();
-  } catch (error) {
-    console.error("Ошибка при загрузке проектов:", error);
-   
-  }
+  const projects = await getProjects()
 
   return (
     <PageErrorBoundary pageName="страница проектов">
