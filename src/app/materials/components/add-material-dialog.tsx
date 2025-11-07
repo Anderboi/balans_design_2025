@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ChevronDownIcon, Plus, Upload, X } from "lucide-react";
+import { ChevronDownIcon, Plus, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -13,7 +13,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -21,11 +20,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SelectSeparator } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { materialsService } from "@/lib/services/materials";
-import { Material, MaterialType, Contact, ContactType } from "@/types";
+import { MaterialType, Contact, ContactType } from "@/types";
 import { CompanyType } from "@/types";
 
 import {
@@ -33,12 +31,12 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { FileDropzone } from '../ui/dropzone';
-import { storageService } from '@/lib/services/storage';
-import { contactsService } from '@/lib/services/contacts';
-import { companiesService } from '@/lib/services/companies';
-import AddContactDialog from '@/app/contacts/components/add-contact-dialog';
+} from "../../../components/ui/dropdown-menu";
+import { FileDropzone } from "../../../components/ui/dropzone";
+import { storageService } from "@/lib/services/storage";
+import { contactsService } from "@/lib/services/contacts";
+import { companiesService } from "@/lib/services/companies";
+import AddContactDialog from "@/app/contacts/components/add-contact-dialog";
 
 interface AddMaterialDialogProps {
   open: boolean;
@@ -59,7 +57,9 @@ export function AddMaterialDialog({
   const [suppliers, setSuppliers] = useState<Contact[]>([]);
   const [isAddSupplierOpen, setIsAddSupplierOpen] = useState(false);
   const [supplierQuery, setSupplierQuery] = useState("");
-  const [supplierCompaniesMap, setSupplierCompaniesMap] = useState<Record<string, string>>({});
+  const [supplierCompaniesMap, setSupplierCompaniesMap] = useState<
+    Record<string, string>
+  >({});
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -177,7 +177,9 @@ export function AddMaterialDialog({
   useEffect(() => {
     const loadCompanies = async () => {
       try {
-        const companies = await companiesService.getCompaniesByType(CompanyType.SUPPLIER);
+        const companies = await companiesService.getCompaniesByType(
+          CompanyType.SUPPLIER
+        );
         const map: Record<string, string> = {};
         (companies as any[]).forEach((c) => {
           if (c && c.id) map[c.id] = c.name;
@@ -207,7 +209,9 @@ export function AddMaterialDialog({
   };
 
   const filteredSuppliers = suppliers.filter((s) => {
-    const companyName = s.company_id ? supplierCompaniesMap[s.company_id] || "" : "";
+    const companyName = s.company_id
+      ? supplierCompaniesMap[s.company_id] || ""
+      : "";
     const hay = `${s.name} ${companyName}`.toLowerCase();
     return hay.includes(supplierQuery.toLowerCase());
   });
@@ -363,11 +367,18 @@ export function AddMaterialDialog({
                     />
                   </div>
                   {filteredSuppliers.map((s) => {
-                    const companyName = s.company_id ? supplierCompaniesMap[s.company_id] : undefined;
+                    const companyName = s.company_id
+                      ? supplierCompaniesMap[s.company_id]
+                      : undefined;
                     return (
                       <DropdownMenuItem
                         key={s.id}
-                        onSelect={() => handleInputChange("supplier", companyName ? `${s.name} — ${companyName}` : s.name)}
+                        onSelect={() =>
+                          handleInputChange(
+                            "supplier",
+                            companyName ? `${s.name} — ${companyName}` : s.name
+                          )
+                        }
                       >
                         {companyName ? `${s.name} — ${companyName}` : s.name}
                       </DropdownMenuItem>

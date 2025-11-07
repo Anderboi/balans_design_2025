@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { ChevronDownIcon, Plus, X } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { ChevronDownIcon, Plus, X } from "lucide-react";
 import {
   Drawer,
   DrawerContent,
@@ -9,21 +9,38 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
-} from '@/components/ui/drawer';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectSeparator } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { materialsService } from '@/lib/services/materials';
-import { Material, MaterialType, Contact, ContactType, CompanyType } from '@/types';
-import { contactsService } from '@/lib/services/contacts';
-import { companiesService } from '@/lib/services/companies';
-import AddContactDialog from '@/app/contacts/components/add-contact-dialog';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+} from "@/components/ui/drawer";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { materialsService } from "@/lib/services/materials";
+import {
+  Material,
+  MaterialType,
+  Contact,
+  ContactType,
+  CompanyType,
+} from "@/types";
+import { contactsService } from "@/lib/services/contacts";
+import { companiesService } from "@/lib/services/companies";
+import AddContactDialog from "@/app/contacts/components/add-contact-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../../components/ui/dropdown-menu";
 
 interface EditMaterialDrawerProps {
   material: Material;
@@ -32,26 +49,33 @@ interface EditMaterialDrawerProps {
   onMaterialUpdated: () => void;
 }
 
-export function EditMaterialDrawer({ material, open, onOpenChange, onMaterialUpdated }: EditMaterialDrawerProps) {
+export function EditMaterialDrawer({
+  material,
+  open,
+  onOpenChange,
+  onMaterialUpdated,
+}: EditMaterialDrawerProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [tagInput, setTagInput] = useState('');
+  const [tagInput, setTagInput] = useState("");
   const [suppliers, setSuppliers] = useState<Contact[]>([]);
   const [isAddSupplierOpen, setIsAddSupplierOpen] = useState(false);
-  const [supplierQuery, setSupplierQuery] = useState('');
-  const [supplierCompaniesMap, setSupplierCompaniesMap] = useState<Record<string, string>>({});
+  const [supplierQuery, setSupplierQuery] = useState("");
+  const [supplierCompaniesMap, setSupplierCompaniesMap] = useState<
+    Record<string, string>
+  >({});
   const [formData, setFormData] = useState({
-    name: '',
-    type: '' as MaterialType,
-    
-    manufacturer: '',
-    supplier: '',
+    name: "",
+    type: "" as MaterialType,
+
+    manufacturer: "",
+    supplier: "",
     price: 0,
-    unit: '',
-    description: '',
-    image_url: '',
-    color: '',
-    size: '',
-    article: '',
+    unit: "",
+    description: "",
+    image_url: "",
+    color: "",
+    size: "",
+    article: "",
     in_stock: true,
     tags: [] as string[],
   });
@@ -59,17 +83,17 @@ export function EditMaterialDrawer({ material, open, onOpenChange, onMaterialUpd
   useEffect(() => {
     if (material) {
       setFormData({
-        name: material.name || '',
-        type: material.type || ('' as MaterialType),
-        manufacturer: material.manufacturer || '',
-        supplier: material.supplier || '',
+        name: material.name || "",
+        type: material.type || ("" as MaterialType),
+        manufacturer: material.manufacturer || "",
+        supplier: material.supplier || "",
         price: material.price || 0,
-        unit: material.unit || '',
-        description: material.description || '',
-        image_url: material.image_url || '',
-        color: material.color || '',
-        size: material.size || '',
-        article: material.article || '',
+        unit: material.unit || "",
+        description: material.description || "",
+        image_url: material.image_url || "",
+        color: material.color || "",
+        size: material.size || "",
+        article: material.article || "",
         in_stock: material.in_stock ?? true,
         tags: material.tags || [],
       });
@@ -80,10 +104,12 @@ export function EditMaterialDrawer({ material, open, onOpenChange, onMaterialUpd
   useEffect(() => {
     const loadSuppliers = async () => {
       try {
-        const data = await contactsService.getContactsByType(ContactType.SUPPLIER);
+        const data = await contactsService.getContactsByType(
+          ContactType.SUPPLIER
+        );
         setSuppliers(data);
       } catch (error) {
-        console.error('Ошибка при загрузке поставщиков:', error);
+        console.error("Ошибка при загрузке поставщиков:", error);
       }
     };
     if (open) loadSuppliers();
@@ -93,65 +119,71 @@ export function EditMaterialDrawer({ material, open, onOpenChange, onMaterialUpd
   useEffect(() => {
     const loadCompanies = async () => {
       try {
-        const companies = await companiesService.getCompaniesByType(CompanyType.SUPPLIER);
+        const companies = await companiesService.getCompaniesByType(
+          CompanyType.SUPPLIER
+        );
         const map: Record<string, string> = {};
         (companies as any[]).forEach((c) => {
           if (c && c.id) map[c.id] = c.name;
         });
         setSupplierCompaniesMap(map);
       } catch (error) {
-        console.error('Ошибка при загрузке компаний:', error);
+        console.error("Ошибка при загрузке компаний:", error);
       }
     };
     if (open) loadCompanies();
   }, [open]);
 
-  const handleCreateSupplier = async (contact: Omit<Contact, 'id' | 'created_at' | 'updated_at'>) => {
+  const handleCreateSupplier = async (
+    contact: Omit<Contact, "id" | "created_at" | "updated_at">
+  ) => {
     try {
       const created = await contactsService.createContact({
         ...contact,
         type: ContactType.SUPPLIER,
       });
       setSuppliers((prev) => [created, ...prev]);
-      handleInputChange('supplier', created.name);
+      handleInputChange("supplier", created.name);
       setIsAddSupplierOpen(false);
     } catch (error) {
-      console.error('Ошибка при создании поставщика:', error);
+      console.error("Ошибка при создании поставщика:", error);
     }
   };
 
   const filteredSuppliers = suppliers.filter((s) => {
-    const companyName = s.company_id ? supplierCompaniesMap[s.company_id] || '' : '';
+    const companyName = s.company_id
+      ? supplierCompaniesMap[s.company_id] || ""
+      : "";
     const hay = `${s.name} ${companyName}`.toLowerCase();
     return hay.includes(supplierQuery.toLowerCase());
   });
 
   const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const handleAddTag = () => {
     if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        tags: [...prev.tags, tagInput.trim()]
+        tags: [...prev.tags, tagInput.trim()],
       }));
-      setTagInput('');
+      setTagInput("");
     }
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
+      tags: prev.tags.filter((tag) => tag !== tagToRemove),
     }));
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       handleAddTag();
     }
@@ -159,7 +191,7 @@ export function EditMaterialDrawer({ material, open, onOpenChange, onMaterialUpd
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name || !formData.type || !formData.manufacturer) {
       return;
     }
@@ -170,25 +202,25 @@ export function EditMaterialDrawer({ material, open, onOpenChange, onMaterialUpd
       onMaterialUpdated();
       onOpenChange(false);
     } catch (error) {
-      console.error('Ошибка при обновлении материала:', error);
+      console.error("Ошибка при обновлении материала:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
   const materialTypes = Object.values(MaterialType);
-  const commonUnits = ['шт', 'м', 'м²', 'м³', 'кг', 'л', 'упак', 'комплект'];
+  const commonUnits = ["шт", "м", "м²", "м³", "кг", "л", "упак", "комплект"];
   const commonCategories = [
-    'Напольные покрытия',
-    'Настенные покрытия',
-    'Потолочные материалы',
-    'Сантехника',
-    'Электрика',
-    'Мебель',
-    'Аксессуары',
-    'Краски и лаки',
-    'Клеи и герметики',
-    'Инструменты'
+    "Напольные покрытия",
+    "Настенные покрытия",
+    "Потолочные материалы",
+    "Сантехника",
+    "Электрика",
+    "Мебель",
+    "Аксессуары",
+    "Краски и лаки",
+    "Клеи и герметики",
+    "Инструменты",
   ];
 
   return (

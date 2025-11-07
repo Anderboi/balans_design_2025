@@ -66,17 +66,17 @@ export function MaterialCard({
     return (
       <>
         <Card className="w-full">
-          <CardContent className="p-4">
+          <CardContent className="/p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4 flex-1">
                 {material.image_url ? (
                   <img
                     src={material.image_url}
                     alt={material.name}
-                    className="w-16 h-16 object-cover rounded-lg"
+                    className="w-18 h-18 object-cover rounded-sm"
                   />
                 ) : (
-                  <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center">
+                  <div className="w-18 h-18 bg-muted rounded-sm flex items-center justify-center">
                     <Package className="w-8 h-8 text-muted-foreground" />
                   </div>
                 )}
@@ -85,8 +85,8 @@ export function MaterialCard({
                   <h3 className="font-semibold text-xl truncate ">
                     {material.name}
                   </h3>
-                  <p className="text-sm text-muted-foreground capitalize">
-                    {material.manufacturer}
+                  <p className="text-xs text-muted-foreground/80 capitalize">
+                    {material.manufacturer?.toUpperCase()}
                   </p>
                   <div className="flex items-center space-x-2 mt-1">
                     <Badge variant="secondary">{material.type}</Badge>
@@ -187,15 +187,15 @@ export function MaterialCard({
   return (
     <>
       <Card className="w-full h-full flex flex-col">
-        <CardContent className="p-4 flex-1">
+        <CardContent className="/p-4 flex-1">
           {material.image_url ? (
             <img
               src={material.image_url}
               alt={material.name}
-              className="w-full h-48 object-cover rounded-lg mb-4"
+              className="w-full h-48 object-cover rounded-sm mb-4"
             />
           ) : (
-            <div className="w-full h-48 bg-muted rounded-lg flex items-center justify-center mb-4">
+            <div className="w-full h-48 bg-muted rounded-sm flex items-center justify-center mb-4">
               <Package className="w-16 h-16 text-muted-foreground" />
             </div>
           )}
@@ -204,8 +204,8 @@ export function MaterialCard({
             <h3 className="font-semibold text-lg line-clamp-2">
               {material.name}
             </h3>
-            <p className="text-sm text-muted-foreground">
-              {material.manufacturer}
+            <p className="text-xs text-muted-foreground/80">
+              {material.manufacturer?.toUpperCase()}
             </p>
 
             <div className="flex flex-wrap gap-1">
@@ -239,8 +239,8 @@ export function MaterialCard({
           </div>
         </CardContent>
 
-        <CardFooter className="p-4 pt-0 flex flex-col space-y-2">
-          <div className="flex justify-between items-center w-full">
+        <CardFooter className="pt-0 flex flex-col space-y-2">
+          <div className="flex justify-end items-center w-full">
             {material.price ? (
               <span className="font-semibold">
                 {material.price} ₽{material.unit ? `/${material.unit}` : ""}
