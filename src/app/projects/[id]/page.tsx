@@ -6,6 +6,8 @@ import { tasksService } from "@/lib/services/tasks";
 import { materialsService } from "@/lib/services/materials";
 import Link from "next/link";
 import { ChevronLeft, Pen, Trash } from "lucide-react";
+import router from 'next/router';
+import ProjectHeader from '../components/project-header';
 
 export const revalidate = 0; // Отключаем кэширование для этой страницы
 
@@ -166,31 +168,11 @@ export default async function ProjectDetailPage({
     ];
   }
 
+
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center pt-6">
-        <div className="flex gap-4">
-          <Button variant={"ghost"} size={"icon-sm"}>
-            <ChevronLeft />
-          </Button>
-          <h1 className="text-3xl font-bold">
-            {project ? project.name : "Проект не найден"}
-          </h1>
-        </div>
-        <div className="space-x-2">
-          <Button variant="outline" asChild size={"icon"}>
-            <Link href={`/projects/${id}/edit`}>
-              <Pen />
-            </Link>
-          </Button>
-          <Button variant="destructive" asChild size={"icon"}>
-            <Link href={`/projects/${id}/delete`}>
-              <Trash />
-            </Link>
-          </Button>
-        </div>
-      </div>
-
+      <ProjectHeader  id={id} project={project}/>
       <Card>
         <CardHeader>
           <CardTitle>Информация о проекте</CardTitle>
@@ -250,7 +232,6 @@ export default async function ProjectDetailPage({
           </div>
         </CardContent>
       </Card>
-
       <Tabs defaultValue="rooms">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="rooms">Помещения</TabsTrigger>

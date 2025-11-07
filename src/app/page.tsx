@@ -7,9 +7,14 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { BriefcaseBusiness, LayoutList, Package } from 'lucide-react';
+import { BriefcaseBusiness, LayoutList, Package } from "lucide-react";
+import { projectsService } from "@/lib/services/projects";
+import { materialsService } from '@/lib/services/materials';
 
-export default function Home() {
+export default async function Home() {
+  const projects = await projectsService.getProjects();
+  const materials = await materialsService.getMaterials();
+
   return (
     <div className="space-y-6">
       <h1 className="text-xl ">Добро пожаловать, UserName!</h1>
@@ -17,9 +22,9 @@ export default function Home() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
           <CardHeader>
-            <BriefcaseBusiness size={64} strokeWidth={1} />
+            <BriefcaseBusiness size={32} strokeWidth={1.5} />
             <CardTitle>Проекты</CardTitle>
-            <CardDescription>Всего проектов: 5</CardDescription>
+            <CardDescription>Всего проектов: {projects.length}</CardDescription>
           </CardHeader>
           <CardContent>
             <Link href="/projects">
@@ -32,7 +37,7 @@ export default function Home() {
 
         <Card>
           <CardHeader>
-            <LayoutList size={64} strokeWidth={1} />
+            <LayoutList size={32} strokeWidth={1.5} />
             <CardTitle>Задачи</CardTitle>
             <CardDescription>Активных задач: 12</CardDescription>
           </CardHeader>
@@ -47,9 +52,9 @@ export default function Home() {
 
         <Card>
           <CardHeader>
-            <Package size={64} strokeWidth={1} />
+            <Package size={32} strokeWidth={1.5} />
             <CardTitle>Материалы</CardTitle>
-            <CardDescription>Всего материалов: 120</CardDescription>
+            <CardDescription>Всего материалов: {materials.length}</CardDescription>
           </CardHeader>
           <CardContent>
             <Link href="/materials">
@@ -68,15 +73,13 @@ export default function Home() {
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
-              <li className="p-2 hover:bg-gray-100 rounded-md">
-                Квартира на Ленинском проспекте
-              </li>
-              <li className="p-2 hover:bg-gray-100 rounded-md">
-                Загородный дом в Подмосковье
-              </li>
-              <li className="p-2 hover:bg-gray-100 rounded-md">
-                Офис IT-компании
-              </li>
+              {projects.map((project) => (
+                <Link href={`/projects/${project.id}`} key={project.id}>
+                  <li className="p-2 hover:bg-gray-100 rounded-md">
+                    {project.name}
+                  </li>
+                </Link>
+              ))}
             </ul>
           </CardContent>
         </Card>
