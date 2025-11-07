@@ -44,29 +44,30 @@ export function CompanyCard({ company }: CompanyCardProps) {
         e.key === "Enter" && router.push(`/contacts/${company.id}`)
       }
       tabIndex={0}
+      onClick={() => router.push(`/contacts/${company.id}`)}
       className="cursor-pointer hover:shadow-lg transition-shadow duration-200 rounded-2xl justify-between border p-6"
     >
-      <div onClick={() => router.push(`/contacts/${company.id}`)}>
+      <section>
         {/* <div className="flex items-start justify-between"> */}
-          <div className="flex items-start gap-4">
-            <Avatar className="h-16 w-16 rounded-lg bg-sky-600 text-white flex items-center justify-center">
-              <AvatarFallback className="bg-transparent text-2xl font-bold">
-                {getInitials(company.name)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 ">
-              <div className="text-xl font-bold leading-6 line-clamp-2">
-                {company.name}
-              </div>
-              {/* <p className="text-base text-gray-500">
+        <div className="flex items-start gap-4">
+          <Avatar className="h-16 w-16 rounded-lg bg-sky-600 text-white flex items-center justify-center">
+            <AvatarFallback className="bg-transparent text-2xl font-bold">
+              {getInitials(company.name)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 ">
+            <div className="text-xl font-bold leading-6 line-clamp-2">
+              {company.name}
+            </div>
+            {/* <p className="text-base text-gray-500">
                 {company.address || "Москва"}
               </p> */}
-              <p className="text-sm text-gray-400">
-                {company.type === CompanyType.SUPPLIER ? "Поставщик" : "Клиент"}
-              </p>
-            </div>
+            <p className="text-sm text-gray-400">
+              {company.type === CompanyType.SUPPLIER ? "Поставщик" : "Клиент"}
+            </p>
           </div>
-          {/* <Button
+        </div>
+        {/* <Button
             variant="ghost"
             size="icon"
             className="rounded-full h-10 w-10"
@@ -78,7 +79,7 @@ export function CompanyCard({ company }: CompanyCardProps) {
             <Pencil className="h-5 w-5 text-gray-400" />
           </Button> */}
         {/* </div> */}
-      </div>
+      </section>
       <div className="pt-0">
         <div className="border-t border-gray-200 my-4"></div>
         <div className="space-y-3">
