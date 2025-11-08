@@ -5,7 +5,7 @@ import { projectsService } from "@/lib/services/projects";
 import { tasksService } from "@/lib/services/tasks";
 import { materialsService } from "@/lib/services/materials";
 import Link from "next/link";
-import ProjectHeader from '../components/project-header';
+import ProjectHeader from "../components/project-header";
 
 export const revalidate = 0; // Отключаем кэширование для этой страницы
 
@@ -19,158 +19,17 @@ export default async function ProjectDetailPage({
   const id = resolvedParams.id;
 
   // Получаем данные проекта из Supabase
-  let project;
-  let rooms = [];
-  let tasks: any[] = [];
+
   let specifications: any[] = [];
 
-  try {
-    project = await projectsService.getProjectById(id);
-
-    if (project) {
-      rooms = await projectsService.getRooms(id);
-      tasks = await tasksService.getTasks(id);
-      specifications = await materialsService.getSpecifications(id);
-    }
-  } catch (error) {
-    console.error("Ошибка при загрузке данных проекта:", error);
-
-    // Если не удалось загрузить проект, используем демо-данные
-    project = {
-      id: id,
-      name:
-        id === "1"
-          ? "Квартира на Ленинском проспекте"
-          : "Загородный дом в Подмосковье",
-      address:
-        id === "1"
-          ? "г. Москва, Ленинский проспект, д. 100"
-          : "Московская обл., Одинцовский р-н",
-      area: id === "1" ? 120 : 250,
-      stage: id === "1" ? "Концепция" : "Рабочая",
-      client_id: null,
-      contacts: [],
-      residents: "Семья из 4 человек",
-      demolition_info: "Демонтаж перегородок в гостиной",
-      construction_info: "Возведение новых перегородок в спальне",
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-
-    rooms = [
-      {
-        id: "1",
-        project_id: id,
-        name: "Гостиная",
-        area: 30,
-        preferred_finishes: "Паркет, обои",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-      {
-        id: "2",
-        project_id: id,
-        name: "Спальня",
-        area: 20,
-        preferred_finishes: "Паркет, краска",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-      {
-        id: "3",
-        project_id: id,
-        name: "Кухня",
-        area: 15,
-        preferred_finishes: "Плитка, краска",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-    ];
-
-    tasks = [
-      {
-        id: "1",
-        project_id: id,
-        title: "Подготовить планировочное решение",
-        description: "",
-        status: "В процессе",
-        priority: "Высокий",
-        due_date: "2023-06-15",
-        assigned_to: null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-      {
-        id: "2",
-        project_id: id,
-        title: "Согласовать отделочные материалы",
-        description: "",
-        status: "К выполнению",
-        priority: "Средний",
-        due_date: "2023-06-20",
-        assigned_to: null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-      {
-        id: "3",
-        project_id: id,
-        title: "Встреча с клиентом",
-        description: "",
-        status: "К выполнению",
-        priority: "Высокий",
-        due_date: "2023-06-25",
-        assigned_to: null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-    ];
-
-    specifications = [
-      {
-        id: "1",
-        project_id: id,
-        material_id: "1",
-        room_id: "1",
-        quantity: 50,
-        unit: "м²",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        materials: { name: "Паркетная доска", type: "Отделка" },
-        rooms: { name: "Гостиная" },
-      },
-      {
-        id: "2",
-        project_id: id,
-        material_id: "2",
-        room_id: "2",
-        quantity: 10,
-        unit: "рулон",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        materials: { name: "Обои", type: "Отделка" },
-        rooms: { name: "Спальня" },
-      },
-      {
-        id: "3",
-        project_id: id,
-        material_id: "3",
-        room_id: "3",
-        quantity: 1,
-        unit: "шт.",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        materials: { name: "Диван", type: "Мебель" },
-        rooms: { name: "Кухня" },
-      },
-    ];
-  }
-
+  const project = await projectsService.getProjectById(id);
+  const rooms = await projectsService.getRooms(id);
+  const tasks = await tasksService.getTasks(); //TODO: фильтровать по project_id
 
 
   return (
     <div className="space-y-6">
-      <ProjectHeader  id={id} project={project}/>
+      <ProjectHeader id={id} project={project} />
       <Card>
         <CardHeader>
           <CardTitle>Информация о проекте</CardTitle>
@@ -178,27 +37,38 @@ export default async function ProjectDetailPage({
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="text-sm">
-              <p>
-                <span className="text-muted-foreground">Адрес:</span>{" "}
-                {project?.address || "Не указано"}
+              <p className="grid grid-cols-4">
+                <span className="text-muted-foreground col-span-1">Адрес:</span>
+                <span className="col-span-3">
+                  {project?.address || "Не указано"}
+                </span>
               </p>
-              <p>
-                <span className="text-muted-foreground">Площадь:</span>{" "}
-                {project?.area || "Не указано"} м²
+              <p className="grid grid-cols-4">
+                <span className="text-muted-foreground col-span-1">
+                  Площадь:
+                </span>
+                <span className="col-span-3">
+                  {project?.area || "Не указано"} м²
+                </span>
               </p>
-              <p>
-                <span className="text-muted-foreground">Стадия:</span>{" "}
-                {project?.stage}
+              <p className="grid grid-cols-4">
+                <span className="text-muted-foreground col-span-1">
+                  Стадия:
+                </span>
+                <span className="col-span-3">{project?.stage}</span>
               </p>
             </div>
             <div>
               {project?.contacts && project.contacts.length > 0 ? (
                 <div className="space-y-1 text-sm">
-                  <p>
-                    <span className="text-muted-foreground">Клиент:</span>{" "}
+                  <p className="grid grid-cols-4">
+                    <span className="text-muted-foreground col-span-1">
+                      Клиент:
+                    </span>
+
                     <Link
                       href={`/contacts/${project.contacts[0].id}`}
-                      className="font-medium text-blue-600 hover:underline"
+                      className="font-medium text-blue-600 hover:underline col-span-3"
                     >
                       {project.contacts[0].name}
                     </Link>
@@ -217,14 +87,18 @@ export default async function ProjectDetailPage({
                   )}
                 </div>
               ) : (
-                <p className="text-sm">
-                  <span className="text-muted-foreground">Клиент:</span> Не
-                  указано
+                <p className="text-sm grid grid-cols-4">
+                  <span className="text-muted-foreground col-span-1">
+                    Клиент:
+                  </span>
+                  <span className="col-span-3"> Не указано</span>
                 </p>
               )}
-              <p className="text-sm">
-                <span className="text-muted-foreground">Проживающие:</span>{" "}
-                {project?.residents}
+              <p className="text-sm grid grid-cols-4">
+                <span className="text-muted-foreground col-span-1">
+                  Проживающие:
+                </span>
+                <span className="col-span-3"> {project?.residents}</span>
               </p>
             </div>
           </div>
@@ -301,7 +175,7 @@ export default async function ProjectDetailPage({
                         </p>
                         <p>
                           <span className="font-medium">Приоритет:</span>{" "}
-                          {task.priority}
+                          {task.status} //TODO: добавить приоритет задаче
                         </p>
                       </div>
                     </div>
