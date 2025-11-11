@@ -12,8 +12,8 @@ const ProjectInfoBlock = async ({ project }: { project: Project | null }) => {
         <CardTitle>Информация о проекте</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="text-sm">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <div className="text-sm space-y-2">
             <p className="grid grid-cols-4">
               <span className="text-muted-foreground col-span-1">Адрес:</span>
               <span className="col-span-3">
@@ -31,7 +31,7 @@ const ProjectInfoBlock = async ({ project }: { project: Project | null }) => {
               <span className="col-span-3">{project?.stage}</span>
             </p>
           </div>
-          <div>
+          <div className="text-sm space-y-2">
             {client ? (
               <div className="space-y-1 text-sm">
                 <p className="grid grid-cols-4">
@@ -64,14 +64,14 @@ const ProjectInfoBlock = async ({ project }: { project: Project | null }) => {
                 )} */}
               </div>
             ) : (
-              <p className="text-sm grid grid-cols-4">
+              <p className="grid grid-cols-4">
                 <span className="text-muted-foreground col-span-1">
                   Клиент:
                 </span>
                 <span className="col-span-3"> Не указано</span>
               </p>
             )}
-            <p className="text-sm grid grid-cols-4">
+            <p className="grid grid-cols-4">
               <span className="text-muted-foreground col-span-1">
                 Проживающие:
               </span>

@@ -1,7 +1,11 @@
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { Project } from "@/types";
+import { Project, ProjectStage } from "@/types";
+import DataLabelValue from "@/components/ui/data-label-value";
+import { getStageBadgeClass } from "@/lib/utils";
 
 interface ProjectsListProps {
   initialProjects?: Project[];
@@ -10,7 +14,6 @@ interface ProjectsListProps {
 export default function ProjectsList({
   initialProjects = [],
 }: ProjectsListProps) {
-  
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -25,31 +28,31 @@ export default function ProjectsList({
           initialProjects.map((project) => (
             <Link href={`/projects/${project.id}`} key={project.id}>
               <Card className="h-full py-6 hover:shadow-md transition-shadow cursor-pointer">
-                <CardHeader>
+                <CardHeader className="flex justify-between items-center">
                   <CardTitle>{project.name}</CardTitle>
+                  <Badge
+                    variant={"outline"}
+                    className={getStageBadgeClass(project.stage)}
+                  >
+                    {project.stage}
+                  </Badge>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-2 text-sm">
-                    <p>
-                      <span className="//font-medium text-muted-foreground">
-                        Адрес:
-                      </span>{" "}
+                  <div className="space-y-2 text-xs">
+                    <DataLabelValue label="Адрес">
                       {project.address}
-                    </p>
-                    <p>
-                      <span className="text-muted-foreground">Площадь:</span>{" "}
-                      {project.area} м²
-                    </p>
-                    <p>
-                      <span className="text-muted-foreground">Стадия:</span>{" "}
-                      {project.stage}
-                    </p>
-                    <p>
-                      <span className="text-muted-foreground">Клиент:</span>{" "}
+                    </DataLabelValue>
+                    <DataLabelValue label="Площадь">{`${project.area} м²`}</DataLabelValue>
+                    {/* <DataLabelValue label="Стадия">
+                      <span className="border py-1 px-2 rounded-full bg-amber-50 border-amber-300 text-amber-500">
+                        {project.stage}
+                      </span>
+                    </DataLabelValue> */}
+                    <DataLabelValue label="Клиент">
                       {project.client_id
                         ? "Загружается на странице проекта"
                         : "—"}
-                    </p>
+                    </DataLabelValue>
                   </div>
                 </CardContent>
               </Card>
