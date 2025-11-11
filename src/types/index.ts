@@ -1,10 +1,10 @@
 // Типы для проектов
 export interface Project {
   id: string;
- name: string;
- address: string;
- area: number;
- client_id: string;
+  name: string;
+  address: string;
+  area: number;
+  client_id: string | null;
   residents: string;
   demolition_info: string;
   construction_info: string;
@@ -16,11 +16,11 @@ export interface Project {
 }
 
 export enum ProjectStage {
-  PREPROJECT = 'Предпроектная',
-  CONCEPT = 'Концепция',
-  WORKING = 'Рабочая',
-  SUPERVISION = 'Авторский контроль',
-  COMPLETION = 'Комплектация'
+  PREPROJECT = "Предпроектная",
+  CONCEPT = "Концепция",
+  WORKING = "Рабочая",
+  SUPERVISION = "Авторский контроль",
+  COMPLETION = "Комплектация",
 }
 
 export interface Room {
@@ -45,10 +45,10 @@ export interface Task {
 }
 
 export enum TaskStatus {
-  TODO = 'К выполнению',
-  IN_PROGRESS = 'В процессе',
-  REVIEW = 'На проверке',
-  DONE = 'Выполнено'
+  TODO = "К выполнению",
+  IN_PROGRESS = "В процессе",
+  REVIEW = "На проверке",
+  DONE = "Выполнено",
 }
 
 export interface TaskComment {
@@ -85,15 +85,15 @@ export interface Material {
 }
 
 export enum MaterialType {
-  FINISH = 'Отделка',
-  FURNITURE = 'Мебель',
-  EQUIPMENT = 'Оборудование',
-  BATHROOM = 'Сантехника',
-  LIGHTING = 'Освещение',
-  TEXTILE = 'Текстиль',
-  FIXTURES = 'Инженерное оборудование',
-  DECOR = 'Декор',
-  OUTDOOR = 'Уличная мебель'
+  FINISH = "Отделка",
+  FURNITURE = "Мебель",
+  EQUIPMENT = "Оборудование",
+  BATHROOM = "Сантехника",
+  LIGHTING = "Освещение",
+  TEXTILE = "Текстиль",
+  FIXTURES = "Инженерное оборудование",
+  DECOR = "Декор",
+  OUTDOOR = "Уличная мебель",
 }
 
 export interface Specification {
@@ -140,11 +140,11 @@ export interface Company {
 }
 
 export enum ContactType {
-  CLIENT = 'Клиент',
-  SUPPLIER = 'Поставщик'
+  CLIENT = "Клиент",
+  SUPPLIER = "Поставщик",
 }
 
 export enum CompanyType {
-  CLIENT = 'Клиент',
-  SUPPLIER = 'Поставщик'
+  CLIENT = "Клиент",
+  SUPPLIER = "Поставщик",
 }

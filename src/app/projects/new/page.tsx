@@ -70,11 +70,19 @@ export default function NewProjectPage() {
     try {
       // Преобразуем площадь в число
       const areaValue = parseFloat(formData.area);
-      const projectData = {
+      // Prepare project data, excluding client_id if it's empty
+      const projectData: any = {
         ...formData,
-        area: !isNaN(areaValue) ? areaValue : null,
-        client_id: formData.client_id === "none" ? null : formData.client_id,
+        area: !isNaN(areaValue) && areaValue ? areaValue : 0, // Default to 0 if invalid or empty
       };
+
+      console.log(projectData);
+      // Only include client_id if it has a valid value
+      if (formData.client_id !== "none" && formData.client_id !== "") {
+        projectData.client_id = formData.client_id;
+      } else {
+        delete projectData.client_id; // Remove client_id property entirely if empty or "none"
+      }
 
       await projectsService.createProject(projectData);
       // Используем window.location для навигации вместо router.push
@@ -167,7 +175,7 @@ export default function NewProjectPage() {
               <Label>Клиент</Label>
               <div className="flex items-center space-x-2">
                 <Select
-                  value={formData.client_id || ""}
+                  value={formData.client_id}
                   onValueChange={(value) => {
                     if (value === "new") {
                       // TODO: open modal or redirect to create client
