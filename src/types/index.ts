@@ -105,6 +105,8 @@ export interface Specification {
   notes: string;
   created_at: string;
   updated_at: string;
+  rooms: Room[];
+  materials: Material[];
 }
 
 // Типы для контактов
