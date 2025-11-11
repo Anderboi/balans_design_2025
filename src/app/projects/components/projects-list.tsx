@@ -1,11 +1,10 @@
-import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { Project, ProjectStage } from "@/types";
+import { Project } from "@/types";
 import DataLabelValue from "@/components/ui/data-label-value";
-import { getStageBadgeClass } from "@/lib/utils";
+import { getStageBadgeClass, formatDate } from "@/lib/utils";
 
 interface ProjectsListProps {
   initialProjects?: Project[];
@@ -52,6 +51,9 @@ export default function ProjectsList({
                       {project.client_id
                         ? "Загружается на странице проекта"
                         : "—"}
+                    </DataLabelValue>
+                    <DataLabelValue label="Создано">
+                      {formatDate(project.created_at)}
                     </DataLabelValue>
                   </div>
                 </CardContent>

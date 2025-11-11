@@ -32,3 +32,11 @@ export function getStageBadgeClass(stage: ProjectStage): string {
       return "bg-gray-100 border-gray-300 text-gray-700";
   }
 }
+
+export function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Month is 0-indexed
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
+}
