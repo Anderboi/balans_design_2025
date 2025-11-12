@@ -8,6 +8,7 @@ const RoomsBlock = ({ rooms, id }: { rooms: Room[]; id: string }) => {
       <BlockHeader
         title="Состав помещений"
         href={`/projects/${id}/rooms/new`}
+        buttontext="Добавить помещение"
       />
 
       {rooms.length > 0 ? (

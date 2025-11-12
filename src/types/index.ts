@@ -93,7 +93,8 @@ export enum MaterialType {
   TEXTILE = "Текстиль",
   FIXTURES = "Инженерное оборудование",
   DECOR = "Декор",
-  OUTDOOR = "Уличная мебель",
+  DOORS = "Двери",
+  ELECTRIC = "Электрика",
 }
 
 export interface Specification {

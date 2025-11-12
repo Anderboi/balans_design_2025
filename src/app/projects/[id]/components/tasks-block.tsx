@@ -5,7 +5,7 @@ import BlockHeader from "./block-header";
 const TasksBlock = ({ tasks, id }: { tasks: Task[]; id: string }) => {
   return (
     <>
-      <BlockHeader title="Задачи" href={`/projects/${id}/tasks/new`} />
+      <BlockHeader title="Задачи" href={`/projects/${id}/tasks/new`} buttontext='Добавить задачу'/>
 
       {tasks.length > 0 ? (
         <div className="grid grid-cols-1 gap-4">

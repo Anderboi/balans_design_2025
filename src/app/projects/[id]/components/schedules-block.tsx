@@ -8,6 +8,7 @@ const SchedulesBlock = ({specifications, id}: {specifications: Specification[], 
       <BlockHeader
         href={`/projects/${id}/specifications/new`}
         title="Спецификации"
+        buttontext="Добавить спецификацию"
       />
 
       {specifications.length > 0 ? (
