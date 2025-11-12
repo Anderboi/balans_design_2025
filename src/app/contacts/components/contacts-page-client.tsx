@@ -13,6 +13,7 @@ import { AddCompanyDialog } from "./add-company-dialog";
 import { ContactCard } from "./contact-card";
 import { EditContactDrawer } from "./edit-contact-drawer";
 import { createCompany, getClients, getCompanies } from '../actions';
+import PageContainer from '@/components/ui/page-container';
 
 interface ContactsPageClientProps {
   initialCompanies: Company[];
@@ -115,7 +116,7 @@ export function ContactsPageClient({
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <PageContainer>
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Адресная книга</h1>
         <Button onClick={() => setIsAddCompanyOpen(true)}>
@@ -215,6 +216,6 @@ export function ContactsPageClient({
         onOpenChange={setIsDrawerOpen}
         onContactUpdated={handleContactUpdated}
       />
-    </div>
+    </PageContainer>
   );
 }

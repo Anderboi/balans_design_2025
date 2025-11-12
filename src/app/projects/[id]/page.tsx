@@ -8,6 +8,7 @@ import ProjectInfoBlock from "./components/project-info-block";
 import TasksBlock from "./components/tasks-block";
 import SchedulesBlock from "./components/schedules-block";
 import ProjectChatBlock from "./components/project-chat-block";
+import PageContainer from "@/components/ui/page-container";
 
 export const revalidate = 0; // Отключаем кэширование для этой страницы
 
@@ -27,7 +28,7 @@ export default async function ProjectDetailPage({
   const specifications = await materialsService.getSpecifications(id);
 
   return (
-    <section className="space-y-6">
+    <PageContainer>
       <ProjectHeader id={id} project={project} />
       <ProjectInfoBlock project={project} />
       <Tabs defaultValue="rooms">
@@ -54,6 +55,6 @@ export default async function ProjectDetailPage({
           <ProjectChatBlock />
         </TabsContent>
       </Tabs>
-    </section>
+    </PageContainer>
   );
 }

@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import DataLabelValue from "@/components/ui/data-label-value";
 import { contactsService } from "@/lib/services/contacts";
 import { Project } from "@/types";
 import Link from "next/link";
@@ -13,25 +14,16 @@ const ProjectInfoBlock = async ({ project }: { project: Project | null }) => {
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          <div className="text-sm space-y-2">
-            <p className="grid grid-cols-4">
-              <span className="text-muted-foreground col-span-1">Адрес:</span>
-              <span className="col-span-3">
-                {project?.address || "Не указано"}
-              </span>
-            </p>
-            <p className="grid grid-cols-4">
-              <span className="text-muted-foreground col-span-1">Площадь:</span>
-              <span className="col-span-3">
-                {project?.area || "Не указано"} м²
-              </span>
-            </p>
-            <p className="grid grid-cols-4">
-              <span className="text-muted-foreground col-span-1">Стадия:</span>
-              <span className="col-span-3">{project?.stage}</span>
-            </p>
+          <div className="text-sm space-y-4">
+            <DataLabelValue label="Адрес">
+              {project?.address || "Не указано"}
+            </DataLabelValue>
+            <DataLabelValue label="Площадь">
+              {project?.area || "Не указано"} м²
+            </DataLabelValue>
+            <DataLabelValue label="Стадия">{project?.stage}</DataLabelValue>
           </div>
-          <div className="text-sm space-y-2">
+          <div className="text-sm space-y-4">
             {client ? (
               <div className="space-y-1 text-sm">
                 <p className="grid grid-cols-4">
@@ -64,19 +56,11 @@ const ProjectInfoBlock = async ({ project }: { project: Project | null }) => {
                 )} */}
               </div>
             ) : (
-              <p className="grid grid-cols-4">
-                <span className="text-muted-foreground col-span-1">
-                  Клиент:
-                </span>
-                <span className="col-span-3"> Не указано</span>
-              </p>
+              <DataLabelValue label="Клиент">Не указано</DataLabelValue>
             )}
-            <p className="grid grid-cols-4">
-              <span className="text-muted-foreground col-span-1">
-                Проживающие:
-              </span>
-              <span className="col-span-3"> {project?.residents}</span>
-            </p>
+            <DataLabelValue label="Проживающие">
+              {project?.residents}
+            </DataLabelValue>
           </div>
         </div>
       </CardContent>

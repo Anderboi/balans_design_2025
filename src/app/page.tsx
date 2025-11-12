@@ -10,14 +10,15 @@ import Link from "next/link";
 import { BriefcaseBusiness, LayoutList, Package } from "lucide-react";
 import { projectsService } from "@/lib/services/projects";
 import { materialsService } from '@/lib/services/materials';
+import PageContainer from '@/components/ui/page-container';
 
 export default async function Home() {
   const projects = await projectsService.getProjects();
   const materials = await materialsService.getMaterials();
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-xl ">Добро пожаловать, UserName!</h1>
+    <PageContainer>
+      <h1 className="text-3xl font-bold">Добро пожаловать, UserName!</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
@@ -54,7 +55,9 @@ export default async function Home() {
           <CardHeader>
             <Package size={32} strokeWidth={1.5} />
             <CardTitle>Материалы</CardTitle>
-            <CardDescription>Всего материалов: {materials.length}</CardDescription>
+            <CardDescription>
+              Всего материалов: {materials.length}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Link href="/materials">
@@ -103,6 +106,6 @@ export default async function Home() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </PageContainer>
   );
 }

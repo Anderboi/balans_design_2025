@@ -18,6 +18,7 @@ import { AddMaterialDialog } from "@/app/materials/components/add-material-dialo
 import { Material, MaterialType } from "@/types";
 import { getMaterials } from "../actions";
 import { toast } from "sonner";
+import PageContainer from "@/components/ui/page-container";
 
 interface MaterialsPageClientProps {
   initialMaterials: Material[];
@@ -98,7 +99,7 @@ export function MaterialsPageClient({
   const materialTypes = Object.values(MaterialType);
 
   return (
-    <div className="container mx-auto py-6">
+    <PageContainer>
       {/* Заголовок */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -221,6 +222,6 @@ export function MaterialsPageClient({
         onOpenChange={setIsAddDialogOpen}
         onMaterialAdded={handleMaterialAdded}
       />
-    </div>
+    </PageContainer>
   );
 }

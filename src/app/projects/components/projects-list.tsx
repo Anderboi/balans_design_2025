@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Project } from "@/types";
 import DataLabelValue from "@/components/ui/data-label-value";
 import { getStageBadgeClass, formatDate } from "@/lib/utils";
+import PageContainer from "@/components/ui/page-container";
 
 interface ProjectsListProps {
   initialProjects?: Project[];
@@ -14,7 +15,7 @@ export default function ProjectsList({
   initialProjects = [],
 }: ProjectsListProps) {
   return (
-    <div className="space-y-6">
+    <PageContainer>
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Проекты</h1>
         <Button asChild>
@@ -26,7 +27,7 @@ export default function ProjectsList({
         {initialProjects.length > 0 ? (
           initialProjects.map((project) => (
             <Link href={`/projects/${project.id}`} key={project.id}>
-              <Card className="h-full py-6 hover:shadow-md transition-shadow cursor-pointer">
+              <Card className="h-full py-4 hover:shadow-md transition-shadow cursor-pointer">
                 <CardHeader className="flex justify-between items-center">
                   <CardTitle>{project.name}</CardTitle>
                   <Badge
@@ -68,6 +69,6 @@ export default function ProjectsList({
           </div>
         )}
       </div>
-    </div>
+    </PageContainer>
   );
 }

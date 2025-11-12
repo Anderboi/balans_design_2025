@@ -11,7 +11,7 @@ import { contactsService } from "@/lib/services/contacts";
 
 
 interface CompanyCardProps {
-  company: Company;
+  company: Company | Contact;
 }
 
 export function CompanyCard({ company }: CompanyCardProps) {
