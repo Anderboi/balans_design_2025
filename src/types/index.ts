@@ -97,18 +97,18 @@ export enum MaterialType {
   ELECTRIC = "Электрика",
 }
 
-export interface Specification {
-  id: string;
-  project_id: string;
-  material_id: string;
-  quantity: number;
-  room_id: string;
-  notes: string;
-  created_at: string;
-  updated_at: string;
-  rooms: Room[];
-  materials: Material[];
-}
+// export interface Specification {
+//   id: string;
+//   project_id: string;
+//   material_id: string;
+//   quantity: number;
+//   room_id: string;
+//   notes: string;
+//   created_at: string;
+//   updated_at: string;
+//   rooms: Room[];
+//   materials: Material[];
+// }
 
 // Типы для контактов
 export interface Contact {

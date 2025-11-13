@@ -5,17 +5,23 @@ const BlockHeader = ({
   title,
   buttontext,
   href,
+  onClick,
 }: {
   title: string;
   buttontext: string;
-  href: string;
+  href?: string;
+  onClick?: () => void;
 }) => {
   return (
     <div className="flex justify-between items-center">
       <h2 className="text-xl font-semibold">{title}</h2>
-      <Button asChild>
-        <Link href={href}>{buttontext}</Link>
-      </Button>
+      {onClick ? (
+        <Button onClick={onClick}>{buttontext}</Button>
+      ) : (
+        <Button asChild>
+          <Link href={href!}>{buttontext}</Link>
+        </Button>
+      )}
     </div>
   );
 };

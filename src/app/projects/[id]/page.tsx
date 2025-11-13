@@ -1,7 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { projectsService } from "@/lib/services/projects";
 import { tasksService } from "@/lib/services/tasks";
-import { materialsService } from "@/lib/services/materials";
 import ProjectHeader from "../components/project-header";
 import RoomsBlock from "./components/rooms-block";
 import ProjectInfoBlock from "./components/project-info-block";
@@ -25,7 +24,6 @@ export default async function ProjectDetailPage({
   const project = await projectsService.getProjectById(id);
   const rooms = await projectsService.getRooms(id);
   const tasks = await tasksService.getTasks(); //TODO: фильтровать по project_id
-  const specifications = await materialsService.getSpecifications(id);
 
   return (
     <PageContainer>
@@ -48,7 +46,7 @@ export default async function ProjectDetailPage({
         </TabsContent>
 
         <TabsContent value="specifications" className="space-y-4 mt-4">
-          <SchedulesBlock id={id} specifications={specifications} />
+          <SchedulesBlock id={id} />
         </TabsContent>
 
         <TabsContent value="info" className="space-y-4 mt-4">
