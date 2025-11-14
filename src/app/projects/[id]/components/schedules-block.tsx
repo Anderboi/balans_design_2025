@@ -9,7 +9,6 @@ const SchedulesBlock = ({ id }: { id: string }) => {
 
   return (
     <>
-      
       <BlockHeader
         title="Спецификации"
         href=""
@@ -17,10 +16,10 @@ const SchedulesBlock = ({ id }: { id: string }) => {
       />
 
       <article>
-        <div className="flex flex-col">
-          {schedules.map((category: string) => (
+        <div className="flex flex-col gap-2">
+          {schedules.map((category: string, key: number) => (
             <Link
-              className="py-2 border-b"
+              className="py-2 /border-b"
               href={`/projects/${id}/specifications?schedule=${category}`}
               key={category}
             >

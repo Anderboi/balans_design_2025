@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { MaterialCard } from "@/app/materials/components/material-card";
+import { MaterialCard } from "@/app/materials/components/card/material-card";
 import { AddMaterialDialog } from "@/app/materials/components/add-material-dialog";
 import { Material, MaterialType } from "@/types";
 import { getMaterials } from "../actions";

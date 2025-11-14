@@ -1,15 +1,20 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { projectsService } from "@/lib/services/projects";
 import { tasksService } from "@/lib/services/tasks";
-import ProjectHeader from "../components/project-header";
 import RoomsBlock from "./components/rooms-block";
 import ProjectInfoBlock from "./components/project-info-block";
 import TasksBlock from "./components/tasks-block";
 import SchedulesBlock from "./components/schedules-block";
 import ProjectChatBlock from "./components/project-chat-block";
-import PageContainer from "@/components/ui/page-container";
 
 export const revalidate = 0; // Отключаем кэширование для этой страницы
+
+const tabs = [
+  { value: "rooms", name: "Помещения" },
+  { value: "tasks", name: "Задачи" },
+  { value: "specifications", name: "Спецификации" },
+  { value: "chat", name: "Чат" },
+];
 
 export default async function ProjectDetailPage({
   params,
@@ -26,15 +31,15 @@ export default async function ProjectDetailPage({
   const tasks = await tasksService.getTasks(); //TODO: фильтровать по project_id
 
   return (
-    <PageContainer>
-      <ProjectHeader id={id} project={project} />
+    <>
       <ProjectInfoBlock project={project} />
       <Tabs defaultValue="rooms">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="rooms">Помещения</TabsTrigger>
-          <TabsTrigger value="tasks">Задачи</TabsTrigger>
-          <TabsTrigger value="specifications">Спецификации</TabsTrigger>
-          <TabsTrigger value="info">Чат</TabsTrigger>
+          {tabs.map((tab) => (
+            <TabsTrigger key={tab.value} value={tab.value}>
+              {tab.name}
+            </TabsTrigger>
+          ))}
         </TabsList>
 
         <TabsContent value="rooms" className="space-y-4 mt-4">
@@ -53,6 +58,6 @@ export default async function ProjectDetailPage({
           <ProjectChatBlock />
         </TabsContent>
       </Tabs>
-    </PageContainer>
+    </>
   );
 }

@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Project } from "@/types";
 import DataLabelValue from "@/components/ui/data-label-value";
-import { getStageBadgeClass, formatDate } from "@/lib/utils";
+import { getStageBadgeClass, formatDate } from "@/lib/utils/utils";
 import PageContainer from "@/components/ui/page-container";
 
 interface ProjectsListProps {

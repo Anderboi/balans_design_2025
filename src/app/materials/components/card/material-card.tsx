@@ -22,8 +22,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { EditMaterialDrawer } from "./edit-material-drawer";
-import { AssignMaterialDialog } from "./assign-material-dialog";
+import { EditMaterialDrawer } from "../edit-material-drawer";
+import { AssignMaterialDialog } from "../assign-material-dialog";
 import { materialsService } from "@/lib/services/materials";
 import { Material } from "@/types";
 
@@ -66,7 +66,7 @@ export function MaterialCard({
     return (
       <>
         <Card className="w-full">
-          <CardContent className="/p-4">
+          <CardContent>
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4 flex-1">
                 {material.image_url ? (

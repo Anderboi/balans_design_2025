@@ -28,12 +28,12 @@ import {
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Contact } from "@/types";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "./ui/select";
 import { Label } from "./ui/label";
 import { useState } from "react";
@@ -46,9 +46,7 @@ import {
   DrawerTrigger,
 } from "./ui/drawer";
 import { contactsService } from "@/lib/services/contacts";
-import { getInitials } from '@/lib/utils';
-
-
+import { getInitials } from "@/lib/utils/utils";
 
 export const columns: ColumnDef<Contact>[] = [
   {
@@ -56,7 +54,8 @@ export const columns: ColumnDef<Contact>[] = [
     header: ({ column }) => {
       return (
         <Button
-          variant="ghost" className='text-xs'
+          variant="ghost"
+          className="text-xs"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Имя
@@ -93,10 +92,7 @@ export const columns: ColumnDef<Contact>[] = [
     cell: ({ row }) => {
       const email = row.getValue("email") as string;
       return (
-        <a
-          href={`mailto:${email}`}
-          className="text-blue-600 hover:underline"
-        >
+        <a href={`mailto:${email}`} className="text-blue-600 hover:underline">
           {email}
         </a>
       );
@@ -128,7 +124,9 @@ export const columns: ColumnDef<Contact>[] = [
       });
 
       // Определяем направление Drawer в зависимости от размера экрана
-      const [drawerDirection, setDrawerDirection] = useState<"right" | "bottom">("right");
+      const [drawerDirection, setDrawerDirection] = useState<
+        "right" | "bottom"
+      >("right");
 
       React.useEffect(() => {
         const checkScreenSize = () => {
@@ -140,23 +138,23 @@ export const columns: ColumnDef<Contact>[] = [
         };
 
         checkScreenSize();
-        window.addEventListener('resize', checkScreenSize);
-        return () => window.removeEventListener('resize', checkScreenSize);
+        window.addEventListener("resize", checkScreenSize);
+        return () => window.removeEventListener("resize", checkScreenSize);
       }, []);
 
       const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setFormData((prev) => ({ ...prev, [name]: value }));
       };
 
       const handleSelectChange = (value: string) => {
-        setFormData(prev => ({ ...prev, position: value }));
+        setFormData((prev) => ({ ...prev, position: value }));
       };
 
       const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-        
+
         try {
           await contactsService.updateContact(contact.id, {
             name: formData.name,
@@ -164,15 +162,15 @@ export const columns: ColumnDef<Contact>[] = [
             email: formData.email,
             phone: formData.phone,
           });
-          
+
           // Обновляем данные в таблице
           Object.assign(contact, formData);
           setIsOpen(false);
-          
+
           // Можно добавить toast уведомление об успешном обновлении
-          console.log('Контакт успешно обновлен');
+          console.log("Контакт успешно обновлен");
         } catch (error) {
-          console.error('Ошибка при обновлении контакта:', error);
+          console.error("Ошибка при обновлении контакта:", error);
           // Можно добавить toast уведомление об ошибке
         } finally {
           setIsLoading(false);
@@ -180,7 +178,11 @@ export const columns: ColumnDef<Contact>[] = [
       };
 
       return (
-        <Drawer open={isOpen} onOpenChange={setIsOpen} direction={drawerDirection}>
+        <Drawer
+          open={isOpen}
+          onOpenChange={setIsOpen}
+          direction={drawerDirection}
+        >
           <DrawerTrigger asChild>
             <Button
               variant="outline"
@@ -214,14 +216,19 @@ export const columns: ColumnDef<Contact>[] = [
 
               <div className="grid gap-2">
                 <Label htmlFor="position">Должность</Label>
-                <Select value={formData.position} onValueChange={handleSelectChange}>
+                <Select
+                  value={formData.position}
+                  onValueChange={handleSelectChange}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Выберите должность" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Менеджер">Менеджер</SelectItem>
                     <SelectItem value="Директор">Директор</SelectItem>
-                    <SelectItem value="Главный инженер">Главный инженер</SelectItem>
+                    <SelectItem value="Главный инженер">
+                      Главный инженер
+                    </SelectItem>
                     <SelectItem value="Архитектор">Архитектор</SelectItem>
                     <SelectItem value="Дизайнер">Дизайнер</SelectItem>
                     <SelectItem value="Прораб">Прораб</SelectItem>
@@ -313,7 +320,7 @@ export function ContactsDataTable({ data }: ContactsDataTableProps) {
       </div>
       <div className="rounded-md border">
         <Table>
-          <TableHeader className='bg-neutral-100 text-xs'>
+          <TableHeader className="bg-neutral-100 text-xs">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
@@ -331,7 +338,7 @@ export function ContactsDataTable({ data }: ContactsDataTableProps) {
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody className='text-xs'>
+          <TableBody className="text-xs">
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
