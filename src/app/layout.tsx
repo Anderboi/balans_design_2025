@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Sidebar } from "@/components/sidebar";
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import AppSidebar from '@/components/app-sidebar';
 import GlobalErrorBoundary from '@/components/global-error-boundary';
@@ -22,12 +21,11 @@ export default function RootLayout({
     <html lang="ru">
       <body className={inter.className}>
         <GlobalErrorBoundary>
-          <div className="flex h-screen">
+          <div className="flex h-screen no-scrollbar">
             <SidebarProvider>
               <AppSidebar/>
-              {/* <Sidebar /> */}
               <SidebarTrigger  className='hidden md:flex'/>
-              <main className="flex-1 overflow-auto p-4  md:py-6 md:pl-0 md:pr-6">{children}</main>
+              <main className="flex-1 overflow-auto p-4  md:py-6 md:pl-0 md:pr-6 no-scrollbar">{children}</main>
             </SidebarProvider>
           </div>
         </GlobalErrorBoundary>
