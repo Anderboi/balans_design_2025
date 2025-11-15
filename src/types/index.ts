@@ -80,8 +80,8 @@ export interface Material {
   image_url?: string;
   in_stock?: boolean;
   tags?: string[];
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export enum MaterialType {

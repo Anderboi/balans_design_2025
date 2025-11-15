@@ -13,7 +13,8 @@ import { SlashIcon } from "lucide-react";
 import { projectsService } from "@/lib/services/projects";
 import { Input } from "@/components/ui/input";
 import { getInitials } from "@/lib/utils/utils";
-import Image from "next/image";
+import SpecMaterialCard from "./components/spec-material-card";
+import { Material, MaterialType } from "@/types";
 
 const ScheduleCategoryPage = async ({
   params,
@@ -29,7 +30,11 @@ const ScheduleCategoryPage = async ({
 
   const projectInfo = await projectsService.getProjectById(id);
 
-  const materials = [{ name: "Плитка", type: "Отделка" }];
+  const testMaterials: Material[] = [
+    { name: "Плитка", type: MaterialType.FINISH, id: "1" },
+    { name: "Плитка", type: MaterialType.FINISH, id: "2" },
+    { name: "Плитка", type: MaterialType.FINISH, id: "3" },
+  ];
 
   return (
     <PageContainer>
@@ -65,32 +70,17 @@ const ScheduleCategoryPage = async ({
       />
 
       <div>
-        {materials.map((material, key) => (
+        {testMaterials.map((material, key) => (
+          
           <div
             key={key}
-            className="w-full p-2 bg-neutral-100 flex rounded-xl items-center gap-2"
+            className="w-full p-1 mb-2 bg-neutral-100 flex rounded-lg items-start gap-1"
           >
-            <Input
-              className="bg-white w-16"
+            {/* <Input
+              className="bg-white w-14 h-14"
               value={`${getInitials(material.type)}-${key + 1}`}
-            />
-            <div className="bg-white w-full p-2 rounded-lg flex gap-2">
-              {
-                <Image
-                  src={""}
-                  alt="product_image"
-                  className="bg-neutral-200 rounded-md"
-                  height={120}
-                  width={120}
-                />
-              }
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 w-full">
-                <span>{material.name}</span>
-                <span>{material.name}</span>
-                <span>{material.name}</span>
-                <span>{material.name}</span>
-              </div>
-            </div>
+            /> */}
+            <SpecMaterialCard material={material} />
           </div>
         ))}
       </div>
