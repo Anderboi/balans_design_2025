@@ -28,9 +28,9 @@ interface AssignMaterialDialogProps {
 export function AssignMaterialDialog({ material, open, onOpenChange, onMaterialAssigned }: AssignMaterialDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
-  const [rooms, setRooms] = useState<Room[]>([]);
+  // const [rooms, setRooms] = useState<Room[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
-  const [selectedRoomId, setSelectedRoomId] = useState<string>('');
+  // const [selectedRoomId, setSelectedRoomId] = useState<string>('');
   const [quantity, setQuantity] = useState<number>(1);
   const [notes, setNotes] = useState<string>('');
 
@@ -40,14 +40,14 @@ export function AssignMaterialDialog({ material, open, onOpenChange, onMaterialA
     }
   }, [open]);
 
-  useEffect(() => {
-    if (selectedProjectId) {
-      loadRooms(selectedProjectId);
-    } else {
-      setRooms([]);
-      setSelectedRoomId('');
-    }
-  }, [selectedProjectId]);
+  // useEffect(() => {
+  //   if (selectedProjectId) {
+  //     loadRooms(selectedProjectId);
+  //   } else {
+  //     // setRooms([]);
+  //     setSelectedRoomId('');
+  //   }
+  // }, [selectedProjectId]);
 
   const loadProjects = async () => {
     try {
@@ -58,19 +58,19 @@ export function AssignMaterialDialog({ material, open, onOpenChange, onMaterialA
     }
   };
 
-  const loadRooms = async (projectId: string) => {
-    try {
-      const roomsData = await projectsService.getRooms(projectId);
-      setRooms(roomsData);
-    } catch (error) {
-      console.error('Ошибка при загрузке помещений:', error);
-    }
-  };
+  // const loadRooms = async (projectId: string) => {
+  //   try {
+  //     const roomsData = await projectsService.getRooms(projectId);
+  //     // setRooms(roomsData);
+  //   } catch (error) {
+  //     console.error('Ошибка при загрузке помещений:', error);
+  //   }
+  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!selectedProjectId || !selectedRoomId || quantity <= 0) {
+    console.log(selectedProjectId, quantity, notes);
+    if (!selectedProjectId || quantity <= 0) {
       return;
     }
 
@@ -79,7 +79,7 @@ export function AssignMaterialDialog({ material, open, onOpenChange, onMaterialA
       
       await materialsService.addSpecification({
         project_id: selectedProjectId,
-        room_id: selectedRoomId,
+        // room_id: selectedRoomId,
         material_id: material.id,
         quantity,
         notes: notes.trim() || '',
@@ -90,7 +90,7 @@ export function AssignMaterialDialog({ material, open, onOpenChange, onMaterialA
       
       // Сброс формы
       setSelectedProjectId('');
-      setSelectedRoomId('');
+      // setSelectedRoomId('');
       setQuantity(1);
       setNotes('');
     } catch (error) {
@@ -104,7 +104,7 @@ export function AssignMaterialDialog({ material, open, onOpenChange, onMaterialA
     onOpenChange(false);
     // Сброс формы
     setSelectedProjectId('');
-    setSelectedRoomId('');
+    // setSelectedRoomId('');
     setQuantity(1);
     setNotes('');
   };
@@ -138,7 +138,7 @@ export function AssignMaterialDialog({ material, open, onOpenChange, onMaterialA
           </div>
 
           {/* Выбор помещения */}
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <Label htmlFor="room">Помещение *</Label>
             <Select 
               value={selectedRoomId} 
@@ -156,7 +156,7 @@ export function AssignMaterialDialog({ material, open, onOpenChange, onMaterialA
                 ))}
               </SelectContent>
             </Select>
-          </div>
+          </div> */}
 
           {/* Количество */}
           <div className="space-y-2">
@@ -212,7 +212,7 @@ export function AssignMaterialDialog({ material, open, onOpenChange, onMaterialA
           </Button>
           <Button 
             onClick={handleSubmit} 
-            disabled={isLoading || !selectedProjectId || !selectedRoomId || quantity <= 0}
+            disabled={isLoading || !selectedProjectId || quantity <= 0}
           >
             {isLoading ? 'Присваивание...' : 'Присвоить материал'}
           </Button>

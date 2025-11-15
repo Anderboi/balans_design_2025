@@ -28,6 +28,7 @@ const ScheduleCategoryPage = async ({
   const resolvedParams = await params;
   const id = resolvedParams.id;
 
+
   const projectInfo = await projectsService.getProjectById(id);
 
   const testMaterials: Material[] = [

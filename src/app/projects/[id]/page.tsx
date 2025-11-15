@@ -6,6 +6,7 @@ import ProjectInfoBlock from "./components/project-info-block";
 import TasksBlock from "./components/tasks-block";
 import SchedulesBlock from "./components/schedules-block";
 import ProjectChatBlock from "./components/project-chat-block";
+import { materialsService } from '@/lib/services/materials';
 
 export const revalidate = 0; // Отключаем кэширование для этой страницы
 
@@ -29,6 +30,9 @@ export default async function ProjectDetailPage({
   const project = await projectsService.getProjectById(id);
   const rooms = await projectsService.getRooms(id);
   const tasks = await tasksService.getTasks(); //TODO: фильтровать по project_id
+  const shedules = await materialsService.getSpecifications(id);
+
+  console.log(shedules || "no spec");
 
   return (
     <>
