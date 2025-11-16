@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DataLabelValue from "@/components/ui/data-label-value";
 import { contactsService } from "@/lib/services/contacts";
@@ -23,10 +24,10 @@ const ProjectInfoBlock = async ({ project }: { project: Project | null }) => {
             </DataLabelValue>
             <DataLabelValue label="Стадия">{project?.stage}</DataLabelValue>
           </div>
-          <div className="text-sm space-y-4">
+          <div className="text-sm  space-y-4">
             {client ? (
               <div className="space-y-1 text-sm">
-                <p className="grid grid-cols-4">
+                <p className="grid grid-cols-4    ">
                   <span className="text-muted-foreground col-span-1">
                     Клиент:
                   </span>
@@ -56,7 +57,9 @@ const ProjectInfoBlock = async ({ project }: { project: Project | null }) => {
                 )} */}
               </div>
             ) : (
-              <DataLabelValue label="Клиент">Не указано</DataLabelValue>
+              <DataLabelValue label="Клиент">
+                <Button variant={"ghost"}>Добавить клиента</Button>
+              </DataLabelValue>
             )}
             <DataLabelValue label="Проживающие">
               {project?.residents}
