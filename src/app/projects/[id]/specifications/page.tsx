@@ -14,7 +14,8 @@ import { projectsService } from "@/lib/services/projects";
 import { Input } from "@/components/ui/input";
 import { getInitials } from "@/lib/utils/utils";
 import SpecMaterialCard from "./components/spec-material-card";
-import { Material, MaterialType } from "@/types";
+import { Material, MaterialType, SpecificationMaterial } from "@/types";
+import { materialsService } from '@/lib/services/materials';
 
 const ScheduleCategoryPage = async ({
   params,
@@ -31,11 +32,13 @@ const ScheduleCategoryPage = async ({
 
   const projectInfo = await projectsService.getProjectById(id);
 
-  const testMaterials: Material[] = [
-    { name: "Плитка", type: MaterialType.FINISH, id: "1" },
-    { name: "Плитка", type: MaterialType.FINISH, id: "2" },
-    { name: "Плитка", type: MaterialType.FINISH, id: "3" },
-  ];
+  const specMaterials = await materialsService.getSpecifications(id);
+
+  // const testMaterials: SpecificationMaterial[] = [
+  //   { name: "Плитка", type: MaterialType.FINISH, id: "1" },
+  //   { name: "Плитка", type: MaterialType.FINISH, id: "2" },
+  //   { name: "Плитка", type: MaterialType.FINISH, id: "3" },
+  // ];
 
   return (
     <PageContainer>
@@ -71,8 +74,7 @@ const ScheduleCategoryPage = async ({
       />
 
       <div>
-        {testMaterials.map((material, key) => (
-          
+        {specMaterials.map((material, key) => (
           <div
             key={key}
             className="w-full p-1 mb-2 bg-neutral-100 flex rounded-lg items-start gap-1"

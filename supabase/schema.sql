@@ -67,6 +67,7 @@ CREATE TABLE IF NOT EXISTS materials (
   price NUMERIC,
   unit TEXT,
   description TEXT,
+  size TEXT,
   image_url TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()

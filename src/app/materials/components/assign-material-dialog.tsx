@@ -69,7 +69,6 @@ export function AssignMaterialDialog({ material, open, onOpenChange, onMaterialA
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(selectedProjectId, quantity, notes);
     if (!selectedProjectId || quantity <= 0) {
       return;
     }
@@ -82,6 +81,21 @@ export function AssignMaterialDialog({ material, open, onOpenChange, onMaterialA
         // room_id: selectedRoomId,
         material_id: material.id,
         quantity,
+        name: material.name,
+        description: material.description,
+        manufacturer: material.manufacturer,
+        article: material.article,
+        lead_time: material.lead_time,
+        product_url: material.product_url,
+        size: material.size,
+        color: material.color,
+        finish: material.finish,
+        material: material.material,
+        type: material.type,
+        supplier: material.supplier,
+        price: material.price,
+        unit: material.unit,
+        image_url: material.image_url,
         notes: notes.trim() || '',
       });
 
@@ -137,26 +151,7 @@ export function AssignMaterialDialog({ material, open, onOpenChange, onMaterialA
             </Select>
           </div>
 
-          {/* Выбор помещения */}
-          {/* <div className="space-y-2">
-            <Label htmlFor="room">Помещение *</Label>
-            <Select 
-              value={selectedRoomId} 
-              onValueChange={setSelectedRoomId}
-              disabled={!selectedProjectId}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Выберите помещение" />
-              </SelectTrigger>
-              <SelectContent>
-                {rooms.map((room) => (
-                  <SelectItem key={room.id} value={room.id}>
-                    {room.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div> */}
+        
 
           {/* Количество */}
           <div className="space-y-2">
@@ -168,6 +163,7 @@ export function AssignMaterialDialog({ material, open, onOpenChange, onMaterialA
                 min="0.01"
                 step="0.01"
                 value={quantity}
+                onFocus={(e) => e.target.select()}
                 onChange={(e) => setQuantity(parseFloat(e.target.value) || 1)}
                 placeholder="1"
                 className="flex-1"
