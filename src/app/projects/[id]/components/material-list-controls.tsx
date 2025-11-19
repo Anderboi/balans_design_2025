@@ -54,13 +54,13 @@ export default function MaterialListControls({ materials }: Props) {
   const sortOrder = form.watch("sortOrder");
 
   // 3. useMemo остается таким же, но теперь зависит от RHF state
-  const displayedMaterials = useMemo(() => {
+  const groupedMaterials = useMemo(() => {
     let processedMaterials = [...materials];
 
     // Фильтрация по типу
     if (filterType !== "all") {
       processedMaterials = processedMaterials.filter(
-        (m) => m.type === filterType // 👈 Убедитесь, что m.type существует
+        (m) => m.type === filterType
       );
     }
 
@@ -68,39 +68,55 @@ export default function MaterialListControls({ materials }: Props) {
     if (searchTerm) {
       const lowerSearch = searchTerm.toLowerCase();
       processedMaterials = processedMaterials.filter(
-        (m) => (m.name || "").toLowerCase().includes(lowerSearch) // 👈 Убедитесь, что m.name существует
+        (m) => (m.name || "").toLowerCase().includes(lowerSearch)
       );
     }
 
     // Сортировка (по имени)
     processedMaterials.sort((a, b) => {
-      const aVal = a.name || ""; // 👈 Убедитесь, что a.name существует
-      const bVal = b.name || ""; // 👈 Убедитесь, что b.name существует
+      const aVal = a.name || "";
+      const bVal = b.name || "";
 
       const comparison = aVal.localeCompare(bVal);
       return sortOrder === "asc" ? comparison : comparison * -1;
     });
 
-    return processedMaterials;
+    // Группировка по типу материала
+    const groups: Record<MaterialType, SpecificationMaterial[]> = {} as Record<
+      MaterialType,
+      SpecificationMaterial[]
+    >;
+    processedMaterials.forEach((material) => {
+      if (!groups[material.type]) {
+        groups[material.type] = [];
+      }
+      groups[material.type].push(material);
+    });
+
+    return groups;
   }, [materials, searchTerm, filterType, sortOrder]);
 
   // Функция для переключения сортировки
   const toggleSortOrder = () => {
     const newOrder = sortOrder === "asc" ? "desc" : "asc";
-    form.setValue("sortOrder", newOrder); // 👈 Обновляем значение в RHF
+    form.setValue("sortOrder", newOrder);
   };
+
+  const hasMaterials = Object.values(groupedMaterials).some(
+    (group) => group.length > 0
+  );
 
   return (
     <div className="flex flex-col gap-4">
       {/* --- Панель управления (теперь с RHF и shadcn) --- */}
       <Form {...form}>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 /p-4 //bg-muted/40 rounded-lg //border">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 /p-4 //bg-muted/40 rounded-lg //border">
           {/* Поиск */}
           <FormField
             control={form.control}
             name="searchTerm"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-2">
                 <FormLabel>Поиск</FormLabel>
                 <FormControl>
                   <Input placeholder="Поиск по названию..." {...field} />
@@ -114,14 +130,13 @@ export default function MaterialListControls({ materials }: Props) {
             control={form.control}
             name="filterType"
             render={({ field }) => (
-              <FormItem className='w-full'>
+              <FormItem className="w-full col-span-1 ">
                 <FormLabel>Фильтр по типу</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
-                  
                 >
-                  <FormControl className='w-full'>
+                  <FormControl className="w-full text-xs">
                     <SelectTrigger>
                       <SelectValue placeholder="Выберите тип" />
                     </SelectTrigger>
@@ -140,12 +155,12 @@ export default function MaterialListControls({ materials }: Props) {
           />
 
           {/* Сортировка */}
-          <FormItem>
-            <FormLabel>Сортировка (по названию)</FormLabel>
+          <FormItem className="col-span-1 w-full">
+            <FormLabel>Сортировка</FormLabel>
             <Button
               variant="outline"
               onClick={toggleSortOrder}
-              className="w-full justify-between"
+              className="w-full justify-between text-xs text-ellipsis overflow-hidden"
             >
               <span>
                 {sortOrder === "asc"
@@ -163,15 +178,25 @@ export default function MaterialListControls({ materials }: Props) {
       </Form>
 
       {/* --- Список материалов (остается без изменений) --- */}
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-6">
         <Suspense fallback={<div>Loading...</div>}>
-          {displayedMaterials.length > 0 ? (
-            displayedMaterials.map((material, index) => (
-              <SpecMaterialCard
-                key={material.id || index}
-                material={material}
-              />
-            ))
+          {hasMaterials ? (
+            Object.entries(groupedMaterials).map(
+              ([type, materialsInGroup]) =>
+                materialsInGroup.length > 0 && (
+                  <div key={type} className="flex flex-col gap-2">
+                    <h2 className="text-base text-muted-foreground/75 font-semibold">
+                      {type}
+                    </h2>
+                    {materialsInGroup.map((material, index) => (
+                      <SpecMaterialCard
+                        key={material.id || index}
+                        material={material}
+                      />
+                    ))}
+                  </div>
+                )
+            )
           ) : (
             <p className="text-gray-500 text-center py-4">
               Материалы не найдены.

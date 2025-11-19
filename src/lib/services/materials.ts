@@ -149,6 +149,24 @@ export const materialsService = {
     return data || [];
   },
 
+  // Получить материалы спецификации по типу
+  async getSpecMaterialsByType(
+    type: SpecificationMaterial
+  ): Promise<SpecificationMaterial[]> {
+    const { data, error } = await supabase
+      .from("specifications")
+      .select("*")
+      .eq("type", type)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Ошибка при получении материалов по типу:", error);
+      throw error;
+    }
+
+    return data || [];
+  },
+
   // Добавление спецификации
   async addSpecification(
     spec: Omit<SpecificationMaterial, "id" | "created_at" | "updated_at">
@@ -189,9 +207,8 @@ export const materialsService = {
     return data;
   },
 
-
   async updateSpecMaterial(
-    specMaterialId: string, 
+    specMaterialId: string,
     data: Partial<{
       name: string;
       description: string;
@@ -213,16 +230,15 @@ export const materialsService = {
     };
 
     const { data: result, error } = await supabase
-      .from('specifications')
+      .from("specifications")
       .update(updateData)
-      .eq('id', specMaterialId)
+      .eq("id", specMaterialId)
       .select()
       .single();
 
     if (error) throw error;
     return result;
   },
-
 
   // Удаление спецификации
   async deleteSpecification(id: string): Promise<void> {
@@ -259,3 +275,4 @@ export const materialsService = {
     return data || [];
   },
 };
+
