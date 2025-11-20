@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { DragDropContext, DropResult } from "@hello-pangea/dnd";
-import { Task, TaskStatus } from "@/types";
+import { Task, TaskStatus, TASK_STATUS_LABELS } from "@/types";
 import { KanbanColumn } from "./kanban-column";
 import { tasksService } from "@/lib/services/tasks";
 import { toast } from "sonner";
@@ -11,11 +11,27 @@ interface KanbanBoardProps {
   initialTasks: Task[];
 }
 
-const COLUMNS: { status: TaskStatus; title: string }[] = [
-  { status: TaskStatus.TODO, title: "К выполнению" },
-  { status: TaskStatus.IN_PROGRESS, title: "В процессе" },
-  { status: TaskStatus.REVIEW, title: "На проверке" },
-  { status: TaskStatus.DONE, title: "Выполнено" },
+const COLUMNS = [
+  {
+    id: "TODO",
+    status: TaskStatus.TODO,
+    title: TASK_STATUS_LABELS[TaskStatus.TODO],
+  },
+  {
+    id: "IN_PROGRESS",
+    status: TaskStatus.IN_PROGRESS,
+    title: TASK_STATUS_LABELS[TaskStatus.IN_PROGRESS],
+  },
+  {
+    id: "REVIEW",
+    status: TaskStatus.REVIEW,
+    title: TASK_STATUS_LABELS[TaskStatus.REVIEW],
+  },
+  {
+    id: "DONE",
+    status: TaskStatus.DONE,
+    title: TASK_STATUS_LABELS[TaskStatus.DONE],
+  },
 ];
 
 export const KanbanBoard = ({ initialTasks }: KanbanBoardProps) => {
@@ -33,7 +49,11 @@ export const KanbanBoard = ({ initialTasks }: KanbanBoardProps) => {
       return;
     }
 
-    const newStatus = destination.droppableId as TaskStatus;
+    // Find the column definition to get the status
+    const column = COLUMNS.find((col) => col.id === destination.droppableId);
+    if (!column) return;
+
+    const newStatus = column.status;
 
     // Optimistic update
     const updatedTasks = tasks.map((task) =>
@@ -44,6 +64,7 @@ export const KanbanBoard = ({ initialTasks }: KanbanBoardProps) => {
 
     try {
       await tasksService.updateTask(draggableId, { status: newStatus });
+      toast.success("Статус обновлен");
     } catch (error) {
       console.error("Failed to update task status", error);
       toast.error("Не удалось обновить статус задачи");
@@ -56,8 +77,8 @@ export const KanbanBoard = ({ initialTasks }: KanbanBoardProps) => {
       <div className="flex gap-4 overflow-x-auto pb-4 h-full">
         {COLUMNS.map((col) => (
           <KanbanColumn
-            key={col.status}
-            status={col.status}
+            key={col.id}
+            id={col.id}
             title={col.title}
             tasks={tasks.filter((t) => t.status === col.status)}
           />

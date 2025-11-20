@@ -1,14 +1,14 @@
 import { Droppable } from "@hello-pangea/dnd";
-import { Task, TaskStatus } from "@/types";
+import { Task } from "@/types";
 import { KanbanCard } from "./kanban-card";
 
 interface KanbanColumnProps {
-  status: TaskStatus;
+  id: string;
   title: string;
   tasks: Task[];
 }
 
-export const KanbanColumn = ({ status, title, tasks }: KanbanColumnProps) => {
+export const KanbanColumn = ({ id, title, tasks }: KanbanColumnProps) => {
   return (
     <div className="flex flex-col w-80 shrink-0">
       <div className="mb-3 font-semibold text-sm text-muted-foreground flex items-center justify-between">
@@ -18,7 +18,7 @@ export const KanbanColumn = ({ status, title, tasks }: KanbanColumnProps) => {
         </span>
       </div>
 
-      <Droppable droppableId={status}>
+      <Droppable droppableId={id}>
         {(provided, snapshot) => (
           <div
             ref={provided.innerRef}

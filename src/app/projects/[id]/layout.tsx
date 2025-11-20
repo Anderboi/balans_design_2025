@@ -5,12 +5,15 @@ import React from "react";
 
 const ProjectLayout = async ({
   children,
+  modal,
 }: {
   children: React.ReactNode;
+  modal: React.ReactNode;
 }) => {
   return (
     <PageContainer>
       {children}
+      {modal}
     </PageContainer>
   );
 };

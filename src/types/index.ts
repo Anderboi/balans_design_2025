@@ -40,7 +40,7 @@ export interface Task {
   status: TaskStatus;
   priority?: TaskPriority;
   due_date: string;
-  assigned_to: string;
+  assigned_to: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -52,11 +52,18 @@ export enum TaskPriority {
 }
 
 export enum TaskStatus {
-  TODO = "К выполнению",
-  IN_PROGRESS = "В процессе",
-  REVIEW = "На проверке",
-  DONE = "Выполнено",
+  TODO = "TODO",
+  IN_PROGRESS = "IN_PROGRESS",
+  REVIEW = "REVIEW",
+  DONE = "DONE",
 }
+
+export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
+  [TaskStatus.TODO]: "К выполнению",
+  [TaskStatus.IN_PROGRESS]: "В процессе",
+  [TaskStatus.REVIEW]: "На проверке",
+  [TaskStatus.DONE]: "Выполнено",
+};
 
 export interface TaskComment {
   id: string;
