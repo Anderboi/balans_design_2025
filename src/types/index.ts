@@ -38,10 +38,17 @@ export interface Task {
   title: string;
   description: string;
   status: TaskStatus;
+  priority?: TaskPriority;
   due_date: string;
   assigned_to: string;
   created_at: string;
   updated_at: string;
+}
+
+export enum TaskPriority {
+  LOW = "Низкий",
+  MEDIUM = "Средний",
+  HIGH = "Высокий",
 }
 
 export enum TaskStatus {

@@ -1,13 +1,16 @@
 // app/contacts/page.tsx
-import { getCompanies, getClients } from "./actions";
+import { contactsService } from '@/lib/services/contacts';
+// import { getCompanies, getClients } from "./actions";
 import { ContactsPageClient } from "./components/contacts-page-client";
-import PageErrorBoundary from "@/components/page-error-boundary";
+import { companiesService } from '@/lib/services/companies';
 
-async function ContactsPageContent() {
+export default async function ContactsPage() {
   // Параллельная загрузка данных на сервере
   const [companies, clients] = await Promise.all([
-    getCompanies(),
-    getClients(),
+    companiesService.getCompanies(),
+    contactsService.getContacts(),
+    // getCompanies(),
+    // getClients(),
   ]);
 
   return (
@@ -15,10 +18,4 @@ async function ContactsPageContent() {
   );
 }
 
-export default function ContactsPage() {
-  return (
-    <PageErrorBoundary pageName="Страница контактов">
-      <ContactsPageContent />
-    </PageErrorBoundary>
-  );
-}
+
