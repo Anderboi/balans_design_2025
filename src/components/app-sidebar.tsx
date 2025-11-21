@@ -27,6 +27,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
 //? Menu items
 const mainItems = [
@@ -64,7 +66,12 @@ const libraryItems = [
   },
 ];
 
-const AppSidebar = () => {
+const AppSidebar = async () => {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   return (
     <Sidebar>
       <SidebarHeader>
@@ -112,7 +119,7 @@ const AppSidebar = () => {
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton size={"lg"}>
                   <UserCircleIcon />
-                  UserName
+                  {user?.email || "Guest"}
                   <ChevronUp className="ml-auto" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
@@ -124,8 +131,17 @@ const AppSidebar = () => {
                   <span>Профиль</span>
                 </DropdownMenuItem>
 
-                <DropdownMenuItem>
-                  <span>Выйти</span>
+                <DropdownMenuItem asChild>
+                  <form
+                    action={async () => {
+                      "use server";
+                      const supabase = await createClient();
+                      await supabase.auth.signOut();
+                      redirect("/login");
+                    }}
+                  >
+                    <button className="w-full text-left">Выйти</button>
+                  </form>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

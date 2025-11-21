@@ -1,19 +1,21 @@
-import { supabase } from '@/lib/supabase';
-import { Task, TaskComment } from '@/types';
+import { supabase } from "../supabase";
+import { Task, TaskComment } from "@/types";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 export const tasksService = {
   // Получение всех задач
-  async getTasks(projectId?: string): Promise<Task[]> {
-    let query = supabase.from('tasks').select('*');
-    
+  async getTasks(projectId?: string, client?: SupabaseClient): Promise<Task[]> {
+    const supabaseClient = client || supabase;
+    let query = supabaseClient.from("tasks").select("*");
+
     if (projectId) {
-      query = query.eq('project_id', projectId);
+      query = query.eq("project_id", projectId);
     }
-    
-    const { data, error } = await query.order('due_date');
+
+    const { data, error } = await query.order("due_date");
 
     if (error) {
-      console.error('Ошибка при получении задач:', error);
+      console.error("Ошибка при получении задач:", error);
       throw error;
     }
 
@@ -21,11 +23,12 @@ export const tasksService = {
   },
 
   // Получение задачи по ID
-  async getTaskById(id: string): Promise<Task | null> {
-    const { data, error } = await supabase
-      .from('tasks')
-      .select('*')
-      .eq('id', id)
+  async getTaskById(id: string, client?: SupabaseClient): Promise<Task | null> {
+    const supabaseClient = client || supabase;
+    const { data, error } = await supabaseClient
+      .from("tasks")
+      .select("*")
+      .eq("id", id)
       .single();
 
     if (error) {
@@ -37,15 +40,19 @@ export const tasksService = {
   },
 
   // Создание новой задачи
-  async createTask(task: Omit<Task, 'id' | 'created_at' | 'updated_at'>): Promise<Task> {
-    const { data, error } = await supabase
-      .from('tasks')
+  async createTask(
+    task: Omit<Task, "id" | "created_at" | "updated_at">,
+    client?: SupabaseClient
+  ): Promise<Task> {
+    const supabaseClient = client || supabase;
+    const { data, error } = await supabaseClient
+      .from("tasks")
       .insert(task)
       .select()
       .single();
 
     if (error) {
-      console.error('Ошибка при создании задачи:', error);
+      console.error("Ошибка при создании задачи:", error);
       throw error;
     }
 
@@ -53,11 +60,16 @@ export const tasksService = {
   },
 
   // Обновление задачи
-  async updateTask(id: string, task: Partial<Task>): Promise<Task> {
-    const { data, error } = await supabase
-      .from('tasks')
+  async updateTask(
+    id: string,
+    task: Partial<Task>,
+    client?: SupabaseClient
+  ): Promise<Task> {
+    const supabaseClient = client || supabase;
+    const { data, error } = await supabaseClient
+      .from("tasks")
       .update(task)
-      .eq('id', id)
+      .eq("id", id)
       .select()
       .single();
 
@@ -70,11 +82,9 @@ export const tasksService = {
   },
 
   // Удаление задачи
-  async deleteTask(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('tasks')
-      .delete()
-      .eq('id', id);
+  async deleteTask(id: string, client?: SupabaseClient): Promise<void> {
+    const supabaseClient = client || supabase;
+    const { error } = await supabaseClient.from("tasks").delete().eq("id", id);
 
     if (error) {
       console.error(`Ошибка при удалении задачи с ID ${id}:`, error);
@@ -83,15 +93,22 @@ export const tasksService = {
   },
 
   // Получение комментариев к задаче
-  async getTaskComments(taskId: string): Promise<TaskComment[]> {
-    const { data, error } = await supabase
-      .from('task_comments')
-      .select('*')
-      .eq('task_id', taskId)
-      .order('created_at');
+  async getTaskComments(
+    taskId: string,
+    client?: SupabaseClient
+  ): Promise<TaskComment[]> {
+    const supabaseClient = client || supabase;
+    const { data, error } = await supabaseClient
+      .from("task_comments")
+      .select("*")
+      .eq("task_id", taskId)
+      .order("created_at");
 
     if (error) {
-      console.error(`Ошибка при получении комментариев для задачи ${taskId}:`, error);
+      console.error(
+        `Ошибка при получении комментариев для задачи ${taskId}:`,
+        error
+      );
       throw error;
     }
 
@@ -99,18 +116,22 @@ export const tasksService = {
   },
 
   // Добавление комментария к задаче
-  async addTaskComment(comment: Omit<TaskComment, 'id' | 'created_at' | 'updated_at'>): Promise<TaskComment> {
-    const { data, error } = await supabase
-      .from('task_comments')
+  async addTaskComment(
+    comment: Omit<TaskComment, "id" | "created_at" | "updated_at">,
+    client?: SupabaseClient
+  ): Promise<TaskComment> {
+    const supabaseClient = client || supabase;
+    const { data, error } = await supabaseClient
+      .from("task_comments")
       .insert(comment)
       .select()
       .single();
 
     if (error) {
-      console.error('Ошибка при добавлении комментария:', error);
+      console.error("Ошибка при добавлении комментария:", error);
       throw error;
     }
 
     return data;
-  }
+  },
 };

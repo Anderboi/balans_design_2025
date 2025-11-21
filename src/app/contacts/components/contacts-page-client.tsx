@@ -1,7 +1,7 @@
 // app/contacts/components/contacts-page-client.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Company, Contact } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,8 +12,8 @@ import { toast } from "sonner";
 import { AddCompanyDialog } from "./add-company-dialog";
 import { ContactCard } from "./contact-card";
 import { EditContactDrawer } from "./edit-contact-drawer";
-import { createCompany, getClients, getCompanies } from '../actions';
-import PageContainer from '@/components/ui/page-container';
+import { createCompany, getClients, getCompanies } from "../actions";
+import PageContainer from "@/components/ui/page-container";
 
 interface ContactsPageClientProps {
   initialCompanies: Company[];
@@ -26,15 +26,31 @@ export function ContactsPageClient({
 }: ContactsPageClientProps) {
   const [companies, setCompanies] = useState<Company[]>(initialCompanies);
   const [clients, setClients] = useState<Contact[]>(initialClients);
-  const [filteredCompanies, setFilteredCompanies] =
-    useState<Company[]>(initialCompanies);
-  const [filteredClients, setFilteredClients] =
-    useState<Contact[]>(initialClients);
-  const [filteredAll, setFilteredAll] = useState<(Company | Contact)[]>([
-    ...initialCompanies,
-    ...initialClients,
-  ]);
   const [searchQuery, setSearchQuery] = useState("");
+  const filteredCompanies = useMemo(() => {
+    const query = searchQuery.toLowerCase();
+    return companies.filter(
+      (company) =>
+        company.name.toLowerCase().includes(query) ||
+        (company.email && company.email.toLowerCase().includes(query)) ||
+        (company.phone && company.phone.toLowerCase().includes(query))
+    );
+  }, [companies, searchQuery]);
+
+  const filteredClients = useMemo(() => {
+    const query = searchQuery.toLowerCase();
+    return clients.filter(
+      (client) =>
+        client.name.toLowerCase().includes(query) ||
+        (client.email && client.email.toLowerCase().includes(query)) ||
+        (client.phone && client.phone.toLowerCase().includes(query))
+    );
+  }, [clients, searchQuery]);
+
+  const filteredAll = useMemo(() => {
+    return [...filteredCompanies, ...filteredClients];
+  }, [filteredCompanies, filteredClients]);
+
   const [activeTab, setActiveTab] = useState("all");
   const [isAddCompanyOpen, setIsAddCompanyOpen] = useState(false);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
@@ -58,34 +74,6 @@ export function ContactsPageClient({
       console.error("Ошибка при загрузке компаний:", error);
       toast.error("Не удалось загрузить компании");
     }
-  };
-
-  useEffect(() => {
-    filterData();
-  }, [searchQuery, companies, clients]);
-
-  useEffect(() => {
-    setFilteredAll([...filteredCompanies, ...filteredClients]);
-  }, [filteredCompanies, filteredClients]);
-
-  const filterData = () => {
-    const query = searchQuery.toLowerCase();
-
-    const filtered = companies.filter(
-      (company) =>
-        company.name.toLowerCase().includes(query) ||
-        (company.email && company.email.toLowerCase().includes(query)) ||
-        (company.phone && company.phone.toLowerCase().includes(query))
-    );
-    setFilteredCompanies(filtered);
-
-    const filteredClientsList = clients.filter(
-      (client) =>
-        client.name.toLowerCase().includes(query) ||
-        (client.email && client.email.toLowerCase().includes(query)) ||
-        (client.phone && client.phone.toLowerCase().includes(query))
-    );
-    setFilteredClients(filteredClientsList);
   };
 
   const handleAddCompany = async (

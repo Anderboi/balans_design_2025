@@ -1,10 +1,12 @@
-import { supabase } from '@/lib/supabase';
+import { supabase } from "../supabase";
 import { Material, SpecificationMaterial, MaterialType } from "@/types";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 export const materialsService = {
   // Получение всех материалов
-  async getMaterials(): Promise<Material[]> {
-    const { data, error } = await supabase
+  async getMaterials(client?: SupabaseClient): Promise<Material[]> {
+    const supabaseClient = client || supabase;
+    const { data, error } = await supabaseClient
       .from("materials")
       .select("*")
       .order("created_at", { ascending: false });
@@ -18,8 +20,12 @@ export const materialsService = {
   },
 
   // Получить материалы по типу
-  async getMaterialsByType(type: MaterialType): Promise<Material[]> {
-    const { data, error } = await supabase
+  async getMaterialsByType(
+    type: MaterialType,
+    client?: SupabaseClient
+  ): Promise<Material[]> {
+    const supabaseClient = client || supabase;
+    const { data, error } = await supabaseClient
       .from("materials")
       .select("*")
       .eq("type", type)
@@ -34,8 +40,12 @@ export const materialsService = {
   },
 
   // Поиск материалов
-  async searchMaterials(query: string): Promise<Material[]> {
-    const { data, error } = await supabase
+  async searchMaterials(
+    query: string,
+    client?: SupabaseClient
+  ): Promise<Material[]> {
+    const supabaseClient = client || supabase;
+    const { data, error } = await supabaseClient
       .from("materials")
       .select("*")
       .or(
@@ -52,8 +62,12 @@ export const materialsService = {
   },
 
   // Получить материал по ID
-  async getMaterialById(id: string): Promise<Material | null> {
-    const { data, error } = await supabase
+  async getMaterialById(
+    id: string,
+    client?: SupabaseClient
+  ): Promise<Material | null> {
+    const supabaseClient = client || supabase;
+    const { data, error } = await supabaseClient
       .from("materials")
       .select("*")
       .eq("id", id)
@@ -69,9 +83,11 @@ export const materialsService = {
 
   // Создать новый материал
   async createMaterial(
-    material: Omit<Material, "id" | "created_at" | "updated_at">
+    material: Omit<Material, "id" | "created_at" | "updated_at">,
+    client?: SupabaseClient
   ): Promise<Material> {
-    const { data, error } = await supabase
+    const supabaseClient = client || supabase;
+    const { data, error } = await supabaseClient
       .from("materials")
       .insert([material])
       .select()
@@ -88,9 +104,11 @@ export const materialsService = {
   // Обновить материал
   async updateMaterial(
     id: string,
-    updates: Partial<Omit<Material, "id" | "created_at" | "updated_at">>
+    updates: Partial<Omit<Material, "id" | "created_at" | "updated_at">>,
+    client?: SupabaseClient
   ): Promise<Material> {
-    const { data, error } = await supabase
+    const supabaseClient = client || supabase;
+    const { data, error } = await supabaseClient
       .from("materials")
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq("id", id)
@@ -106,8 +124,12 @@ export const materialsService = {
   },
 
   // Удалить материал
-  async deleteMaterial(id: string): Promise<void> {
-    const { error } = await supabase.from("materials").delete().eq("id", id);
+  async deleteMaterial(id: string, client?: SupabaseClient): Promise<void> {
+    const supabaseClient = client || supabase;
+    const { error } = await supabaseClient
+      .from("materials")
+      .delete()
+      .eq("id", id);
 
     if (error) {
       console.error("Ошибка при удалении материала:", error);
@@ -116,8 +138,9 @@ export const materialsService = {
   },
 
   // Получить уникальные категории
-  async getCategories(): Promise<string[]> {
-    const { data, error } = await supabase
+  async getCategories(client?: SupabaseClient): Promise<string[]> {
+    const supabaseClient = client || supabase;
+    const { data, error } = await supabaseClient
       .from("materials")
       .select("category")
       .not("category", "is", null);
@@ -132,8 +155,12 @@ export const materialsService = {
   },
 
   // Получение спецификаций для проекта
-  async getSpecifications(projectId: string): Promise<SpecificationMaterial[]> {
-    const { data, error } = await supabase
+  async getSpecifications(
+    projectId: string,
+    client?: SupabaseClient
+  ): Promise<SpecificationMaterial[]> {
+    const supabaseClient = client || supabase;
+    const { data, error } = await supabaseClient
       .from("specifications")
       .select("*, materials(*), rooms(name)")
       .eq("project_id", projectId);
@@ -151,9 +178,11 @@ export const materialsService = {
 
   // Получить материалы спецификации по типу
   async getSpecMaterialsByType(
-    type: SpecificationMaterial
+    type: SpecificationMaterial,
+    client?: SupabaseClient
   ): Promise<SpecificationMaterial[]> {
-    const { data, error } = await supabase
+    const supabaseClient = client || supabase;
+    const { data, error } = await supabaseClient
       .from("specifications")
       .select("*")
       .eq("type", type)
@@ -169,9 +198,11 @@ export const materialsService = {
 
   // Добавление спецификации
   async addSpecification(
-    spec: Omit<SpecificationMaterial, "id" | "created_at" | "updated_at">
+    spec: Omit<SpecificationMaterial, "id" | "created_at" | "updated_at">,
+    client?: SupabaseClient
   ): Promise<SpecificationMaterial> {
-    const { data, error } = await supabase
+    const supabaseClient = client || supabase;
+    const { data, error } = await supabaseClient
       .from("specifications")
       .insert(spec)
       .select()
@@ -190,9 +221,11 @@ export const materialsService = {
     id: string,
     updates: Partial<
       Omit<SpecificationMaterial, "id" | "created_at" | "updated_at">
-    >
+    >,
+    client?: SupabaseClient
   ): Promise<SpecificationMaterial> {
-    const { data, error } = await supabase
+    const supabaseClient = client || supabase;
+    const { data, error } = await supabaseClient
       .from("specifications")
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq("id", id)
@@ -221,15 +254,17 @@ export const materialsService = {
       unit: string;
       price: number;
       notes: string;
-    }>
+    }>,
+    client?: SupabaseClient
   ) {
+    const supabaseClient = client || supabase;
     // Подготавливаем данные для обновления
-    const updateData: any = {
+    const updateData: Partial<SpecificationMaterial> = {
       ...data,
       updated_at: new Date().toISOString(),
     };
 
-    const { data: result, error } = await supabase
+    const { data: result, error } = await supabaseClient
       .from("specifications")
       .update(updateData)
       .eq("id", specMaterialId)
@@ -241,8 +276,12 @@ export const materialsService = {
   },
 
   // Удаление спецификации
-  async deleteSpecification(id: string): Promise<void> {
-    const { error } = await supabase
+  async deleteSpecification(
+    id: string,
+    client?: SupabaseClient
+  ): Promise<void> {
+    const supabaseClient = client || supabase;
+    const { error } = await supabaseClient
       .from("specifications")
       .delete()
       .eq("id", id);
@@ -256,9 +295,11 @@ export const materialsService = {
   // Получение спецификаций для конкретного помещения
   async getSpecificationsByRoom(
     projectId: string,
-    roomId: string
+    roomId: string,
+    client?: SupabaseClient
   ): Promise<SpecificationMaterial[]> {
-    const { data, error } = await supabase
+    const supabaseClient = client || supabase;
+    const { data, error } = await supabaseClient
       .from("specifications")
       .select("*, materials(*), rooms(name)")
       .eq("project_id", projectId)
@@ -275,4 +316,3 @@ export const materialsService = {
     return data || [];
   },
 };
-

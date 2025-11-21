@@ -16,7 +16,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { projectsService } from "@/lib/services/projects";
 import { contactsService } from "@/lib/services/contacts";
-import { ProjectStage, Contact, ContactType } from "@/types";
+import { Project, ProjectStage, Contact, ContactType } from "@/types";
 
 export default function NewProjectPage() {
   const router = useRouter();
@@ -41,7 +41,7 @@ export default function NewProjectPage() {
         );
         // Фильтруем менеджеров из списка клиентов
         const filteredClients = clientData.filter(
-          client => client.position?.toLowerCase() !== 'менеджер'
+          (client) => client.position?.toLowerCase() !== "менеджер"
         );
         setClients(filteredClients);
       } catch (error) {
@@ -71,18 +71,19 @@ export default function NewProjectPage() {
       // Преобразуем площадь в число
       const areaValue = parseFloat(formData.area);
       // Prepare project data, excluding client_id if it's empty
-      const projectData: any = {
+      const projectData: Omit<
+        Project,
+        "id" | "created_at" | "updated_at" | "contacts" | "rooms"
+      > = {
         ...formData,
         area: !isNaN(areaValue) && areaValue ? areaValue : 0, // Default to 0 if invalid or empty
+        client_id:
+          formData.client_id === "none" || formData.client_id === ""
+            ? null
+            : formData.client_id,
       };
 
       console.log(projectData);
-      // Only include client_id if it has a valid value
-      if (formData.client_id !== "none" && formData.client_id !== "") {
-        projectData.client_id = formData.client_id;
-      } else {
-        delete projectData.client_id; // Remove client_id property entirely if empty or "none"
-      }
 
       await projectsService.createProject(projectData);
       // Используем window.location для навигации вместо router.push
