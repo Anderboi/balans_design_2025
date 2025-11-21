@@ -2,6 +2,7 @@ import { Draggable } from "@hello-pangea/dnd";
 import { Card, CardContent } from "@/components/ui/card";
 import { Task } from "@/types";
 import { cn } from "@/lib/utils/utils";
+import { useRouter } from "next/navigation";
 
 interface KanbanCardProps {
   task: Task;
@@ -9,6 +10,8 @@ interface KanbanCardProps {
 }
 
 export const KanbanCard = ({ task, index }: KanbanCardProps) => {
+  const router = useRouter();
+
   return (
     <Draggable draggableId={task.id} index={index}>
       {(provided, snapshot) => (
@@ -17,8 +20,11 @@ export const KanbanCard = ({ task, index }: KanbanCardProps) => {
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           className={cn("mb-3", snapshot.isDragging && "opacity-50")}
+          onClick={() =>
+            router.push(`/projects/${task.project_id}/tasks/${task.id}`)
+          }
         >
-          <Card className="cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow">
+          <Card className="cursor-pointer hover:shadow-md transition-shadow">
             <CardContent className="p-3 space-y-2">
               <div className="font-medium text-sm">{task.title}</div>
               <div className="flex justify-between items-center text-xs text-muted-foreground">
