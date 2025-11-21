@@ -9,16 +9,28 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { BriefcaseBusiness, LayoutList, Package } from "lucide-react";
 import { projectsService } from "@/lib/services/projects";
-import { materialsService } from '@/lib/services/materials';
-import PageContainer from '@/components/ui/page-container';
+import { materialsService } from "@/lib/services/materials";
+import PageContainer from "@/components/ui/page-container";
+
+import { createClient } from "@/lib/supabase/server";
 
 export default async function Home() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   const projects = await projectsService.getProjects();
   const materials = await materialsService.getMaterials();
 
+  const userName =
+    user?.user_metadata?.full_name ||
+    user?.email?.split("@")[0] ||
+    "Пользователь";
+
   return (
     <PageContainer>
-      <h1 className="text-3xl font-bold">Добро пожаловать, UserName!</h1>
+      <h1 className="text-3xl font-bold">Добро пожаловать, {userName}!</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>

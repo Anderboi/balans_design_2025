@@ -13,7 +13,7 @@ import ProjectHeader from '../components/project-header';
 export const revalidate = 0; // Отключаем кэширование для этой страницы
 
 const tabs = [
-  { value: "rooms", name: "Помещения" },
+  // { value: "rooms", name: "Помещения" },
   { value: "tasks", name: "Задачи" },
   { value: "specifications", name: "Спецификации" },
   { value: "chat", name: "Чат" },
@@ -65,7 +65,7 @@ export default async function ProjectDetailPage({
       <ProjectInfoBlock project={project} />
       
       <Tabs defaultValue="rooms">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           {tabs.map((tab) => (
             <TabsTrigger key={tab.value} value={tab.value}>
               {tab.name}
