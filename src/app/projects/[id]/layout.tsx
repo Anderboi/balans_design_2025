@@ -10,6 +10,7 @@ const ProjectLayout = async ({
   children: React.ReactNode;
   modal: React.ReactNode;
 }) => {
+  console.log("ProjectLayout modal prop:", modal);
   return (
     <PageContainer>
       {children}

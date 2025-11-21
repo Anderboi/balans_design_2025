@@ -11,7 +11,7 @@ const TasksBlock = ({ tasks, id }: { tasks: Task[]; id: string }) => {
         buttontext="Добавить задачу"
       />
       <div className="h-[calc(100vh-250px)] min-h-[600px]">
-        <KanbanBoard initialTasks={tasks} />
+        <KanbanBoard initialTasks={tasks} projectId={id} />
       </div>
     </>
   );

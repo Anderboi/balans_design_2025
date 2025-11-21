@@ -9,6 +9,7 @@ import { toast } from "sonner";
 
 interface KanbanBoardProps {
   initialTasks: Task[];
+  projectId: string;
 }
 
 const COLUMNS = [
@@ -34,8 +35,12 @@ const COLUMNS = [
   },
 ];
 
-export const KanbanBoard = ({ initialTasks }: KanbanBoardProps) => {
+export const KanbanBoard = ({ initialTasks, projectId }: KanbanBoardProps) => {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
+
+  const onTaskCreated = (newTask: Task) => {
+    setTasks((prev) => [...prev, newTask]);
+  };
 
   const onDragEnd = async (result: DropResult) => {
     const { destination, source, draggableId } = result;
@@ -81,6 +86,8 @@ export const KanbanBoard = ({ initialTasks }: KanbanBoardProps) => {
             id={col.id}
             title={col.title}
             tasks={tasks.filter((t) => t.status === col.status)}
+            projectId={projectId}
+            onTaskCreated={onTaskCreated}
           />
         ))}
       </div>
