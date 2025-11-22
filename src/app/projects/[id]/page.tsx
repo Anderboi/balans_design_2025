@@ -18,7 +18,6 @@ import { getProjectMembers } from "@/lib/actions/team";
 export const revalidate = 0;
 
 const tabs = [
-  // { value: "rooms", name: "Помещения" },
   { value: "tasks", name: "Задачи" },
   { value: "specifications", name: "Спецификации" },
   { value: "chat", name: "Чат" },
