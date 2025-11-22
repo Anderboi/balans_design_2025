@@ -86,7 +86,6 @@ export default function NewProjectPage() {
       console.log(projectData);
 
       await projectsService.createProject(projectData);
-      // Используем window.location для навигации вместо router.push
       window.location.href = "/projects";
     } catch (error) {
       console.error("Ошибка при создании проекта:", error);

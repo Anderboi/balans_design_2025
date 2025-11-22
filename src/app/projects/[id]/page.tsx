@@ -8,30 +8,37 @@ import SchedulesBlock from "./components/schedules-block";
 import ProjectChatBlock from "./components/project-chat-block";
 import { materialsService } from "@/lib/services/materials";
 import { Suspense } from "react";
-import ProjectHeader from '../components/project-header';
+import ProjectHeader from "../components/project-header";
+import { notFound } from "next/navigation";
+import PageContainer from "@/components/ui/page-container";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TeamManagement } from "./components/team-management";
+import { getProjectMembers } from "@/lib/actions/team";
 
-export const revalidate = 0; // Отключаем кэширование для этой страницы
+export const revalidate = 0;
 
 const tabs = [
   // { value: "rooms", name: "Помещения" },
   { value: "tasks", name: "Задачи" },
   { value: "specifications", name: "Спецификации" },
   { value: "chat", name: "Чат" },
+  // { value: "files", name: "Файлы" },
+  { value: "team", name: "Команда" },
 ];
 
-  async function getProjectData(id: string) {
-    return await projectsService.getProjectById(id);
-  }
+async function getProjectData(id: string) {
+  return await projectsService.getProjectById(id);
+}
 
-  async function getProjectDetails(id: string) {
-    const [rooms, tasks, schedules] = await Promise.all([
-      projectsService.getRooms(id),
-      tasksService.getTasks(), // TODO: добавить фильтрацию по project_id
-      materialsService.getSpecifications(id),
-    ]);
+async function getProjectDetails(id: string) {
+  const [rooms, tasks, schedules] = await Promise.all([
+    projectsService.getRooms(id),
+    tasksService.getTasks(), // TODO: добавить фильтрацию по project_id
+    materialsService.getSpecifications(id),
+  ]);
 
-    return { rooms, tasks, schedules };
-  }
+  return { rooms, tasks, schedules };
+}
 
 export default async function ProjectDetailPage({
   params,
@@ -43,29 +50,26 @@ export default async function ProjectDetailPage({
   const id = resolvedParams.id;
 
   // Параллельная загрузка данных
-  const [project, projectDetails] = await Promise.all([
+  const [project, projectDetails, members] = await Promise.all([
     getProjectData(id),
     getProjectDetails(id),
+    getProjectMembers(id),
   ]);
 
-   const { rooms, tasks, schedules } = projectDetails;
+  const { rooms, tasks } = projectDetails;
 
-  // // Получаем данные проекта из Supabase
-  // const project = await projectsService.getProjectById(id);
-  // const rooms = await projectsService.getRooms(id);
-  // const tasks = await tasksService.getTasks(); //TODO: фильтровать по project_id
-  // const shedules = await materialsService.getSpecifications(id);
-
-  // Выносим тяжелые запросы в отдельные функции для параллельной загрузки
+  if (!project) {
+    notFound();
+  }
 
   return (
     <>
       {/* Передаем проект в header */}
       <ProjectHeader id={id} project={project} />
       <ProjectInfoBlock project={project} />
-      
-      <Tabs defaultValue="rooms">
-        <TabsList className="grid w-full grid-cols-3">
+
+      <Tabs defaultValue="tasks">
+        <TabsList className="grid w-full grid-cols-4">
           {tabs.map((tab) => (
             <TabsTrigger key={tab.value} value={tab.value}>
               {tab.name}
@@ -92,10 +96,29 @@ export default async function ProjectDetailPage({
         </Suspense>
 
         <Suspense fallback={<div>Loading...</div>}>
-          <TabsContent value="info" className="space-y-4 mt-4">
+          <TabsContent value="chat" className="space-y-4 mt-4">
             <ProjectChatBlock />
           </TabsContent>
         </Suspense>
+
+        <Suspense fallback={<div>Loading...</div>}>
+          <TabsContent value="files" className="space-y-4 mt-4">
+            <div className="p-4 text-center text-muted-foreground">
+              Раздел файлов в разработке
+            </div>
+          </TabsContent>
+        </Suspense>
+
+        <TabsContent value="team" className="mt-6">
+          {/* <Card>
+            <CardHeader>
+              <CardTitle>Управление командой</CardTitle>
+            </CardHeader>
+            <CardContent> */}
+          <TeamManagement projectId={id} initialMembers={members} />
+          {/* </CardContent>
+          </Card> */}
+        </TabsContent>
       </Tabs>
     </>
   );

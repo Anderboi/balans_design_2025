@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const ProjectChatBlock = () => {
   return (
@@ -11,6 +11,6 @@ const ProjectChatBlock = () => {
       </CardContent>
     </Card>
   );
-}
+};
 
-export default ProjectChatBlock
+export default ProjectChatBlock;

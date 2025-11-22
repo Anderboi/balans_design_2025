@@ -53,16 +53,24 @@ export const projectsService = {
     >,
     client?: SupabaseClient
   ): Promise<Project> {
+    // Используем server action для создания проекта с автоматическим добавлением владельца
+    const { createProjectAction } = await import("@/lib/actions/projects");
+    const result = await createProjectAction(project);
+
+    if (!result.success) {
+      throw new Error(result.error || "Не удалось создать проект");
+    }
+
+    // Получить созданный проект для возврата
     const supabaseClient = client || supabase;
     const { data, error } = await supabaseClient
       .from("projects")
-      .insert(project)
-      .select()
+      .select("*")
+      .eq("id", result.projectId)
       .single();
 
-    if (error) {
-      console.error("Ошибка при создании проекта:", error);
-      throw error;
+    if (error || !data) {
+      throw new Error("Проект создан, но не удалось получить его данные");
     }
 
     return data;
