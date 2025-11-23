@@ -60,8 +60,15 @@ const BriefCarousel = () => {
   const renderBriefForm = () => {
     if (selectedBriefBlock === null) return null;
 
+    // TODO: В будущем получать ID из URL или пропсов страницы
+    // Сейчас берем из URL params, так как компонент клиентский и находится в page.tsx
+    // Но лучше передавать как проп.
+    // Временное решение: берем ID из pathname (плохая практика, но работает для демо)
+    const pathParts = window.location.pathname.split("/");
+    const projectId = pathParts[pathParts.indexOf("projects") + 1];
+
     const commonProps = {
-      projectId: "test-project-id", // TODO: Pass real projectId
+      projectId: projectId,
       onSave: handleSave,
     };
 
@@ -88,7 +95,7 @@ const BriefCarousel = () => {
         opts={{
           align: "start",
         }}
-        className="/flex gap-2 bg-secondary py-2  rounded-lg /border w-full /overflow-scroll /no-scrollbar "
+        className="gap-2 bg-secondary py-2  rounded-lg w-full "
       >
         <CarouselContent className="-ml-2 px-2">
           {briefBlocks.map((block, index) => (

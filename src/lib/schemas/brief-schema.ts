@@ -44,8 +44,8 @@ export type Equipment = z.infer<typeof EquipmentSchema>;
 // ? Помещение
 export const PremiseSchema = z.object({
   name: z.string().min(1, "Необходимо указать название"),
-  order: z.coerce.number(),
-  area: z.coerce.number().optional(),
+  order: z.number(),
+  area: z.number().optional(),
   type: RoomTypeEnum.optional(),
   equipment: z.array(EquipmentSchema).optional(),
 });
