@@ -18,13 +18,17 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChevronRight, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { ResidentsForm } from "@/components/brief/forms/residents-form";
+import { DemolitionForm } from "@/components/brief/forms/demolition-form";
+import { ConstructionForm } from "@/components/brief/forms/construction-form";
+import { PremisesForm } from "@/components/brief/forms/premises-form";
+import { EngineeringForm } from "@/components/brief/forms/engineering-form";
 
 const briefBlocks = [
-  { title: "Общая информация", progress: 50 },
   { title: "Информация о проживающих", progress: 50 },
+  { title: "Состав помещений", progress: 50 },
   { title: "Информация по демонтажу", progress: 50 },
   { title: "Информация по монтажу", progress: 50 },
-  { title: "Состав помещений", progress: 50 },
   { title: "Инженерные системы", progress: 50 },
 ];
 
@@ -45,6 +49,36 @@ const BriefCarousel = () => {
   const handleOpenDrawer = (index: number) => {
     setSelectedBriefBlock(index);
     setIsDrawerOpen(true);
+  };
+
+  const handleSave = async (data: unknown) => {
+    console.log("Saving brief data:", data);
+    // TODO: Implement actual save logic
+    setIsDrawerOpen(false);
+  };
+
+  const renderBriefForm = () => {
+    if (selectedBriefBlock === null) return null;
+
+    const commonProps = {
+      projectId: "test-project-id", // TODO: Pass real projectId
+      onSave: handleSave,
+    };
+
+    switch (selectedBriefBlock) {
+      case 0:
+        return <ResidentsForm {...commonProps} />;
+      case 1:
+        return <PremisesForm {...commonProps} />;
+      case 2:
+        return <DemolitionForm {...commonProps} />;
+      case 3:
+        return <ConstructionForm {...commonProps} />;
+      case 4:
+        return <EngineeringForm {...commonProps} />;
+      default:
+        return null;
+    }
   };
 
   return (
@@ -102,20 +136,7 @@ const BriefCarousel = () => {
           </DrawerHeader>
 
           <ScrollArea className="flex-1 px-4">
-            <div className="space-y-6 pb-6">
-              {/* Здесь будет содержимое формы в зависимости от selectedBriefBlock */}
-              <p className="text-sm text-muted-foreground">
-                Форма для раздела:{" "}
-                {selectedBriefBlock !== null
-                  ? briefBlocks[selectedBriefBlock].title
-                  : ""}
-              </p>
-
-              {/* TODO: Подключить соответствующие формы brief блоков */}
-              <div className="p-4 border rounded-lg bg-muted/50">
-                <p className="text-sm">Содержимое формы будет здесь</p>
-              </div>
-            </div>
+            <div className="space-y-6 pb-6">{renderBriefForm()}</div>
           </ScrollArea>
 
           <DrawerFooter>
@@ -128,7 +149,17 @@ const BriefCarousel = () => {
               >
                 Отмена
               </Button>
-              <Button className="flex-1">Сохранить</Button>
+              <Button
+                className="flex-1"
+                onClick={() => {
+                  const form = document.querySelector("form");
+                  if (form) {
+                    form.requestSubmit();
+                  }
+                }}
+              >
+                Сохранить
+              </Button>
             </div>
           </DrawerFooter>
         </DrawerContent>
