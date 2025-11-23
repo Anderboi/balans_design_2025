@@ -6,15 +6,9 @@ import { contactsService } from "@/lib/services/contacts";
 import { Project } from "@/types";
 import { ChevronRight } from 'lucide-react';
 import Link from "next/link";
+import BriefCarousel from './brief-carousel';
 
-const briefBlocks = [
-  {title: "Общая информация", progress: 50},
-  {title: "Информация о проживающих", progress: 50},
-  {title:"Информация по демонтажу", progress: 50},
-  {title:"Информация по монтажу", progress: 50},
-  {title:"Состав помещений", progress: 50},
-  {title:"Инженерные системы", progress: 50},
-]
+
 
 const ProjectInfoBlock = async ({ project }: { project: Project | null }) => {
   const client = await contactsService.getContactById(project?.client_id || "");
@@ -82,27 +76,7 @@ const ProjectInfoBlock = async ({ project }: { project: Project | null }) => {
       </CardContent>
       <CardFooter className="flex flex-col gap-2 items-start">
         <h3>Информация о проекте</h3>
-        <Carousel orientation='horizontal'
-          opts={{
-            align: "start",
-          }}
-          className="/flex gap-2 bg-secondary py-2  rounded-lg /border w-full /overflow-scroll /no-scrollbar "
-        >
-          <CarouselContent className='-ml-2 px-2'>
-            {briefBlocks.map((block, index) => (
-              <CarouselItem
-                key={index}
-                className="flex items-center md:basis-1/3 lg:basis-1/4 gap-2 ml-2 p-2 rounded-md bg-white w-60 min-w-60"
-              >
-                <div className='flex flex-col gap-2 justify-between h-full grow'>
-                  <p className="text-sm">{block.title}</p>
-                  <p className="text-xs text-secondary-foreground/30">Прогресс бар</p>
-                </div>
-                <ChevronRight className='size-4 text-secondary-foreground/30'/>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
+       <BriefCarousel/>
       </CardFooter>
     </Card>
   );
