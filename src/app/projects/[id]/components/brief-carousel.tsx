@@ -80,7 +80,7 @@ const BriefCarousel = () => {
       case 2:
         return <DemolitionForm {...commonProps} />;
       case 3:
-        return <ConstructionForm {...commonProps} />;
+        return <ConstructionForm roomList={[]} {...commonProps} />; //TODO: add rooms from Supabase
       case 4:
         return <EngineeringForm {...commonProps} />;
       default:
