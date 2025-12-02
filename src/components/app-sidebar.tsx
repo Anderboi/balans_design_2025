@@ -1,8 +1,8 @@
-import React from "react";
 import {
   Book,
   BriefcaseBusiness,
   ChevronUp,
+  Command,
   Home,
   Image,
   Package,
@@ -20,6 +20,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
 } from "./ui/sidebar";
 import {
   DropdownMenu,
@@ -29,6 +30,7 @@ import {
 } from "./ui/dropdown-menu";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 //? Menu items
 const mainItems = [
@@ -73,9 +75,22 @@ const AppSidebar = async () => {
   } = await supabase.auth.getUser();
 
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
       <SidebarHeader>
-        <h1 className="text-3xl font-bold p-2">BALANS</h1>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <Link href="/">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                  <Command className="size-4" />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-bold text-xl">BALANS</span>
+                </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -84,10 +99,10 @@ const AppSidebar = async () => {
               {mainItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.href}>
+                    <Link href={item.href}>
                       <item.icon />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -147,6 +162,7 @@ const AppSidebar = async () => {
             </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>
+        <SidebarTrigger className="hidden sm:flex w-full justify-center py-4" />
       </SidebarFooter>
     </Sidebar>
   );
