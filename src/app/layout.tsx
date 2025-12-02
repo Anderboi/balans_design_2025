@@ -26,7 +26,7 @@ export default function RootLayout({
             <SidebarProvider>
               <SidebarLogic />
               <AppSidebar />
-              <main className="flex-1 overflow-auto p-4  md:py-6 md:pl-0 md:pr-6 bg-secondary no-scrollbar">
+              <main className="flex-1 overflow-auto p-4  md:py-6 //md:pl-0 //md:pr-6 bg-secondary no-scrollbar">
                 <SidebarTrigger className="md:hidden mb-4" />
                 {children}
               </main>

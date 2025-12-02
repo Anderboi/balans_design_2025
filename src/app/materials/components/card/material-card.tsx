@@ -26,6 +26,7 @@ import { EditMaterialDrawer } from "../edit-material-drawer";
 import { AssignMaterialDialog } from "../assign-material-dialog";
 import { materialsService } from "@/lib/services/materials";
 import { Material } from "@/types";
+import Image from "next/image";
 
 interface MaterialCardProps {
   material: Material;
@@ -65,89 +66,86 @@ export function MaterialCard({
   if (viewMode === "list") {
     return (
       <>
-        <Card className="w-full">
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4 flex-1">
-                {material.image_url ? (
-                  <img
-                    src={material.image_url}
-                    alt={material.name}
-                    className="w-18 h-18 object-cover rounded-sm"
-                  />
-                ) : (
-                  <div className="w-18 h-18 bg-muted rounded-sm flex items-center justify-center">
-                    <Package className="w-8 h-8 text-muted-foreground" />
-                  </div>
-                )}
-
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-xl truncate ">
-                    {material.name}
-                  </h3>
-                  <p className="text-xs text-muted-foreground/80 capitalize">
-                    {material.manufacturer?.toUpperCase()}
-                  </p>
-                  <div className="flex items-center space-x-2 mt-1">
-                    <Badge variant="secondary">{material.type}</Badge>
-
-                    {!material.in_stock && (
-                      <Badge variant="destructive">Нет в наличии</Badge>
-                    )}
-                  </div>
+        <div className="w-full border rounded-md overflow-clip">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4 flex-1">
+              {material.image_url ? (
+                <img
+                  src={material.image_url}
+                  alt={material.name}
+                  className="size-24 object-cover"
+                />
+              ) : (
+                <div className="size-24 bg-muted flex items-center justify-center">
+                  <Package className="size-8 text-muted-foreground" />
                 </div>
+              )}
 
-                <div className="text-right">
-                  {material.price && (
-                    <p className="font-semibold text-lg">
-                      {material.price} ₽
-                      {material.unit ? `/${material.unit}` : ""}
-                    </p>
-                  )}
-                  {material.article && (
-                    <p className="text-sm text-muted-foreground">
-                      Арт: {material.article}
-                    </p>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-xl truncate ">
+                  {material.name}
+                </h3>
+                <p className="text-xs text-muted-foreground/80 capitalize">
+                  {material.manufacturer?.toUpperCase()}
+                </p>
+                <div className="flex items-center space-x-2 mt-1">
+                  <Badge variant="secondary">{material.type}</Badge>
+
+                  {!material.in_stock && (
+                    <Badge variant="destructive">Нет в наличии</Badge>
                   )}
                 </div>
               </div>
 
-              <div className="flex items-center space-x-2 ml-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleAssignMaterial}
-                  className="flex items-center space-x-1"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Присвоить</span>
-                </Button>
-
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">
-                      <MoreHorizontal className="w-4 h-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => setShowEditDrawer(true)}>
-                      <Edit className="w-4 h-4 mr-2" />
-                      Редактировать
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => setShowDeleteDialog(true)}
-                      className="text-destructive"
-                    >
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      Удалить
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+              <div className="text-right">
+                {material.price && (
+                  <p className="font-semibold text-lg">
+                    {material.price} ₽{material.unit ? `/${material.unit}` : ""}
+                  </p>
+                )}
+                {material.article && (
+                  <p className="text-sm text-muted-foreground">
+                    Арт: {material.article}
+                  </p>
+                )}
               </div>
             </div>
-          </CardContent>
-        </Card>
+
+            <div className="flex items-center space-x-2 ml-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleAssignMaterial}
+                className="flex items-center space-x-1"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Присвоить</span>
+              </Button>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <MoreHorizontal className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setShowEditDrawer(true)}>
+                    <Edit className="w-4 h-4 mr-2" />
+                    Редактировать
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => setShowDeleteDialog(true)}
+                    className="text-destructive"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Удалить
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        </div>
 
         <EditMaterialDrawer
           material={material}
@@ -196,12 +194,12 @@ export function MaterialCard({
             />
           ) : (
             <div className="w-full h-48 bg-muted rounded-sm flex items-center justify-center mb-4">
-              <Package className="w-16 h-16 text-muted-foreground" />
+              <Package className="size-16 text-muted-foreground" />
             </div>
           )}
 
           <div className="space-y-2">
-            <h3 className="font-semibold text-lg line-clamp-2">
+            <h3 className="font-semibold text-xl line-clamp-2">
               {material.name}
             </h3>
             <p className="text-xs text-muted-foreground/80">
@@ -211,17 +209,9 @@ export function MaterialCard({
             <div className="flex flex-wrap gap-1">
               <Badge variant="secondary">{material.type}</Badge>
 
-              {!material.in_stock && (
+              {/* {!material.in_stock && (
                 <Badge variant="destructive">Нет в наличии</Badge>
-              )}
-            </div>
-
-            {material.description && (
-              <p className="text-sm text-muted-foreground line-clamp-3">
-                {material.description}
-              </p>
-            )}
-
+              )} */}
             {material.tags && material.tags.length > 0 && (
               <div className="flex flex-wrap gap-1">
                 {material.tags.slice(0, 3).map((tag, index) => (
@@ -236,6 +226,8 @@ export function MaterialCard({
                 )}
               </div>
             )}
+            </div>
+
           </div>
         </CardContent>
 
