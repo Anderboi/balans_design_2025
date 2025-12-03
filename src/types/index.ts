@@ -30,6 +30,7 @@ export interface Room {
   order: number;
   type?: "living" | "wet" | "utility" | "technical";
   furniture_equipment: string[];
+  preferred_finishes?: string;
 }
 
 // Типы для задач

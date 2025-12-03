@@ -1,12 +1,9 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useParams } from "next/navigation";
 
-export default function NewSpecificationPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function NewSpecificationPage() {
+  const params = useParams<{ id: string }>();
   const searchParams = useSearchParams();
   const type = searchParams.get("type");
 

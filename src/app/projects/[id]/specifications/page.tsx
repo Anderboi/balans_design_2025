@@ -11,18 +11,18 @@ import {
 import Link from "next/link";
 import { SlashIcon } from "lucide-react";
 import { projectsService } from "@/lib/services/projects";
-import { materialsService } from '@/lib/services/materials';
+import { materialsService } from "@/lib/services/materials";
 import MaterialListControls from "../components/material-list-controls";
 
 const ScheduleCategoryPage = async ({
   params,
   searchParams,
 }: {
-  params: { id: string };
-  searchParams: { [key: string]: string };
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string }>;
 }) => {
-  const { id } = params;
-  const { schedule: scheduleName } = searchParams;
+  const { id } = await params;
+  const { schedule: scheduleName } = await searchParams;
 
   const [projectInfo, specifications] = await Promise.all([
     projectsService.getProjectById(id),
