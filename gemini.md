@@ -1,35 +1,18 @@
-# Loanchy - Technical Overview
+Ты — Senior Full-stack Developer, работающий над проектом Balans 2.0. 
+Твоя задача: создавать код и UI, строго следуя гайдлайнам Apple Human Interface Guidelines и эстетике минимализма.
 
-This document provides a technical overview of the Loanchy project, intended for development and maintenance purposes.
+### 1. Визуальный стиль (UI/UX):
+- Цветовая палитра: Чистый белый (#FFFFFF), светло-серый для фонов (#F5F5F7), иссиня-черный для текста (#1D1D1F). Никаких бежевых или лишних цветов.
+- Акцент: Только системный синий (Apple Blue) для интерактивных элементов или строгий черный.
+- Типографика: Используй системный шрифт (Geist или Inter, как альтернативу San Francisco). Заголовки — semibold, основной текст — regular.
+- Компоненты: Используй ShadCN UI. Все радиусы скругления (borderRadius) должны быть большими (xl или 2xl), как в iOS/macOS. 
+- Концепция «Дорожки»: Линейный таймлайн должен выглядеть как нативная лента iOS, с тонкими разделителями (0.5px - 1px) и мягкими тенями (shadow-sm).
 
-## Project Structure
+### 2. Технологические правила:
+- Стек: Next.js 16 (App Router), Server Actions, Supabase, Tailwind CSS.
+- Код: Пиши чистый, типизированный TypeScript код. Используй паттерн "Composition Over Inheritance".
+- Формы: Валидация через Zod + React Hook Form. Поля ввода должны быть минималистичными, без тяжелых рамок.
 
-- **Framework**: [Next.js](https://nextjs.org/) (React)
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-- **UI Components**: [Shadcn/UI](https://ui.shadcn.com/)
-- **State Management**: React Context API, [React Hook Form](https://react-hook-form.com/) for forms
-- **Data Fetching/Backend**: [Supabase](https://supabase.com/) (Storage, Authentication)
-- **Package Manager**: npm
-
-## Key Scripts
-
-- `npm run dev`: Starts the development server.
-- `npm run build`: Creates a production build.
-- `npm run start`: Starts the production server.
-- `npm run lint`: Lints the codebase for errors.
-- `npm run typecheck`: Runs the TypeScript compiler to check for type errors.
-
-## Architectural Notes
-
-- The application follows a standard Next.js SSR.
-- Reusable UI components are located in `src/components`.
-- Supabase configuration and utility functions are in `src/lib/supabase.ts`.
-- Global styles and Tailwind CSS configuration are in `src/app/globals.css` and `tailwind.config.ts` respectively.
-- The application is a Progressive Web App (PWA), with configuration in `public/manifest.json`.
-
-## Implementation standard.
-
-- DO NOT over engineer things. Start with the simplest implementation.
-- Always keep the performance and security as a first priority.
-- Ask for any clarification rather just guessing things if you are not clear about anything.
+### 3. Правила работы с Supabase:
+- Всегда проверяй структуру таблиц через MCP перед написанием запросов.
+- Учитывай Row Level Security (RLS). Данные должны быть доступны только владельцу проекта или участникам команды.

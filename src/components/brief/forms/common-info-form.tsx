@@ -2,7 +2,10 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CommonDataSchema, type CommonFormValues } from "@/lib/schemas/brief-schema";
+import {
+  CommonDataSchema,
+  type CommonFormValues,
+} from "@/lib/schemas/brief-schema";
 import {
   Form,
   FormControl,
@@ -86,7 +89,11 @@ export function CommonInfoForm({
               <FormItem>
                 <FormLabel>Email *</FormLabel>
                 <FormControl>
-                  <Input type="email" placeholder="example@mail.com" {...field} />
+                  <Input
+                    type="email"
+                    placeholder="example@mail.com"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -115,7 +122,10 @@ export function CommonInfoForm({
             <FormItem>
               <FormLabel>Адрес *</FormLabel>
               <FormControl>
-                <Input placeholder="Москва, ул. Примерная, д. 1, кв. 10" {...field} />
+                <Input
+                  placeholder="Москва, ул. Примерная, д. 1, кв. 10"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -134,7 +144,10 @@ export function CommonInfoForm({
                     type="number"
                     placeholder="50"
                     {...field}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value);
+                      field.onChange(isNaN(value) ? 0 : value);
+                    }}
                   />
                 </FormControl>
                 <FormMessage />

@@ -24,13 +24,20 @@ import { Room } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronDown, ChevronUp, Trash2Icon } from "lucide-react";
 import { useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import {
+  FieldArrayWithId,
+  UseFieldArrayAppend,
+  UseFieldArrayRemove,
+  useFieldArray,
+  useForm,
+  Path,
+} from "react-hook-form";
 import { toast } from "sonner";
 
 interface ConstructionFormProps {
   projectId?: string;
-  initialData?: any;
-  onSave?: (data: any) => Promise<void>;
+  initialData?: Partial<ConstructionFormValues>;
+  onSave?: (data: ConstructionFormValues) => Promise<void>;
   roomList: Room[];
 }
 
@@ -58,9 +65,9 @@ const wallTypes = [
 ];
 
 export function ConstructionForm({
-  projectId,
-  initialData,
-  onSave,
+  // projectId,
+  // initialData,
+  // onSave,
   roomList,
 }: ConstructionFormProps) {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
@@ -189,9 +196,16 @@ export function ConstructionForm({
     category: "floor" | "ceiling" | "walls",
     title: string,
     types: string[],
-    fields: any[],
-    append: any,
-    remove: any
+    fields: FieldArrayWithId<
+      ConstructionFormValues,
+      "floor" | "ceiling" | "walls",
+      "id"
+    >[],
+    append: UseFieldArrayAppend<
+      ConstructionFormValues,
+      "floor" | "ceiling" | "walls"
+    >,
+    remove: UseFieldArrayRemove
   ) => {
     const sections = form.watch(category);
     const isExpanded = expandedCategories.has(category);
@@ -227,7 +241,9 @@ export function ConstructionForm({
                   <div className="flex gap-2 items-start">
                     <FormField
                       control={form.control}
-                      name={`${category}.${index}.type` as any}
+                      name={
+                        `${category}.${index}.type` as Path<ConstructionFormValues>
+                      }
                       render={({ field }) => (
                         <FormItem className="w-full">
                           <Select
@@ -266,7 +282,9 @@ export function ConstructionForm({
                   {sections[index]?.type === "Другое" && (
                     <FormField
                       control={form.control}
-                      name={`${category}.${index}.material` as any}
+                      name={
+                        `${category}.${index}.material` as Path<ConstructionFormValues>
+                      }
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
@@ -300,7 +318,7 @@ export function ConstructionForm({
                         const isSelected =
                           sections[index]?.rooms?.includes(room.id) || false;
                         return (
-                          <Toggle
+                          <Button
                             key={room.id}
                             type="button"
                             size="sm"
@@ -313,7 +331,7 @@ export function ConstructionForm({
                           >
                             <span className="opacity-60">{room.order}.</span>
                             {room.name}
-                          </Toggle>
+                          </Button>
                         );
                       })}
                     </div>
@@ -376,12 +394,7 @@ export function ConstructionForm({
           )}
         </div>
         <div className="pt-4">
-          <Button
-            type="submit"
-            variant="default"
-            className="w-full"
-            
-          >
+          <Button type="submit" variant="default" className="w-full">
             Сохранить
           </Button>
         </div>

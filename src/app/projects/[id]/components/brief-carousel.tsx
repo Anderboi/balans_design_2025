@@ -95,7 +95,7 @@ const BriefCarousel = () => {
         opts={{
           align: "start",
         }}
-        className="gap-2 bg-secondary py-2  rounded-lg w-full "
+        className="gap-2 bg-neutral-200 py-2  rounded-lg w-full "
       >
         <CarouselContent className="-ml-2 px-2">
           {briefBlocks.map((block, index) => (

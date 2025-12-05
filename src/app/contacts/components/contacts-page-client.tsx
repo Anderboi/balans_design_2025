@@ -108,14 +108,14 @@ export function ContactsPageClient({
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Адресная книга</h1>
         <Button onClick={() => setIsAddCompanyOpen(true)}>
-          <PlusCircle className="mr-2 h-4 w-4" />
+          <PlusCircle className="mr-2 size-4" />
           Добавить новый
         </Button>
       </div>
 
       <div className="flex items-center space-x-2">
         <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
           <Input
             type="search"
             placeholder="Поиск..."
@@ -130,7 +130,7 @@ export function ContactsPageClient({
               className="absolute right-0 top-0 h-full px-3 py-2"
               onClick={() => setSearchQuery("")}
             >
-              <X className="h-4 w-4" />
+              <X className="size-4" />
             </Button>
           )}
         </div>

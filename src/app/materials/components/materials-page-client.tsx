@@ -101,7 +101,7 @@ export function MaterialsPageClient({
   return (
     <PageContainer>
       {/* Заголовок */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-start justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold">Библиотека материалов</h1>
           <p className="text-muted-foreground mt-1">

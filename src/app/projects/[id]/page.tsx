@@ -9,16 +9,19 @@ import RoomsBlockLoader from "./components/rooms-block-loader";
 import TasksBlockLoader from "./components/tasks-block-loader";
 import TeamManagementLoader from "./components/team-management-loader";
 import ProjectInfoBlock from "./components/project-info-block";
+import BriefCarousel from "./components/brief-carousel";
+import { FileSpreadsheet, Info, SquareKanban } from "lucide-react";
 
 export const revalidate = 0;
 
 const tabs = [
-  { value: "tasks", name: "Задачи" },
+  { value: "info", name: "Информация", icon: Info },
+  { value: "tasks", name: "Задачи", icon: SquareKanban },
   // { value: "rooms", name: "Помещения" },
-  { value: "specifications", name: "Спецификации" },
-  { value: "chat", name: "Чат" },
+  { value: "specifications", name: "Спецификации", icon: FileSpreadsheet },
+  // { value: "chat", name: "Чат" },
   // { value: "files", name: "Файлы" },
-  { value: "team", name: "Команда" },
+  // { value: "team", name: "Команда" },
 ];
 
 async function getProjectData(id: string) {
@@ -45,16 +48,21 @@ export default async function ProjectDetailPage({
     <>
       {/* Передаем проект в header */}
       <ProjectHeader id={id} project={project} />
-      <ProjectInfoBlock project={project} />
-
       <Tabs defaultValue="tasks">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="flex //grid //w-full //grid-cols-4 bg-secondary">
           {tabs.map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value}>
+            <TabsTrigger key={tab.value} value={tab.value} className="px-4">
+              <tab.icon />
               {tab.name}
             </TabsTrigger>
           ))}
         </TabsList>
+
+        <Suspense fallback={<div>Loading...</div>}>
+          <TabsContent value="info" className="space-y-4 mt-4">
+            <ProjectInfoBlock project={project} />
+          </TabsContent>
+        </Suspense>
 
         <Suspense fallback={<div>Loading...</div>}>
           <TabsContent value="rooms" className="space-y-4 mt-4">
@@ -94,6 +102,8 @@ export default async function ProjectDetailPage({
           </Suspense>
         </TabsContent>
       </Tabs>
+      {/* <ProjectInfoBlock project={project} /> */}
+      <BriefCarousel />
     </>
   );
 }
