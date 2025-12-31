@@ -16,7 +16,7 @@ export default async function Home() {
     "Пользователь";
 
   return (
-    <div className="max-w-[1600px] mx-auto space-y-8">
+    <div className="space-y-8">
       {/* Hero Section */}
       <section>
         <HeroCard userName={userName} />

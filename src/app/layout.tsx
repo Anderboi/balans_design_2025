@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/app-sidebar";
 import GlobalErrorBoundary from "@/components/global-error-boundary";
 import { SidebarLogic } from "@/components/sidebar-logic";
@@ -29,7 +29,7 @@ export default function RootLayout({
               <AppSidebar />
               <main className="flex-1 overflow-auto flex flex-col bg-white no-scrollbar h-screen">
                 <DashboardHeader />
-                <div className="flex-1 overflow-auto p-4 md:py-6 no-scrollbar">
+                <div className="max-w-7xl mx-auto pb-20 animate-fade-in flex-1 overflow-auto p-4 md:py-6 no-scrollbar">
                   {children}
                 </div>
               </main>
