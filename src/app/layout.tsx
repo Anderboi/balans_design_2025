@@ -5,6 +5,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/app-sidebar";
 import GlobalErrorBoundary from "@/components/global-error-boundary";
 import { SidebarLogic } from "@/components/sidebar-logic";
+import DashboardHeader from "@/components/dashboard-header";
 
 const inter = Inter({ subsets: ["cyrillic"] });
 
@@ -26,9 +27,11 @@ export default function RootLayout({
             <SidebarProvider>
               <SidebarLogic />
               <AppSidebar />
-              <main className="flex-1 overflow-auto p-4  md:py-6 //md:pl-0 //md:pr-6 bg-white no-scrollbar">
-                <SidebarTrigger className="md:hidden mb-4" />
-                {children}
+              <main className="flex-1 overflow-auto flex flex-col bg-white no-scrollbar h-screen">
+                <DashboardHeader />
+                <div className="flex-1 overflow-auto p-4 md:py-6 no-scrollbar">
+                  {children}
+                </div>
               </main>
             </SidebarProvider>
           </div>
