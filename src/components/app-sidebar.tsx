@@ -19,6 +19,7 @@ import {
 } from "./ui/sidebar";
 import Link from "next/link";
 import { Button } from "./ui/button";
+import { CreateProjectDialog } from "./create-project-dialog";
 
 //? Menu items
 const items = [
@@ -100,12 +101,14 @@ const AppSidebar = async () => {
         </SidebarMenu>
 
         <div className="px-2 pb-2 group-data-[collapsible=icon]:px-0">
-          <Button className="w-full rounded-full bg-black hover:bg-gray-800 text-white shadow-lg h-12 flex items-center justify-start px-4 gap-3 group transition-all duration-200 group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:mx-auto">
-            <PlusCircle className="size-6 text-white/90 shrink-0" />
-            <span className="font-medium overflow-hidden whitespace-nowrap transition-all duration-200 group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0">
-              Новый проект
-            </span>
-          </Button>
+          <CreateProjectDialog>
+            <Button className="w-full rounded-full bg-black hover:bg-gray-800 text-white shadow-lg h-12 flex items-center justify-start px-4 gap-3 group transition-all duration-200 group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:mx-auto">
+              <PlusCircle className="size-6 text-white/90 shrink-0" />
+              <span className="font-medium overflow-hidden whitespace-nowrap transition-all duration-200 group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0">
+                Новый проект
+              </span>
+            </Button>
+          </CreateProjectDialog>
         </div>
       </SidebarFooter>
     </Sidebar>

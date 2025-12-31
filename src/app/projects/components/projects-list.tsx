@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { Project } from "@/types";
 import ProjectCard from "./project-card";
+import { CreateProjectDialog } from "@/components/create-project-dialog";
 
 interface ProjectsListProps {
   initialProjects?: Project[];
@@ -35,12 +35,11 @@ export default function ProjectsList({
               Создайте свой первый проект, чтобы начать работу над дизайном и
               документацией.
             </p>
-            <Button
-              asChild
-              className="rounded-full px-6 h-12 bg-black hover:bg-gray-800"
-            >
-              <Link href="/projects/new">Создать проект</Link>
-            </Button>
+            <CreateProjectDialog>
+              <Button className="rounded-full px-6 h-12 bg-black hover:bg-gray-800">
+                Создать проект
+              </Button>
+            </CreateProjectDialog>
           </div>
         )}
       </div>
