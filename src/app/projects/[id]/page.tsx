@@ -54,8 +54,9 @@ export default async function ProjectDetailPage({
     notFound();
   }
 
-  // Mock data for display until Project type update
-  const clientName = "Елена и Сергей";
+  // Get client name directly from the joined contact
+  // Since we use a foreign key relation, 'contacts' is a single object here.
+  const clientName = project.contacts?.name || "Клиент не указан";
   const address = project.address || "Адрес не указан";
 
   return (
@@ -77,12 +78,12 @@ export default async function ProjectDetailPage({
             <span className="text-xs font-bold tracking-widest text-gray-400 uppercase">
               Проект
             </span>
-            <h1 className="text-4xl font-normal text-gray-900 tracking-tight">
+            <h1 className="text-3xl md:text-5xl text-zinc-900 mb-2 tracking-tight">
               {project.name}
             </h1>
-            <p className="text-base text-gray-500">
-              {address} <span className="mx-2 text-gray-300">•</span>{" "}
-              {project.client_id ? "Клиент загружается..." : clientName}
+            <p className="text-base text-zinc-500">
+              {address} <span className="mx-2 text-zinc-500">•</span>{" "}
+              {clientName}
             </p>
           </div>
 
