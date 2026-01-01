@@ -1,27 +1,40 @@
+// Импорты UI компонентов
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+
+// Импорты иконок (lucide-react)
+import {
+  FileSpreadsheet,
+  Info,
+  SquareKanban,
+  Sparkles,
+  ChevronLeft,
+  Users,
+} from "lucide-react";
+
+// Импорты внутренней логики и компонентов
 import { projectsService } from "@/lib/services/projects";
-import SchedulesBlock from "./components/schedules-block";
-import ProjectChatBlock from "./components/project-chat-block";
 import { Suspense } from "react";
-import ProjectHeader from "../components/project-header";
 import { notFound } from "next/navigation";
-import RoomsBlockLoader from "./components/rooms-block-loader";
+import Link from "next/link";
+import { ProjectStages } from "../components/project-stages";
+
+// Загрузчики и блоки
+import SchedulesBlock from "./components/schedules-block";
+// import ProjectChatBlock from "./components/project-chat-block";
+// import RoomsBlockLoader from "./components/rooms-block-loader";
 import TasksBlockLoader from "./components/tasks-block-loader";
 import TeamManagementLoader from "./components/team-management-loader";
-import ProjectInfoBlock from "./components/project-info-block";
+// import ProjectInfoBlock from "./components/project-info-block";
 import BriefCarousel from "./components/brief-carousel";
-import { FileSpreadsheet, Info, SquareKanban } from "lucide-react";
 
 export const revalidate = 0;
 
 const tabs = [
-  { value: "info", name: "Информация", icon: Info },
+  { value: "overview", name: "Обзор", icon: Info },
   { value: "tasks", name: "Задачи", icon: SquareKanban },
-  // { value: "rooms", name: "Помещения" },
   { value: "specifications", name: "Спецификации", icon: FileSpreadsheet },
-  // { value: "chat", name: "Чат" },
-  // { value: "files", name: "Файлы" },
-  // { value: "team", name: "Команда" },
+  { value: "team", name: "Команда", icon: Users },
 ];
 
 async function getProjectData(id: string) {
@@ -33,77 +46,112 @@ export default async function ProjectDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  // Получаем параметры маршрута
   const resolvedParams = await params;
   const id = resolvedParams.id;
-
-  // Загружаем только основные данные проекта, остальное грузится в компонентах
   const project = await getProjectData(id);
 
   if (!project) {
     notFound();
   }
 
+  // Mock data for display until Project type update
+  const clientName = "Елена и Сергей";
+  const address = project.address || "Адрес не указан";
+
   return (
-    <>
-      {/* Передаем проект в header */}
-      <ProjectHeader id={id} project={project} />
-      <Tabs defaultValue="tasks">
-        <TabsList className="flex //grid //w-full //grid-cols-4 bg-secondary">
-          {tabs.map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value} className="px-4">
-              <tab.icon />
-              {tab.name}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+    <div className=" px-6 py-6 space-y-8">
+      {/* Header Section */}
+      <div className="space-y-6">
+        {/* Breadcrumb / Back Link */}
+        <Link
+          href="/projects"
+          className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-black transition-colors"
+        >
+          <ChevronLeft className="w-4 h-4 mr-1" />
+          Назад к списку
+        </Link>
 
-        <Suspense fallback={<div>Loading...</div>}>
-          <TabsContent value="info" className="space-y-4 mt-4">
-            <ProjectInfoBlock project={project} />
-          </TabsContent>
-        </Suspense>
+        {/* Title Area */}
+        <div className="flex items-start justify-between">
+          <div className="space-y-1">
+            <span className="text-xs font-bold tracking-widest text-gray-400 uppercase">
+              Проект
+            </span>
+            <h1 className="text-4xl font-normal text-gray-900 tracking-tight">
+              {project.name}
+            </h1>
+            <p className="text-base text-gray-500">
+              {address} <span className="mx-2 text-gray-300">•</span>{" "}
+              {project.client_id ? "Клиент загружается..." : clientName}
+            </p>
+          </div>
 
-        <Suspense fallback={<div>Loading...</div>}>
-          <TabsContent value="rooms" className="space-y-4 mt-4">
-            <RoomsBlockLoader id={id} />
-          </TabsContent>
-        </Suspense>
+          <Button className="rounded-full h-12 px-6 bg-[#7C3AED] hover:bg-[#6D28D9] text-white shadow-lg shadow-purple-200/50 transition-all font-medium flex items-center gap-2">
+            <Sparkles className="w-4 h-4" />
+            Спросить Aura AI
+          </Button>
+        </div>
+      </div>
 
-        <Suspense fallback={<div>Loading...</div>}>
-          <TabsContent value="tasks" className="space-y-4 mt-4">
+      {/* Tabs Section */}
+      <Tabs defaultValue="overview" className="space-y-8">
+        <div className="border-b border-gray-100">
+          <TabsList className="h-auto p-0 bg-transparent gap-8">
+            {tabs.map((tab) => (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                className="h-12 px-0 rounded-none border-b-2 border-transparent data-[state=active]:border-b-black data-[state=active]:bg-transparent data-[state=active]:text-black data-[state=active]:shadow-none text-gray-500 hover:text-gray-800 transition-colors bg-transparent font-medium"
+              >
+                {tab.name}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
+
+        <TabsContent
+          value="overview"
+          className="space-y-12 animate-in fade-in slide-in-from-bottom-2 duration-300"
+        >
+          <ProjectStages />
+
+          {/* Brief Carousel or other blocks can participate here if needed, 
+               but for now Stages is the main overview */}
+          {/* <BriefCarousel /> */}
+        </TabsContent>
+
+        <TabsContent
+          value="tasks"
+          className="animate-in fade-in slide-in-from-bottom-2 duration-300"
+        >
+          <Suspense fallback={<div>Loading tasks...</div>}>
             <TasksBlockLoader id={id} />
-          </TabsContent>
-        </Suspense>
+          </Suspense>
+        </TabsContent>
 
-        <Suspense fallback={<div>Loading...</div>}>
-          <TabsContent value="specifications" className="space-y-4 mt-4">
+        <TabsContent
+          value="specifications"
+          className="animate-in fade-in slide-in-from-bottom-2 duration-300"
+        >
+          <Suspense fallback={<div>Loading specs...</div>}>
             <SchedulesBlock id={id} />
-          </TabsContent>
-        </Suspense>
+          </Suspense>
+        </TabsContent>
 
-        <Suspense fallback={<div>Loading...</div>}>
-          <TabsContent value="chat" className="space-y-4 mt-4">
-            <ProjectChatBlock />
-          </TabsContent>
-        </Suspense>
-
-        <Suspense fallback={<div>Loading...</div>}>
-          <TabsContent value="files" className="space-y-4 mt-4">
-            <div className="p-4 text-center text-muted-foreground">
-              Раздел файлов в разработке
-            </div>
-          </TabsContent>
-        </Suspense>
-
-        <TabsContent value="team" className="mt-6">
+        <TabsContent
+          value="team"
+          className="animate-in fade-in slide-in-from-bottom-2 duration-300"
+        >
           <Suspense fallback={<div>Loading team...</div>}>
             <TeamManagementLoader id={id} />
           </Suspense>
         </TabsContent>
       </Tabs>
-      {/* <ProjectInfoBlock project={project} /> */}
-      <BriefCarousel />
-    </>
+
+      {/* Kept BriefCarousel component, might need to be inside stages or Overview */}
+      <div className="hidden">
+        <BriefCarousel />
+      </div>
+    </div>
   );
 }

@@ -27,9 +27,9 @@ export default function RootLayout({
             <SidebarProvider>
               <SidebarLogic />
               <AppSidebar />
-              <main className="flex-1 overflow-auto flex flex-col bg-white no-scrollbar h-screen">
+              <main className="flex-1 overflow-auto flex flex-col bg-[#f5f5f7] no-scrollbar h-screen">
                 <DashboardHeader />
-                <div className="max-w-7xl mx-auto pb-20 animate-fade-in flex-1 overflow-auto p-4 md:py-6 no-scrollbar">
+                <div className="max-w-7xl w-full mx-auto pb-20 animate-fade-in flex-1 overflow-auto p-4 md:py-6 no-scrollbar">
                   {children}
                 </div>
               </main>

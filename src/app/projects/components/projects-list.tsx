@@ -11,7 +11,7 @@ export default function ProjectsList({
   initialProjects = [],
 }: ProjectsListProps) {
   return (
-    <div className="max-w-[1600px] mx-auto">
+    <div className="max-w-7xl mx-auto">
       <div className="mb-12">
         <h1 className="text-4xl font-normal text-gray-900 mb-3 tracking-tight">
           Проекты

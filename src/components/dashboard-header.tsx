@@ -10,9 +10,9 @@ export default async function DashboardHeader() {
   } = await supabase.auth.getUser();
 
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between gap-4 border-b bg-white px-6">
+    <header className="flex h-16 shrink-0 items-center justify-between gap-4 border-b px-6">
       <div className="flex items-center gap-4 flex-1">
-        <SidebarTrigger className="-ml-1" />
+        <SidebarTrigger className="-ml-1 text-zinc-400 hover:text-zinc-900 bg-white transition-all" />
         <div className="relative w-full max-w-md hidden md:flex items-center">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
