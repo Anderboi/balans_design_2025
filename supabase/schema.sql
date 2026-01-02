@@ -33,6 +33,17 @@ CREATE TABLE IF NOT EXISTS room_furniture (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Создание таблицы профилей (участников команды)
+CREATE TABLE IF NOT EXISTS profiles (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  username TEXT NOT NULL,
+  full_name TEXT,
+  avatar_url TEXT,
+  email TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Создание таблицы задач
 CREATE TABLE IF NOT EXISTS tasks (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -42,9 +53,17 @@ CREATE TABLE IF NOT EXISTS tasks (
   status TEXT NOT NULL,
   priority TEXT,
   due_date TIMESTAMP WITH TIME ZONE,
-  assigned_to UUID,
+  assigned_to UUID REFERENCES profiles(id) ON DELETE SET NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Создание таблицы участников задач (наблюдателей)
+CREATE TABLE IF NOT EXISTS task_participants (
+  task_id UUID REFERENCES tasks(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  role TEXT DEFAULT 'observer',
+  PRIMARY KEY (task_id, user_id)
 );
 
 -- Создание таблицы комментариев к задачам
@@ -128,11 +147,13 @@ ALTER TABLE materials ENABLE ROW LEVEL SECURITY;
 ALTER TABLE specifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE companies ENABLE ROW LEVEL SECURITY;
 ALTER TABLE contacts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
 -- Создание политик доступа (для примера)
 CREATE POLICY "Публичный доступ к материалам" ON materials FOR SELECT USING (true);
 CREATE POLICY "Публичный доступ к компаниям" ON companies FOR SELECT USING (true);
 CREATE POLICY "Публичный доступ к контактам" ON contacts FOR SELECT USING (true);
+CREATE POLICY "Публичный доступ к профилям" ON profiles FOR SELECT USING (true);
 
 -- Индексы для ускорения выборок
 CREATE INDEX IF NOT EXISTS idx_companies_type ON companies(type);
@@ -150,3 +171,33 @@ USING (bucket_id = 'materials');
 CREATE POLICY IF NOT EXISTS "Анонимная загрузка материалов (Storage)" ON storage.objects
 FOR INSERT
 WITH CHECK (bucket_id = 'materials');
+
+-- Создание таблицы вложений к задачам
+CREATE TABLE IF NOT EXISTS task_attachments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  task_id UUID REFERENCES tasks(id) ON DELETE CASCADE,
+  file_name TEXT NOT NULL,
+  file_url TEXT NOT NULL,
+  file_size NUMERIC,
+  file_type TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- RLS для вложений задач
+ALTER TABLE task_attachments ENABLE ROW LEVEL SECURITY;
+CREATE POLICY IF NOT EXISTS "Публичный доступ к вложениям задач" ON task_attachments FOR SELECT USING (true);
+CREATE POLICY IF NOT EXISTS "Любой может добавлять вложения к задачам" ON task_attachments FOR INSERT WITH CHECK (true);
+CREATE POLICY IF NOT EXISTS "Любой может удалять свои вложения" ON task_attachments FOR DELETE USING (true);
+
+-- Политики хранилища для вложений задач (bucket: task-attachments)
+CREATE POLICY IF NOT EXISTS "Публичное чтение вложений задач (Storage)" ON storage.objects
+FOR SELECT
+USING (bucket_id = 'task-attachments');
+
+CREATE POLICY IF NOT EXISTS "Анонимная загрузка вложений задач (Storage)" ON storage.objects
+FOR INSERT
+WITH CHECK (bucket_id = 'task-attachments');
+
+CREATE POLICY IF NOT EXISTS "Анонимное удаление вложений задач (Storage)" ON storage.objects
+FOR DELETE
+USING (bucket_id = 'task-attachments');

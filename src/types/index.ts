@@ -45,6 +45,35 @@ export interface Task {
   assigned_to: string | null;
   created_at: string;
   updated_at: string;
+  // UI helper fields
+  assigneeName?: string;
+  observer_ids?: string[];
+  observers?: Participant[];
+  comments?: Comment[];
+  history?: TaskHistoryItem[];
+  attachments?: TaskAttachment[];
+}
+
+export interface Participant {
+  id: string;
+  name: string;
+  avatar?: string;
+  role?: "executor" | "observer";
+}
+
+export interface Comment {
+  id: string;
+  userName: string;
+  userAvatar?: string;
+  text: string;
+  createdAt: string;
+}
+
+export interface TaskHistoryItem {
+  id: string;
+  userName: string;
+  action: string;
+  createdAt: string;
 }
 
 export enum TaskPriority {
@@ -72,6 +101,16 @@ export interface TaskComment {
   task_id: string;
   user_id: string;
   content: string;
+  created_at: string;
+}
+
+export interface TaskAttachment {
+  id: string;
+  task_id: string;
+  file_name: string;
+  file_url: string;
+  file_size?: number;
+  file_type?: string;
   created_at: string;
 }
 

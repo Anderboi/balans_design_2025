@@ -14,6 +14,7 @@ interface KanbanColumnProps {
   tasks: Task[];
   projectId: string;
   onTaskCreated: (task: Task) => void;
+  members: import("@/types").Participant[];
 }
 
 export const KanbanColumn = ({
@@ -22,6 +23,7 @@ export const KanbanColumn = ({
   tasks,
   projectId,
   onTaskCreated,
+  members,
 }: KanbanColumnProps) => {
   const [isAdding, setIsAdding] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
@@ -75,7 +77,12 @@ export const KanbanColumn = ({
             `}
           >
             {tasks.map((task, index) => (
-              <KanbanCard key={task.id} task={task} index={index} />
+              <KanbanCard
+                key={task.id}
+                task={task}
+                index={index}
+                members={members}
+              />
             ))}
             {provided.placeholder}
 

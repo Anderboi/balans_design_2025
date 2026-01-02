@@ -5,7 +5,10 @@ import { DragDropContext, DropResult } from "@hello-pangea/dnd";
 import { Task, TaskStatus, TASK_STATUS_LABELS } from "@/types";
 import { KanbanColumn } from "./kanban-column";
 import { tasksService } from "@/lib/services/tasks";
+import { profilesService } from "@/lib/services/profiles";
 import { toast } from "sonner";
+import { useEffect } from "react";
+import { Participant } from "@/types";
 
 interface KanbanBoardProps {
   initialTasks: Task[];
@@ -37,6 +40,19 @@ const COLUMNS = [
 
 export const KanbanBoard = ({ initialTasks, projectId }: KanbanBoardProps) => {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [members, setMembers] = useState<Participant[]>([]);
+
+  useEffect(() => {
+    const fetchMembers = async () => {
+      try {
+        const data = await profilesService.getProfiles();
+        setMembers(data);
+      } catch (error) {
+        console.error("Failed to fetch profiles", error);
+      }
+    };
+    fetchMembers();
+  }, []);
 
   const onTaskCreated = (newTask: Task) => {
     setTasks((prev) => [...prev, newTask]);
@@ -88,6 +104,7 @@ export const KanbanBoard = ({ initialTasks, projectId }: KanbanBoardProps) => {
             tasks={tasks.filter((t) => t.status === col.status)}
             projectId={projectId}
             onTaskCreated={onTaskCreated}
+            members={members}
           />
         ))}
       </div>
