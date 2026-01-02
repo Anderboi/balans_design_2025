@@ -93,6 +93,12 @@ export const KanbanBoard = ({ initialTasks, projectId }: KanbanBoardProps) => {
     }
   };
 
+  const handleUpdateTask = (taskId: string, updates: Partial<Task>) => {
+    setTasks((prev) =>
+      prev.map((t) => (t.id === taskId ? { ...t, ...updates } : t))
+    );
+  };
+
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="flex gap-4 overflow-x-auto pb-4 h-full">
@@ -104,6 +110,7 @@ export const KanbanBoard = ({ initialTasks, projectId }: KanbanBoardProps) => {
             tasks={tasks.filter((t) => t.status === col.status)}
             projectId={projectId}
             onTaskCreated={onTaskCreated}
+            onUpdateTask={handleUpdateTask}
             members={members}
           />
         ))}

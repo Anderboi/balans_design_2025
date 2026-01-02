@@ -8,9 +8,15 @@ interface KanbanCardProps {
   task: Task;
   index: number;
   members: import("@/types").Participant[];
+  onUpdateTask: (taskId: string, updates: Partial<Task>) => void;
 }
 
-export const KanbanCard = ({ task, index, members }: KanbanCardProps) => {
+export const KanbanCard = ({
+  task,
+  index,
+  members,
+  onUpdateTask,
+}: KanbanCardProps) => {
   return (
     <Draggable draggableId={task.id} index={index}>
       {(provided, snapshot) => (
@@ -20,7 +26,11 @@ export const KanbanCard = ({ task, index, members }: KanbanCardProps) => {
           {...provided.dragHandleProps}
           className={cn("mb-3", snapshot.isDragging && "opacity-50")}
         >
-          <TaskDetailsDialog task={task} members={members}>
+          <TaskDetailsDialog
+            task={task}
+            members={members}
+            onUpdateTask={onUpdateTask}
+          >
             <Card className="cursor-pointer hover:shadow-md transition-shadow">
               <CardContent className="p-3 space-y-2">
                 <div className="font-medium text-sm">{task.title}</div>

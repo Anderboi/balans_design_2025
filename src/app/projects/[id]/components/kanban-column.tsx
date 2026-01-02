@@ -14,6 +14,7 @@ interface KanbanColumnProps {
   tasks: Task[];
   projectId: string;
   onTaskCreated: (task: Task) => void;
+  onUpdateTask: (taskId: string, updates: Partial<Task>) => void;
   members: import("@/types").Participant[];
 }
 
@@ -23,6 +24,7 @@ export const KanbanColumn = ({
   tasks,
   projectId,
   onTaskCreated,
+  onUpdateTask,
   members,
 }: KanbanColumnProps) => {
   const [isAdding, setIsAdding] = useState(false);
@@ -82,6 +84,7 @@ export const KanbanColumn = ({
                 task={task}
                 index={index}
                 members={members}
+                onUpdateTask={onUpdateTask}
               />
             ))}
             {provided.placeholder}

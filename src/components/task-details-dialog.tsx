@@ -54,6 +54,7 @@ export function TaskDetailsDialog({
   task,
   onOpenChange,
   onAddComment = (id, text) => console.log("Add comment:", id, text),
+  onUpdateTask = (id, updates) => console.log("Update task:", id, updates),
   members = [],
 }: TaskDetailsDialogProps) {
   const [activeTab, setActiveTab] = useState<"chat" | "history">("chat");
@@ -176,29 +177,35 @@ export function TaskDetailsDialog({
     const isObserver = observers.some((o) => o.id === id);
     try {
       if (isObserver) {
-        setObservers((prev) => prev.filter((o) => o.id !== id));
+        const newObservers = observers.filter((o) => o.id !== id);
+        setObservers(newObservers);
         await tasksService.removeParticipant(task.id, id);
+        onUpdateTask(task.id, { observers: newObservers });
       } else {
         const member = members.find((m) => m.id === id);
         if (member) {
-          setObservers((prev) => [...prev, member]);
+          const newObservers = [...observers, member];
+          setObservers(newObservers);
           await tasksService.addParticipant(task.id, id);
+          onUpdateTask(task.id, { observers: newObservers });
         }
       }
     } catch (error) {
       console.error("Failed to update observer:", error);
       toast.error("Не удалось обновить участника");
-      // Revert if needed, but let's keep it simple for now
     }
   };
 
   const updateExecutor = async (id: string) => {
     try {
       const member = members.find((m) => m.id === id);
+      const updates = { assigned_to: id || null };
+
+      // Optimistic
       setExecutor(member || null);
-      await tasksService.updateTask(task.id, {
-        assigned_to: id || null,
-      } as Partial<Task>);
+      onUpdateTask(task.id, updates);
+
+      await tasksService.updateTask(task.id, updates);
       toast.success("Исполнитель обновлен");
     } catch (error) {
       console.error("Failed to update executor:", error);
@@ -212,8 +219,11 @@ export function TaskDetailsDialog({
 
   const handleDescriptionSave = async () => {
     try {
-      await tasksService.updateTask(task.id, { description });
+      // Optimistic update
+      onUpdateTask(task.id, { description });
       setIsEditingDescription(false);
+
+      await tasksService.updateTask(task.id, { description });
       toast.success("Описание обновлено");
     } catch (error) {
       console.error("Failed to update description:", error);
@@ -632,7 +642,7 @@ export function TaskDetailsDialog({
                 </div>
               ) : (
                 <p className="text-zinc-600 text-sm leading-relaxed whitespace-pre-line">
-                  {task.description || (
+                  {description || (
                     <span className="text-zinc-400 italic">
                       Описание отсутствует.
                     </span>
