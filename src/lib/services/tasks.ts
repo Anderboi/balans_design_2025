@@ -50,7 +50,7 @@ export const tasksService = {
         *,
         assignee:assigned_to(id, full_name, avatar_url),
         observers:task_participants(user:profiles(id, full_name, avatar_url)),
-        comments:task_comments(*),
+        comments:task_comments(*, user:profiles(full_name, avatar_url)),
         attachments:task_attachments(*)
       `
       )
@@ -70,6 +70,14 @@ export const tasksService = {
           id: o.user.id,
           name: o.user.full_name,
           avatar: o.user.avatar_url,
+        })) || [],
+      comments:
+        data.comments?.map((c: Record<string, any>) => ({
+          id: c.id,
+          userName: c.user?.full_name || "Unknown",
+          userAvatar: c.user?.avatar_url,
+          text: c.content,
+          createdAt: c.created_at,
         })) || [],
       attachments: data.attachments || [],
     } as Task;
