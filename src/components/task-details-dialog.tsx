@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import { Task, Participant } from "@/types";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
@@ -12,7 +10,6 @@ import { TaskParticipants } from "@/components/task/task-participants";
 import { TaskDescription } from "@/components/task/task-description";
 import { TaskAttachments } from "@/components/task/task-attachments";
 import { TaskActivity } from "@/components/task/task-activity";
-import { useTaskParticipants } from "@/components/task/hooks/use-task-participants";
 
 interface TaskDetailsDialogProps {
   children?: React.ReactNode;
@@ -31,64 +28,6 @@ export function TaskDetailsDialog({
   onUpdateTask = (id, updates) => console.log("Update task:", id, updates),
   members = [],
 }: TaskDetailsDialogProps) {
-  // Use custom hook for participants logic
-  const {
-    executor,
-    observers,
-    openParticipants,
-    setOpenParticipants,
-    toggleObserver,
-    updateExecutor,
-    isSelected,
-    setObservers,
-  } = useTaskParticipants({ task, members, onUpdateTask });
-
-  const getPriorityColor = (priority?: string) => {
-    switch (priority) {
-      case "Высокий":
-      case "high":
-        return "bg-red-100 text-red-700 border-red-200";
-      case "Средний":
-      case "medium":
-        return "bg-amber-100 text-amber-700 border-amber-200";
-      case "Низкий":
-      case "low":
-        return "bg-zinc-100 text-zinc-600 border-zinc-200";
-      default:
-        return "bg-zinc-100 text-zinc-600 border-zinc-200";
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case "TODO":
-        return "К выполнению";
-      case "IN_PROGRESS":
-        return "В работе";
-      case "REVIEW":
-        return "Согласование";
-      case "DONE":
-        return "Готово";
-      default:
-        return status;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "TODO":
-        return "bg-zinc-100 text-zinc-600";
-      case "IN_PROGRESS":
-        return "bg-blue-100 text-blue-700";
-      case "REVIEW":
-        return "bg-purple-100 text-purple-700";
-      case "DONE":
-        return "bg-green-100 text-green-700";
-      default:
-        return "bg-zinc-100 text-zinc-600";
-    }
-  };
-
   return (
     <Dialog onOpenChange={onOpenChange}>
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
@@ -101,35 +40,16 @@ export function TaskDetailsDialog({
             <div className="flex items-start justify-between gap-4 mb-6">
               <div className="space-y-4 w-full">
                 {/* Title & Meta */}
-                <TaskHeader
-                  task={task}
-                  getPriorityColor={getPriorityColor}
-                  getStatusColor={getStatusColor}
-                  getStatusLabel={getStatusLabel}
-                />
+                <TaskHeader task={task} />
 
                 {/* Actions Row */}
-                <TaskActions
-                  members={members}
-                  executor={executor}
-                  observers={observers}
-                  openParticipants={openParticipants}
-                  setOpenParticipants={setOpenParticipants}
-                  updateExecutor={updateExecutor}
-                  toggleObserver={toggleObserver}
-                  isSelected={isSelected}
-                  setObservers={setObservers}
-                />
+                <TaskActions />
 
                 {/* Participants Row */}
                 <TaskParticipants
-                  executor={executor}
-                  observers={observers}
+                  task={task}
                   members={members}
-                  updateExecutor={updateExecutor}
-                  toggleObserver={toggleObserver}
-                  isSelected={isSelected}
-                  setObservers={setObservers}
+                  onUpdateTask={onUpdateTask}
                 />
               </div>
             </div>

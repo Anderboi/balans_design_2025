@@ -1,31 +1,12 @@
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { UserPlus, PlusIcon, Tag, Calendar, CheckSquare } from "lucide-react";
-import { Participant } from "@/types";
-import { ParticipantSelector } from "./participant-selector";
-
-interface TaskActionsProps {
-  members: Participant[];
-  executor: Participant | null;
-  observers: Participant[];
-  openParticipants: boolean;
-  setOpenParticipants: (open: boolean) => void;
-  updateExecutor: (id: string) => void;
-  toggleObserver: (id: string) => void;
-  isSelected: (id: string) => boolean;
-  setObservers: React.Dispatch<React.SetStateAction<Participant[]>>;
-}
+import { Tag, Calendar, CheckSquare } from "lucide-react";
 
 const taskHeaderButtons = [
-  {
-    label: "Добавить",
-    icon: PlusIcon,
-    onClick: () => {},
-  },
+  // {
+  //   label: "Добавить",
+  //   icon: PlusIcon,
+  //   onClick: () => {},
+  // },
   {
     label: "Метки",
     icon: Tag,
@@ -43,17 +24,7 @@ const taskHeaderButtons = [
   },
 ];
 
-export function TaskActions({
-  members,
-  executor,
-  observers,
-  openParticipants,
-  setOpenParticipants,
-  updateExecutor,
-  toggleObserver,
-  isSelected,
-  setObservers,
-}: TaskActionsProps) {
+export function TaskActions() {
   return (
     <div className="flex items-center gap-1.5 capitalize">
       {/* trello style buttons */}
@@ -70,7 +41,7 @@ export function TaskActions({
           </Button>
         ))}
       </div>
-      <Popover open={openParticipants} onOpenChange={setOpenParticipants}>
+      {/* <Popover open={openParticipants} onOpenChange={setOpenParticipants}>
         <PopoverTrigger asChild>
           <Button
             variant="secondary"
@@ -93,7 +64,7 @@ export function TaskActions({
             title="Исполнитель"
           />
         </PopoverContent>
-      </Popover>
+      </Popover> */}
     </div>
   );
 }

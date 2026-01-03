@@ -9,31 +9,35 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Plus as PlusIcon } from "lucide-react";
-import { Participant } from "@/types";
+import { Participant, Task } from "@/types";
 import { ParticipantSelector } from "./participant-selector";
-
-interface TaskParticipantsProps {
-  executor: Participant | null;
-  observers: Participant[];
-  members: Participant[];
-  updateExecutor: (id: string) => void;
-  toggleObserver: (id: string) => void;
-  isSelected: (id: string) => boolean;
-  setObservers: (
-    action: Participant[] | ((prev: Participant[]) => Participant[])
-  ) => void;
-}
+import { useTaskParticipants } from './hooks/use-task-participants';
 
 export function TaskParticipants({
-  executor,
-  observers,
+  task,
   members,
-  updateExecutor,
-  toggleObserver,
-  isSelected,
-  setObservers,
-}: TaskParticipantsProps) {
-  const [openParticipants, setOpenParticipants] = useState(false);
+  onUpdateTask,
+}: {
+  task: Task;
+  members: Participant[];
+  onUpdateTask: (taskId: string, updates: Partial<Task>) => void;
+}) {
+  // const [openParticipants, setOpenParticipants] = useState(false);
+  // Use custom hook for participants logic
+  const {
+    executor,
+    observers,
+    openParticipants,
+    setOpenParticipants,
+    toggleObserver,
+    updateExecutor,
+    isSelected,
+    setObservers,
+  } = useTaskParticipants({
+    task,
+    members,
+    onUpdateTask,
+  });
 
   return (
     <div className="flex flex-col gap-2">
