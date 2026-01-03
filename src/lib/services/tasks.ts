@@ -1,6 +1,11 @@
 import { supabase } from "../supabase";
 import { Task, TaskComment } from "@/types";
 import { SupabaseClient } from "@supabase/supabase-js";
+import {
+  mapObserversToParticipants,
+  mapCommentsData,
+  mapAssigneeName,
+} from "@/lib/utils/data-mappers";
 
 export const tasksService = {
   // Получение всех задач
@@ -30,13 +35,8 @@ export const tasksService = {
     // Map nested data to Participant interface
     return (data || []).map((task: Record<string, any>) => ({
       ...task,
-      assigneeName: task.assignee?.full_name,
-      observers:
-        task.observers?.map((o: Record<string, any>) => ({
-          id: o.user.id,
-          name: o.user.full_name,
-          avatar: o.user.avatar_url,
-        })) || [],
+      assigneeName: mapAssigneeName(task.assignee),
+      observers: mapObserversToParticipants(task.observers),
     })) as Task[];
   },
 
@@ -64,21 +64,9 @@ export const tasksService = {
 
     return {
       ...data,
-      assigneeName: data.assignee?.full_name,
-      observers:
-        data.observers?.map((o: Record<string, any>) => ({
-          id: o.user.id,
-          name: o.user.full_name,
-          avatar: o.user.avatar_url,
-        })) || [],
-      comments:
-        data.comments?.map((c: Record<string, any>) => ({
-          id: c.id,
-          userName: c.user?.full_name || "Unknown",
-          userAvatar: c.user?.avatar_url,
-          text: c.content,
-          createdAt: c.created_at,
-        })) || [],
+      assigneeName: mapAssigneeName(data.assignee),
+      observers: mapObserversToParticipants(data.observers),
+      comments: mapCommentsData(data.comments),
       attachments: data.attachments || [],
     } as Task;
   },
