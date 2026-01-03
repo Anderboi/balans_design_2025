@@ -40,7 +40,7 @@ export function TaskDetailsDialog({
             <div className="flex items-start justify-between gap-4 mb-6">
               <div className="space-y-4 w-full">
                 {/* Title & Meta */}
-                <TaskHeader task={task} />
+                <TaskHeader task={task} onUpdateTask={onUpdateTask} />
 
                 {/* Actions Row */}
                 <TaskActions />

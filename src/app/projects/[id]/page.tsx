@@ -102,7 +102,7 @@ export default async function ProjectDetailPage({
               <TabsTrigger
                 key={tab.value}
                 value={tab.value}
-                className="h-12 px-0 rounded-none border-b-2 border-transparent data-[state=active]:border-b-black data-[state=active]:bg-transparent data-[state=active]:text-black data-[state=active]:shadow-none text-gray-500 hover:text-gray-800 transition-colors bg-transparent font-medium"
+                className="h-12 px-0 cursor-pointer rounded-none border-b-2 border-transparent data-[state=active]:border-b-black data-[state=active]:bg-transparent data-[state=active]:text-black data-[state=active]:shadow-none text-gray-500 hover:text-gray-800 transition-colors bg-transparent font-medium"
               >
                 {tab.name}
               </TabsTrigger>
