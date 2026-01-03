@@ -6,6 +6,7 @@ import {
   mapCommentsData,
   mapAssigneeName,
 } from "@/lib/utils/data-mappers";
+import { handleServiceError, ERROR_CODES } from "@/lib/utils/error-handler";
 
 export const tasksService = {
   // Получение всех задач
@@ -28,8 +29,12 @@ export const tasksService = {
       .order("due_date");
 
     if (error) {
-      console.error("Ошибка при получении задач:", error);
-      throw error;
+      handleServiceError(
+        error,
+        "tasksService.getTasks",
+        "Не удалось загрузить задачи",
+        ERROR_CODES.DB_QUERY_FAILED
+      );
     }
 
     // Map nested data to Participant interface
@@ -58,8 +63,12 @@ export const tasksService = {
       .single();
 
     if (error) {
-      console.error(`Ошибка при получении задачи с ID ${id}:`, error);
-      throw error;
+      handleServiceError(
+        error,
+        "tasksService.getTaskById",
+        `Не удалось загрузить задачу с ID ${id}`,
+        ERROR_CODES.DB_QUERY_FAILED
+      );
     }
 
     return {
@@ -84,8 +93,12 @@ export const tasksService = {
       .single();
 
     if (error) {
-      console.error("Ошибка при создании задачи:", error);
-      throw error;
+      handleServiceError(
+        error,
+        "tasksService.createTask",
+        "Не удалось создать задачу",
+        ERROR_CODES.DB_INSERT_FAILED
+      );
     }
 
     return data;
@@ -106,8 +119,12 @@ export const tasksService = {
       .single();
 
     if (error) {
-      console.error(`Ошибка при обновлении задачи с ID ${id}:`, error);
-      throw error;
+      handleServiceError(
+        error,
+        "tasksService.updateTask",
+        `Не удалось обновить задачу с ID ${id}`,
+        ERROR_CODES.DB_UPDATE_FAILED
+      );
     }
 
     return data;
@@ -119,8 +136,12 @@ export const tasksService = {
     const { error } = await supabaseClient.from("tasks").delete().eq("id", id);
 
     if (error) {
-      console.error(`Ошибка при удалении задачи с ID ${id}:`, error);
-      throw error;
+      handleServiceError(
+        error,
+        "tasksService.deleteTask",
+        `Не удалось удалить задачу с ID ${id}`,
+        ERROR_CODES.DB_DELETE_FAILED
+      );
     }
   },
 
@@ -137,11 +158,12 @@ export const tasksService = {
       .order("created_at");
 
     if (error) {
-      console.error(
-        `Ошибка при получении комментариев для задачи ${taskId}:`,
-        error
+      handleServiceError(
+        error,
+        "tasksService.getTaskComments",
+        `Не удалось загрузить комментарии для задачи ${taskId}`,
+        ERROR_CODES.DB_QUERY_FAILED
       );
-      throw error;
     }
 
     return data || [];
@@ -160,8 +182,12 @@ export const tasksService = {
       .single();
 
     if (error) {
-      console.error("Ошибка при добавлении комментария:", error);
-      throw error;
+      handleServiceError(
+        error,
+        "tasksService.addTaskComment",
+        "Не удалось добавить комментарий",
+        ERROR_CODES.DB_INSERT_FAILED
+      );
     }
 
     return data;
@@ -182,8 +208,12 @@ export const tasksService = {
     });
 
     if (error) {
-      console.error("Ошибка при добавлении участника:", error);
-      throw error;
+      handleServiceError(
+        error,
+        "tasksService.addParticipant",
+        "Не удалось добавить участника",
+        ERROR_CODES.DB_INSERT_FAILED
+      );
     }
   },
 
@@ -200,8 +230,12 @@ export const tasksService = {
       .eq("user_id", userId);
 
     if (error) {
-      console.error("Ошибка при удалении участника:", error);
-      throw error;
+      handleServiceError(
+        error,
+        "tasksService.removeParticipant",
+        "Не удалось удалить участника",
+        ERROR_CODES.DB_DELETE_FAILED
+      );
     }
   },
 
@@ -225,8 +259,12 @@ export const tasksService = {
       .upload(filePath, file);
 
     if (uploadError) {
-      console.error("Ошибка при загрузке файла в Storage:", uploadError);
-      throw uploadError;
+      handleServiceError(
+        uploadError,
+        "tasksService.uploadAttachment",
+        "Не удалось загрузить файл",
+        ERROR_CODES.STORAGE_UPLOAD_FAILED
+      );
     }
 
     // 2. Получение публичной ссылки
@@ -248,8 +286,12 @@ export const tasksService = {
       .single();
 
     if (dbError) {
-      console.error("Ошибка при создании записи в БД для вложения:", dbError);
-      throw dbError;
+      handleServiceError(
+        dbError,
+        "tasksService.uploadAttachment.createRecord",
+        "Не удалось создать запись о вложении",
+        ERROR_CODES.DB_INSERT_FAILED
+      );
     }
 
     return attachment;
@@ -284,8 +326,12 @@ export const tasksService = {
       .eq("id", id);
 
     if (dbError) {
-      console.error("Ошибка при удалении записи из БД:", dbError);
-      throw dbError;
+      handleServiceError(
+        dbError,
+        "tasksService.deleteAttachment",
+        "Не удалось удалить вложение",
+        ERROR_CODES.DB_DELETE_FAILED
+      );
     }
   },
 };
