@@ -12,6 +12,8 @@ import {
 import { SlashIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BriefSectionsGrid } from "./components/brief-section-grid";
+import PageHeader from '@/components/ui/page-header';
+import PageContainer from '@/components/ui/page-container';
 
 export default async function BriefPage({
   params,
@@ -26,7 +28,7 @@ export default async function BriefPage({
   }
 
   return (
-    <div className="max-w-[1200px] mx-auto space-y-12 pb-20">
+    <PageContainer>
       {/* Header & Breadcrumbs */}
       <div className="space-y-8">
         <Breadcrumb>
@@ -47,17 +49,15 @@ export default async function BriefPage({
           </BreadcrumbList>
         </Breadcrumb>
 
-        <h1 className="text-4xl font-medium tracking-tight text-zinc-900">
-          Техническое задание
-        </h1>
+        <PageHeader title="Техническое задание"/>
       </div>
 
       {/* Main Content Info */}
       <div className="text-center space-y-6 max-w-2xl mx-auto pt-10">
         <div className="space-y-2">
-          <p className="text-[10px] font-bold tracking-[0.2em] text-gray-400 uppercase">
+          {/* <p className="text-[10px] font-bold tracking-[0.2em] text-gray-400 uppercase">
             Техническое задание
-          </p>
+          </p> */}
           <h2 className="text-5xl font-medium tracking-tight text-zinc-900">
             Заполните анкету
           </h2>
@@ -86,6 +86,6 @@ export default async function BriefPage({
           Скачать анкету в PDF
         </Button>
       </div>
-    </div>
+    </PageContainer>
   );
 }

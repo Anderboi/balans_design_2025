@@ -36,7 +36,7 @@ export default function RootLayout({
               </main>
             </SidebarProvider>
           </div>
-          <Toaster position="top-right" richColors closeButton />
+          <Toaster position="bottom-right" richColors closeButton />
         </GlobalErrorBoundary>
       </body>
     </html>

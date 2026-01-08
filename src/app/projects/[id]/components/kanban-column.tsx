@@ -16,6 +16,7 @@ interface KanbanColumnProps {
   onTaskCreated: (task: Task) => void;
   onUpdateTask: (taskId: string, updates: Partial<Task>) => void;
   members: import("@/types").Participant[];
+  color: string;
 }
 
 export const KanbanColumn = ({
@@ -26,6 +27,7 @@ export const KanbanColumn = ({
   onTaskCreated,
   onUpdateTask,
   members,
+  color,
 }: KanbanColumnProps) => {
   const [isAdding, setIsAdding] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
@@ -60,10 +62,10 @@ export const KanbanColumn = ({
   };
 
   return (
-    <div className="flex flex-col w-80 shrink-0">
-      <div className="mb-3 font-semibold text-sm text-muted-foreground flex items-center justify-between">
+    <div className={`${color} flex flex-col w-80 shrink-0 border rounded-2xl border-transparent transition-colors hover:border-zinc-200/50`}>
+      <div className="mb-3 p-4 font-semibold text-sm text-muted-foreground flex items-center justify-between">
         <span>{title}</span>
-        <span className="bg-secondary px-2 py-0.5 rounded-full text-xs text-foreground">
+        <span className="px-2 py-0.5 rounded-full text-xs text-foreground">
           {tasks.length}
         </span>
       </div>
@@ -74,7 +76,7 @@ export const KanbanColumn = ({
             ref={provided.innerRef}
             {...provided.droppableProps}
             className={`
-              flex-1 bg-secondary rounded-2xl p-3 min-h-[500px]
+              flex-1 rounded-2xl p-3 min-h-[500px]
               ${snapshot.isDraggingOver ? "bg-secondary/50" : ""}
             `}
           >
