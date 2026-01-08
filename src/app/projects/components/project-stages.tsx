@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   Check,
   ChevronDown,
+  ChevronRight,
   ChevronUp,
   FileText,
   Loader2,
@@ -11,6 +12,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useParams } from "next/navigation";
+import Link from "next/link";
 
 // Types for stage configuration
 type StageStatus = "completed" | "in_progress" | "locked";
@@ -111,6 +114,9 @@ const STAGES: StageItem[] = [
 ];
 
 export function ProjectStages() {
+  const params = useParams();
+  const id = params?.id as string;
+
   // By default expand the 'in_progress' stage or the first one
   const [expandedStages, setExpandedStages] = useState<string[]>([
     "preproject",
@@ -242,11 +248,19 @@ export function ProjectStages() {
                 <div className="px-6 pb-6 pt-0 space-y-2 animate-in slide-in-from-top-2 duration-200">
                   <div className="h-px bg-gray-100 mb-4 mx-2" />
                   {stage.items.map((item) => (
-                    <div
+                    <Link
                       key={item.id}
-                      className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 transition-colors group cursor-pointer"
+                      href={
+                        item.id === "brief" && id
+                          ? `/projects/${id}/brief`
+                          : "#"
+                      }
+                      className={cn(
+                        "flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 transition-colors group cursor-pointer",
+                        item.id !== "brief" && "pointer-events-none"
+                      )}
                     >
-                      <div className="flex items-center gap-3 text-gray-600 group-hover:text-gray-900">
+                      <div className="flex items-center gap-3 text-gray-600 group-hover:text-zinc-900 transition-colors">
                         <div
                           className={cn(
                             "w-8 h-8 rounded-lg flex items-center justify-center shrink-0",
@@ -266,10 +280,15 @@ export function ProjectStages() {
                         </span>
                       </div>
 
-                      {item.completed && (
-                        <Check className="w-4 h-4 text-green-500" />
-                      )}
-                    </div>
+                      <div className="flex items-center gap-2">
+                        {item.completed && (
+                          <Check className="w-4 h-4 text-green-500" />
+                        )}
+                        {item.id === "brief" && (
+                          <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-black transition-colors" />
+                        )}
+                      </div>
+                    </Link>
                   ))}
                 </div>
               )}
