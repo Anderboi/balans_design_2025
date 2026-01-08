@@ -6,6 +6,7 @@ import AppSidebar from "@/components/app-sidebar";
 import GlobalErrorBoundary from "@/components/global-error-boundary";
 import { SidebarLogic } from "@/components/sidebar-logic";
 import DashboardHeader from "@/components/dashboard-header";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({ subsets: ["cyrillic"] });
 
@@ -35,6 +36,7 @@ export default function RootLayout({
               </main>
             </SidebarProvider>
           </div>
+          <Toaster position="top-right" richColors closeButton />
         </GlobalErrorBoundary>
       </body>
     </html>

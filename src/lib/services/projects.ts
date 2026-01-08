@@ -1,7 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { Project } from "@/types";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { requireAuth } from '../supabase/actions';
 
 export const projectsService = {
   // Получение всех проектов
@@ -47,6 +46,7 @@ export const projectsService = {
   },
 
   // Создание нового проекта
+  // Создание нового проекта
   async createProject(
     project: Omit<
       Project,
@@ -54,28 +54,55 @@ export const projectsService = {
     >,
     client?: SupabaseClient
   ): Promise<Project> {
-    const { user, supabase } = await requireAuth();
-    // Используем server action для создания проекта с автоматическим добавлением владельца
-    const { createProjectAction } = await import("@/lib/actions/projects");
-    const result = await createProjectAction(project);
+    const supabaseClient = client || supabase;
 
-    if (!result.success) {
-      throw new Error(result.error || "Не удалось создать проект");
+    // Вызвать функцию PostgreSQL
+    const { data, error } = await supabaseClient.rpc(
+      "create_project_with_owner",
+      {
+        p_name: project.name,
+        p_address: project.address || "",
+        p_area: project.area || 0,
+        p_client_id: project.client_id || null,
+        p_stage: project.stage,
+        p_residents: project.residents || "",
+        p_demolition_info: project.demolition_info || "",
+        p_construction_info: project.construction_info || "",
+      }
+    );
+
+    if (error) {
+      console.error("Error creating project:", error);
+      throw error;
     }
 
-    // Получить созданный проект для возврата
-    const supabaseClient = client || supabase;
-    const { data, error } = await supabaseClient
+    // Если функция возвращает ID созданного проекта, получаем полные данные
+    // В данном случае, судя по RPC, она может возвращать сам объект или ID.
+    // Предполагаем, что RPC возвращает { id: "..." } или сам объект.
+    // Если RPC возвращает void или только ID, то нужно сделать select.
+
+    // Для совместимости с текущим API получим проект
+    // (Если RPC возвращает уже полный проект, можно вернуть data)
+
+    // Проверим, что вернуло data.
+    // Если id есть в data, используем его.
+    const newProjectId = data?.id || data;
+
+    if (!newProjectId) {
+      throw new Error("Не удалось получить ID созданного проекта");
+    }
+
+    const { data: newProject, error: fetchError } = await supabaseClient
       .from("projects")
       .select("*")
-      .eq("id", result.projectId)
+      .eq("id", newProjectId)
       .single();
 
-    if (error || !data) {
+    if (fetchError || !newProject) {
       throw new Error("Проект создан, но не удалось получить его данные");
     }
 
-    return data;
+    return newProject;
   },
 
   // Обновление проекта

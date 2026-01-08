@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { projectsService } from "@/lib/services/projects";
 import { revalidatePath } from "next/cache";
 
 interface CreateProjectFormData {
@@ -15,30 +16,30 @@ interface CreateProjectFormData {
 }
 
 export async function createProjectAction(formData: CreateProjectFormData) {
+  // 1. Auth check
   const supabase = await createClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { success: false, error: "Unauthorized" };
+  }
 
   try {
-    // Вызвать функцию PostgreSQL
-    const { data, error } = await supabase.rpc("create_project_with_owner", {
-      p_name: formData.name,
-      p_address: formData.address || "",
-      p_area: formData.area || 0,
-      p_client_id: formData.client_id || null,
-      p_stage: formData.stage,
-      p_residents: formData.residents || "",
-      p_demolition_info: formData.demolition_info || "",
-      p_construction_info: formData.construction_info || "",
-    });
+    // 2. Service call
+    const newProject = await projectsService.createProject(formData, supabase);
 
-    if (error) {
-      console.error("Error creating project:", error);
-      return { success: false, error: error.message };
-    }
-
+    // 3. Revalidate
     revalidatePath("/projects");
-    return { success: true, projectId: data.id };
-  } catch (error) {
+    return { success: true, projectId: newProject.id };
+  } catch (error: unknown) {
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : "Произошла непредвиденная ошибка";
     console.error("Unexpected error:", error);
-    return { success: false, error: "Произошла непредвиденная ошибка" };
+    return { success: false, error: errorMessage };
   }
 }

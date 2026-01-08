@@ -1,12 +1,12 @@
-import { ProjectStage } from '@/types';
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { ProjectStage } from "@/types";
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
- // Функция для получения инициалов
+// Функция для получения инициалов
 export function getInitials(name: string): string {
   return name
     .split(" ")
@@ -16,7 +16,7 @@ export function getInitials(name: string): string {
     .slice(0, 2);
 }
 
-export function getStageBadgeClass(stage: ProjectStage): string {
+export function getStageBadgeClass(stage: string | ProjectStage): string {
   switch (stage) {
     case ProjectStage.PREPROJECT:
       return "bg-gray-100 border-gray-300 text-gray-700"; // Light gray for pre-project
@@ -35,8 +35,8 @@ export function getStageBadgeClass(stage: ProjectStage): string {
 
 export function formatDate(dateString: string): string {
   const date = new Date(dateString);
-  const day = date.getDate().toString().padStart(2, '0');
-  const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Month is 0-indexed
+  const day = date.getDate().toString().padStart(2, "0");
+  const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Month is 0-indexed
   const year = date.getFullYear();
   return `${day}-${month}-${year}`;
 }

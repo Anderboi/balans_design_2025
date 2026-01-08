@@ -2,17 +2,20 @@
 export interface Project {
   id: string;
   name: string;
-  address: string;
-  area: number;
+  address: string | null;
+  area?: number;
   client_id: string | null;
-  residents: string;
-  demolition_info: string;
-  construction_info: string;
+  residents?: string; // Optional/missing in DB main table
+  demolition_info?: string; // Optional/missing in DB main table
+  construction_info?: string; // Optional/missing in DB main table
   rooms: Room[];
-  stage: ProjectStage;
+  stage: string; // Changed from ProjectStage enum to string to match DB
   created_at: string;
   updated_at: string;
-  contacts: Contact | null;
+  contacts?: Contact | null;
+  location?: string | null;
+  tags?: string[] | null;
+  owner_id?: string | null;
 }
 
 export enum ProjectStage {

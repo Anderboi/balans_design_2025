@@ -55,10 +55,13 @@ export function CreateProjectDialog({
 
       const result = await createProjectAction({
         name: formData.name,
-        address: formData.address,
+        address: formData.address || "", // Fix undefined vs null mismatch
         area: areaNumber,
         client_id: null,
         stage: "PREPROJECT",
+        residents: "",
+        demolition_info: "",
+        construction_info: "",
       });
 
       if (result.success) {
