@@ -1,15 +1,11 @@
-import { createClient } from "@/lib/supabase/server";
 import { HeroCard } from "@/components/dashboard/hero-card";
 import { TasksWidget } from "@/components/dashboard/tasks-widget";
 import { DeliveryWidget } from "@/components/dashboard/delivery-widget";
 import { HistoryWidget } from "@/components/dashboard/history-widget";
+import { getUser } from '@/lib/supabase/getuser';
 
 export default async function Home() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const user = await getUser()
   const userName =
     user?.user_metadata?.full_name ||
     user?.email?.split("@")[0] ||

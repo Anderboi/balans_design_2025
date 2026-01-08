@@ -167,7 +167,7 @@ export function ProjectStages() {
                   >
                     {isCompleted && <Check className="w-6 h-6" />}
                     {isInProgress && (
-                      <Loader2 className="w-6 h-6 animate-spin text-gray-500" />
+                      <Loader2 className="w-6 h-6 //animate-spin text-gray-500" />
                     )}
                     {isLocked && <Lock className="w-5 h-5 text-gray-400" />}
                   </div>

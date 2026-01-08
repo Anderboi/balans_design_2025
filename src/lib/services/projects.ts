@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { Project } from "@/types";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { requireAuth } from '../supabase/actions';
 
 export const projectsService = {
   // Получение всех проектов
@@ -53,6 +54,7 @@ export const projectsService = {
     >,
     client?: SupabaseClient
   ): Promise<Project> {
+    const { user, supabase } = await requireAuth();
     // Используем server action для создания проекта с автоматическим добавлением владельца
     const { createProjectAction } = await import("@/lib/actions/projects");
     const result = await createProjectAction(project);
