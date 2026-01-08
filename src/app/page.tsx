@@ -3,6 +3,7 @@ import { TasksWidget } from "@/components/dashboard/tasks-widget";
 import { DeliveryWidget } from "@/components/dashboard/delivery-widget";
 import { HistoryWidget } from "@/components/dashboard/history-widget";
 import { getUser } from '@/lib/supabase/getuser';
+import PageContainer from '@/components/ui/page-container';
 
 export default async function Home() {
   const user = await getUser()
@@ -12,7 +13,7 @@ export default async function Home() {
     "Пользователь";
 
   return (
-    <div className="space-y-8">
+    <PageContainer>
       {/* Hero Section */}
       <section>
         <HeroCard userName={userName} />
@@ -34,6 +35,6 @@ export default async function Home() {
           <HistoryWidget />
         </div>
       </section>
-    </div>
+    </PageContainer>
   );
 }

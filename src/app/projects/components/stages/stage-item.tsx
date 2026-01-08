@@ -6,21 +6,41 @@ import { StageSubItem as IStageSubItem } from "@/config/project-stages";
 interface StageItemProps {
   item: IStageSubItem;
   projectId: string;
+  stageId: string;
+  stageStatus: string;
 }
 
-export function StageItem({ item, projectId }: StageItemProps) {
+export function StageItem({
+  item,
+  stageStatus,
+  projectId,
+}: Omit<StageItemProps, "onToggle">) {
   const isBrief = item.id === "brief";
   const Icon = item.icon || FileText;
 
   return (
     <Link
-      href={isBrief && projectId ? `/projects/${projectId}/brief` : "#"}
+      href={isBrief ? `/projects/${projectId}/brief` : "#"}
+      key={item.id}
+      onClick={(e) => {
+        if (!isBrief) e.preventDefault();
+      }}
       className={cn(
         "flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 transition-colors group cursor-pointer",
         !isBrief && "pointer-events-none"
       )}
     >
       <div className="flex items-center gap-3 text-gray-600 group-hover:text-zinc-900 transition-colors">
+        <div
+          className={cn(
+            "w-5 h-5 rounded border flex items-center justify-center transition-colors mr-3",
+            item.completed
+              ? "bg-black border-black text-white"
+              : "border-gray-300 bg-transparent"
+          )}
+        >
+          {item.completed && <Check className="w-3 h-3" />}
+        </div>
         <div
           className={cn(
             "w-8 h-8 rounded-lg flex items-center justify-center shrink-0",

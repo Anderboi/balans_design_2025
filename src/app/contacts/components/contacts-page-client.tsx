@@ -1,4 +1,3 @@
-// app/contacts/components/contacts-page-client.tsx
 "use client";
 
 import { useState, useMemo } from "react";
@@ -14,6 +13,7 @@ import { ContactCard } from "./contact-card";
 import { EditContactDrawer } from "./edit-contact-drawer";
 import { createCompany, getClients, getCompanies } from "../actions";
 import PageContainer from "@/components/ui/page-container";
+import PageHeader from '@/components/ui/page-header';
 
 interface ContactsPageClientProps {
   initialCompanies: Company[];
@@ -105,8 +105,8 @@ export function ContactsPageClient({
 
   return (
     <PageContainer>
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Адресная книга</h1>
+      <div className="flex justify-between items-start">
+        <PageHeader title='Адресная книга' description='Управление контактами'/>
         <Button onClick={() => setIsAddCompanyOpen(true)}>
           <PlusCircle className="mr-2 size-4" />
           Добавить новый

@@ -18,6 +18,17 @@ export interface Project {
   owner_id?: string | null;
 }
 
+export interface ProjectStageItem {
+  id: string;
+  project_id: string;
+  stage_id: string;
+  item_id: string;
+  completed: boolean;
+  completed_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export enum ProjectStage {
   PREPROJECT = "Предпроектная",
   CONCEPT = "Концепция",

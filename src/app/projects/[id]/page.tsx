@@ -17,7 +17,11 @@ import { projectsService } from "@/lib/services/projects";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ProjectStages } from "../components/project-stages";
+// import { ProjectStages } from "../components/project-stages";
+import {
+  ProjectStagesLoader,
+  ProjectStagesSkeleton,
+} from "../components/project-stages-loader";
 
 // Загрузчики и блоки
 import SchedulesBlock from "./components/schedules-block";
@@ -113,7 +117,9 @@ export default async function ProjectDetailPage({
           value="overview"
           className="space-y-12 animate-in fade-in slide-in-from-bottom-2 duration-300"
         >
-          <ProjectStages />
+          <Suspense fallback={<ProjectStagesSkeleton />}>
+            <ProjectStagesLoader projectId={id} />
+          </Suspense>
 
           {/* Brief Carousel or other blocks can participate here if needed, 
                but for now Stages is the main overview */}

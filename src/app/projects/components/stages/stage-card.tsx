@@ -37,10 +37,17 @@ export function StageCard({
       {/* Expandable Content */}
       {!isLocked && isExpanded && (
         <div className="px-6 pb-6 pt-0 space-y-2 animate-in slide-in-from-top-2 duration-200">
-          <div className="h-px bg-gray-100 mb-4 mx-2" />
-          {stage.items.map((item) => (
-            <StageItem key={item.id} item={item} projectId={projectId} />
-          ))}
+          <div className="mt-4 space-y-2">
+            {stage.items.map((item) => (
+              <StageItem
+                key={item.id}
+                item={item}
+                stageStatus={stage.defaultStatus}
+                projectId={projectId}
+                stageId={stage.id}
+              />
+            ))}
+          </div>
         </div>
       )}
     </div>

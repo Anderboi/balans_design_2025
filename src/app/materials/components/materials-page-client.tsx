@@ -1,7 +1,6 @@
-// app/materials/components/materials-page-client.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Plus, Search, Grid, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +18,7 @@ import { Material, MaterialType } from "@/types";
 import { getMaterials } from "../actions";
 import { toast } from "sonner";
 import PageContainer from "@/components/ui/page-container";
+import PageHeader from "@/components/ui/page-header";
 
 interface MaterialsPageClientProps {
   initialMaterials: Material[];
@@ -30,18 +30,12 @@ export function MaterialsPageClient({
   initialCategories,
 }: MaterialsPageClientProps) {
   const [materials, setMaterials] = useState<Material[]>(initialMaterials);
-  const [filteredMaterials, setFilteredMaterials] =
-    useState<Material[]>(initialMaterials);
   const [categories] = useState<string[]>(initialCategories);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<MaterialType | "all">("all");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-
-  useEffect(() => {
-    filterMaterials();
-  }, [materials, searchQuery, selectedType, selectedCategory]);
 
   const loadMaterials = async () => {
     try {
@@ -52,8 +46,7 @@ export function MaterialsPageClient({
       toast.error("Не удалось загрузить материалы");
     }
   };
-
-  const filterMaterials = () => {
+  const filteredMaterials = useMemo(() => {
     let filtered = materials;
 
     // Фильтр по поиску
@@ -76,12 +69,14 @@ export function MaterialsPageClient({
     }
 
     // Фильтр по категории
-    // if (selectedCategory !== 'all') {
-    //   filtered = filtered.filter(material => material.category === selectedCategory);
+    // if (selectedCategory !== "all") {
+    //   filtered = filtered.filter(
+    //     (material) => material.category === selectedCategory
+    //   );
     // }
 
-    setFilteredMaterials(filtered);
-  };
+    return filtered;
+  }, [materials, searchQuery, selectedType]);
 
   const handleMaterialAdded = () => {
     loadMaterials();
@@ -102,12 +97,10 @@ export function MaterialsPageClient({
     <PageContainer>
       {/* Заголовок */}
       <div className="flex items-start justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold">Библиотека материалов</h1>
-          <p className="text-muted-foreground mt-1">
-            Управление материалами для ваших проектов
-          </p>
-        </div>
+        <PageHeader
+          title="Библиотека материалов"
+          description="Управление материалами для ваших проектов"
+        />
         <Button onClick={() => setIsAddDialogOpen(true)}>
           <Plus className="size-4 mr-2" />
           Добавить материал

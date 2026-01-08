@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import { Project } from "@/types";
+import { Project, ProjectStageItem } from "@/types";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 export const projectsService = {
@@ -204,5 +204,63 @@ export const projectsService = {
     }
 
     return data || [];
+  },
+
+  // Получение статусов этапов проекта
+  async getProjectStageItems(
+    projectId: string,
+    client?: SupabaseClient
+  ): Promise<ProjectStageItem[]> {
+    if (!projectId) return [];
+
+    const supabaseClient = client || supabase;
+    const { data, error } = await supabaseClient
+      .from("project_stage_items")
+      .select("*")
+      .eq("project_id", projectId);
+
+    if (error) {
+      console.error(`Ошибка при получении этапов проекта ${projectId}:`, error);
+      // Не выбрасываем ошибку, чтобы не ломать UI, просто вернем пустой массив
+      return [];
+    }
+
+    return data || [];
+  },
+
+  // Обновление/создание статуса этапа
+  async toggleProjectStageItem(
+    projectId: string,
+    stageId: string,
+    itemId: string,
+    completed: boolean,
+    client?: SupabaseClient
+  ): Promise<ProjectStageItem | null> {
+    const supabaseClient = client || supabase;
+
+    // Используем upsert для создания или обновления
+    // completed_at ставим текущее время если completed=true, иначе null
+    const { data, error } = await supabaseClient
+      .from("project_stage_items")
+      .upsert(
+        {
+          project_id: projectId,
+          stage_id: stageId,
+          item_id: itemId,
+          completed,
+          completed_at: completed ? new Date().toISOString() : null,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "project_id,stage_id,item_id" }
+      )
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Ошибка при обновлении статуса этапа:", error);
+      throw error;
+    }
+
+    return data;
   },
 };
