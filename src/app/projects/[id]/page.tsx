@@ -26,7 +26,6 @@ import SchedulesBlock from "./components/schedules-block";
 import TasksBlockLoader from "./components/tasks-block-loader";
 import TeamManagementLoader from "./components/team-management-loader";
 // import ProjectInfoBlock from "./components/project-info-block";
-import BriefCarousel from "./components/brief-carousel";
 
 export const revalidate = 0;
 
@@ -148,11 +147,6 @@ export default async function ProjectDetailPage({
           </Suspense>
         </TabsContent>
       </Tabs>
-
-      {/* Kept BriefCarousel component, might need to be inside stages or Overview */}
-      <div className="hidden">
-        <BriefCarousel />
-      </div>
     </div>
   );
 }
