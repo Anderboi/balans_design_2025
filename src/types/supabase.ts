@@ -175,6 +175,48 @@ export type Database = {
           }
         ];
       };
+      project_briefs: {
+        Row: {
+          project_id: string;
+          residents: Json | null;
+          construction: Json | null;
+          demolition: Json | null;
+          engineering: Json | null;
+          equipment: Json | null;
+          general_info: Json | null;
+          created_at: string | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          project_id: string;
+          residents?: Json | null;
+          construction?: Json | null;
+          demolition?: Json | null;
+          engineering?: Json | null;
+          equipment?: Json | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          project_id?: string;
+          residents?: Json | null;
+          construction?: Json | null;
+          demolition?: Json | null;
+          engineering?: Json | null;
+          equipment?: Json | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "project_briefs_project_id_fkey";
+            columns: ["project_id"];
+            isOneToOne: true;
+            referencedRelation: "projects";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       rooms: {
         Row: {
           area: number | null;

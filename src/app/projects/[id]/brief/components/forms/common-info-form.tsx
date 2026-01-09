@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -17,36 +18,95 @@ import {
 import { Input } from "@/components/ui/input";
 import SubBlockCard from "@/components/ui/sub-block-card";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { projectsService } from "@/lib/services/projects";
+import { contactsService } from "@/lib/services/contacts";
+import { useRouter } from "next/navigation";
 
 interface CommonInfoFormProps {
-  projectId?: string;
-  initialData?: Partial<CommonFormValues>;
-  onSave?: (data: CommonFormValues) => Promise<void>;
+  projectId: string;
+  initialData: CommonFormValues;
+  contactId?: string;
+  clientId?: string;
+  onNext?: (data: CommonFormValues) => void;
 }
 
 export function CommonInfoForm({
   projectId,
   initialData,
-  onSave,
+  contactId,
+  clientId,
+  onNext,
 }: CommonInfoFormProps) {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+
   const form = useForm<CommonFormValues>({
     resolver: zodResolver(CommonDataSchema),
-    defaultValues: initialData || {
-      clientName: "",
-      clientSurname: "",
-      email: "",
-      phone: "",
-      address: "",
-      area: 0,
-      contractNumber: "",
-      startDate: "",
-      finalDate: "",
-    },
+    defaultValues: initialData,
   });
 
   const handleSubmit = async (data: CommonFormValues) => {
-    if (onSave) {
-      await onSave(data);
+    if (!projectId) {
+      toast.error("Project ID missing");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      console.log(data);
+      // 1. Update Project Data
+      await projectsService.updateProject(projectId, {
+        address: data.address,
+        area: data.area,
+      });
+
+      // 1.1 Update Brief General Info
+      await projectsService.updateProjectBrief(projectId, {
+        general_info: {
+          contractNumber: data.contractNumber,
+          startDate: data.startDate,
+          finalDate: data.finalDate,
+        },
+      });
+
+      // 2. Update Contact Data
+      if (contactId) {
+        const fullName = `${data.clientName} ${data.clientSurname}`.trim();
+        await contactsService.updateContact(contactId, {
+          name: fullName,
+          email: data.email,
+          phone: data.phone,
+        });
+      } else if (clientId) {
+        // If client_id exists but contact fetch failed, we might need a way to find contact by client_id?
+        // This logic remains similar to before but using props
+      }
+
+      // 3. Mark stage item as completed
+      // Using 'preproject' stage and 'object_info' item based on config
+      await projectsService.toggleProjectStageItem(
+        projectId,
+        "preproject",
+        "object_info",
+        true
+      );
+
+      // Update store - RESERVED for future if needed
+      // setCommonData(data);
+
+      toast.success("Общая информация сохранена");
+
+      router.refresh(); // Refresh to update progress/status UI
+
+      if (onNext) {
+        onNext(data);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Ошибка при сохранении данных");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -60,23 +120,26 @@ export function CommonInfoForm({
               name="clientName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Имя клиента *</FormLabel>
+                  <FormLabel>Имя</FormLabel>
                   <FormControl>
-                    <Input placeholder="Иван" {...field} />
+                    <Input {...field} placeholder="Иван" disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="clientSurname"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Фамилия клиента *</FormLabel>
+                  <FormLabel>Фамилия</FormLabel>
                   <FormControl>
-                    <Input placeholder="Иванов" {...field} />
+                    <Input
+                      {...field}
+                      placeholder="Иванов"
+                      disabled={isLoading}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -90,19 +153,18 @@ export function CommonInfoForm({
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email *</FormLabel>
+                  <FormLabel>Электронная почта</FormLabel>
                   <FormControl>
                     <Input
-                      type="email"
-                      placeholder="example@mail.com"
                       {...field}
+                      placeholder="example@mail.com"
+                      disabled={isLoading}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="phone"
@@ -110,7 +172,11 @@ export function CommonInfoForm({
                 <FormItem>
                   <FormLabel>Телефон</FormLabel>
                   <FormControl>
-                    <Input placeholder="+7 (900) 123-45-67" {...field} />
+                    <Input
+                      {...field}
+                      placeholder="+7 (999) 000-00-00"
+                      disabled={isLoading}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -124,41 +190,41 @@ export function CommonInfoForm({
             name="address"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Адрес *</FormLabel>
+                <FormLabel>Адрес объекта</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Москва, ул. Примерная, д. 1, кв. 10"
                     {...field}
+                    placeholder="г. Москва, ул. Примерная, д. 1, кв. 1"
+                    disabled={isLoading}
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <FormField
               control={form.control}
               name="area"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Площадь (м²) *</FormLabel>
+                  <FormLabel>Площадь (м²)</FormLabel>
                   <FormControl>
                     <Input
-                      type="number"
-                      placeholder="50"
                       {...field}
-                      onChange={(e) => {
-                        const value = parseFloat(e.target.value);
-                        field.onChange(isNaN(value) ? 0 : value);
-                      }}
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      onChange={(e) =>
+                        field.onChange(parseFloat(e.target.value))
+                      }
+                      disabled={isLoading}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="contractNumber"
@@ -166,15 +232,16 @@ export function CommonInfoForm({
                 <FormItem>
                   <FormLabel>Номер договора</FormLabel>
                   <FormControl>
-                    <Input placeholder="№ 123/2025" {...field} />
+                    <Input
+                      {...field}
+                      placeholder="№ 123-45"
+                      disabled={isLoading}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="startDate"
@@ -182,21 +249,20 @@ export function CommonInfoForm({
                 <FormItem>
                   <FormLabel>Дата начала</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} />
+                    <Input {...field} type="date" disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="finalDate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Дата окончания</FormLabel>
+                  <FormLabel>Дата завершения</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} />
+                    <Input {...field} type="date" disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -205,8 +271,8 @@ export function CommonInfoForm({
           </div>
         </SubBlockCard>
         <div className="w-full flex justify-end border-t pt-4">
-          <Button type="submit" size={"lg"}>
-            Сохранить
+          <Button type="submit" size={"lg"} disabled={isLoading}>
+            {isLoading ? "Сохранение..." : "Сохранить"}
           </Button>
         </div>
       </form>

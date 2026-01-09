@@ -263,4 +263,55 @@ export const projectsService = {
 
     return data;
   },
+
+  // Получение брифа проекта
+  async getProjectBrief(projectId: string, client?: SupabaseClient) {
+    if (!projectId) return null;
+
+    const supabaseClient = client || supabase;
+    const { data, error } = await supabaseClient
+      .from("project_briefs")
+      .select("*")
+      .eq("project_id", projectId)
+      .single();
+
+    if (error && error.code !== "PGRST116") {
+      // PGRST116 = no rows returned (бриф еще не создан)
+      console.error(`Ошибка при получении брифа проекта ${projectId}:`, error);
+      throw error;
+    }
+
+    return data;
+  },
+
+  // Обновление/создание брифа
+  async updateProjectBrief(
+    projectId: string,
+    data: Record<string, any>, // Allow flexible partial updates
+    client?: SupabaseClient
+  ) {
+    if (!projectId) throw new Error("ID проекта обязателен");
+
+    const supabaseClient = client || supabase;
+
+    const { data: result, error } = await supabaseClient
+      .from("project_briefs")
+      .upsert(
+        {
+          project_id: projectId,
+          ...data,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "project_id" }
+      )
+      .select()
+      .single();
+
+    if (error) {
+      console.error(`Ошибка при сохранении брифа проекта ${projectId}:`, error);
+      throw error;
+    }
+
+    return result;
+  },
 };

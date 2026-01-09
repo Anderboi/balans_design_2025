@@ -9,7 +9,7 @@ export const CommonDataSchema = z.object({
     .email("Напишите email куда будет приходить информация по проекту"),
   phone: z.string().optional(),
   address: z.string().min(1, "Введите адрес"),
-  area: z.coerce.number().min(1, "Введите площадь"),
+  area: z.number().min(1, "Введите площадь"),
   contractNumber: z.string().optional(),
   startDate: z.string().date().optional(),
   finalDate: z.string().date().optional(),
