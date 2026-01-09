@@ -31,16 +31,16 @@ export function StageItem({
       )}
     >
       <div className="flex items-center gap-3 text-gray-600 group-hover:text-zinc-900 transition-colors">
-        <div
+        {/* <div
           className={cn(
-            "w-5 h-5 rounded border flex items-center justify-center transition-colors mr-3",
+            "size-5 rounded border flex items-center justify-center transition-colors mr-3",
             item.completed
               ? "bg-black border-black text-white"
               : "border-gray-300 bg-transparent"
           )}
         >
-          {item.completed && <Check className="w-3 h-3" />}
-        </div>
+          {item.completed && <Check className="size-4" />}
+        </div> */}
         <div
           className={cn(
             "w-8 h-8 rounded-lg flex items-center justify-center shrink-0",
@@ -49,15 +49,15 @@ export function StageItem({
               : "bg-gray-100 text-gray-400"
           )}
         >
-          <Icon className="w-4 h-4" />
+          <Icon className="size-4" />
         </div>
         <span className="font-medium text-sm">{item.title}</span>
       </div>
 
       <div className="flex items-center gap-2">
-        {item.completed && <Check className="w-4 h-4 text-green-500" />}
+        {item.completed && <Check className="size-4 text-green-500" />}
         {isBrief && (
-          <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-black transition-colors" />
+          <ChevronRight className="size-4 text-gray-300 group-hover:text-black transition-colors" />
         )}
       </div>
     </Link>

@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import { StageConfig } from "@/config/project-stages";
 import { StageHeader } from "./stage-header";
 import { StageItem } from "./stage-item";
+import MainBlockCard from '@/components/ui/main-block-card';
 
 interface StageCardProps {
   stage: StageConfig;
@@ -21,12 +22,7 @@ export function StageCard({
   const isLocked = status === "locked";
 
   return (
-    <div
-      className={cn(
-        "rounded-3xl transition-all duration-300",
-        isLocked ? "opacity-60" : "bg-white border border-gray-100 shadow-sm"
-      )}
-    >
+    <MainBlockCard isLocked={isLocked}>
       <StageHeader
         stage={stage}
         isExpanded={isExpanded}
@@ -36,8 +32,8 @@ export function StageCard({
 
       {/* Expandable Content */}
       {!isLocked && isExpanded && (
-        <div className="px-6 pb-6 pt-0 space-y-2 animate-in slide-in-from-top-2 duration-200">
-          <div className="mt-4 space-y-2">
+        <div className="px-1 pb-1 pt-0 space-y-2 animate-in slide-in-from-top-2 duration-200 ">
+          <div className="space-y-2 bg-zinc-100/50 rounded-[20px]">
             {stage.items.map((item) => (
               <StageItem
                 key={item.id}
@@ -50,6 +46,6 @@ export function StageCard({
           </div>
         </div>
       )}
-    </div>
+    </MainBlockCard>
   );
 }

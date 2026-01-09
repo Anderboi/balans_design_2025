@@ -18,11 +18,11 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChevronRight, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { ResidentsForm } from "@/components/brief/forms/residents-form";
-import { DemolitionForm } from "@/components/brief/forms/demolition-form";
-import { ConstructionForm } from "@/components/brief/forms/construction-form";
-import { PremisesForm } from "@/components/brief/forms/premises-form";
-import { EngineeringForm } from "@/components/brief/forms/engineering-form";
+import { ResidentsForm } from "@/app/projects/[id]/brief/components/forms/residents-form";
+import { DemolitionForm } from "@/app/projects/[id]/brief/components/forms/demolition-form";
+import { ConstructionForm } from "@/app/projects/[id]/brief/components/forms/construction-form";
+import { PremisesForm } from "@/app/projects/[id]/brief/components/forms/premises-form";
+import { EngineeringForm } from "@/app/projects/[id]/brief/components/forms/engineering-form";
 
 const briefBlocks = [
   { title: "Информация о проживающих", progress: 50 },

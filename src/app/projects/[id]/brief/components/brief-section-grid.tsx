@@ -63,17 +63,26 @@ const sections = [
   },
 ];
 
+import { useParams } from "next/navigation";
+import Link from "next/link";
+
 export function BriefSectionsGrid() {
+  const params = useParams();
+  const projectId = params.id as string;
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {sections.map((section) => (
-        <BriefSectionCard
+        <Link
+          href={`/projects/${projectId}/brief/${section.id}`}
           key={section.id}
-          title={section.title}
-          description={section.description}
-          icon={section.icon}
-          onClick={() => console.log(`Opening ${section.id}`)}
-        />
+        >
+          <BriefSectionCard
+            title={section.title}
+            description={section.description}
+            icon={section.icon}
+          />
+        </Link>
       ))}
     </div>
   );
