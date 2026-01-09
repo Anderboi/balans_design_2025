@@ -84,7 +84,7 @@ export default async function BriefGeneralPage({
         </Breadcrumb>
       </div>
 
-      <MainBlockCard className="space-y-6 p-8">
+      <MainBlockCard className="space-y-6 p-8 md:p-12">
         <PageHeader title="Общая информация" />
         <CommonInfoForm
           projectId={id}

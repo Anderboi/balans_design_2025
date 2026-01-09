@@ -16,8 +16,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -25,19 +23,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash2 } from "lucide-react";
+import { Activity, Heart, PawPrint, Plus } from "lucide-react";
+import SubBlockCard from "@/components/ui/sub-block-card";
+import DeleteIconButton from "@/components/ui/delete-button";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupTextarea,
+} from "@/components/ui/input-group";
+import FormSubmitButton from "./form-submit-button";
+import { useState } from "react";
+import { projectsService } from "@/lib/services/projects";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface ResidentsFormProps {
   projectId?: string;
   initialData?: Partial<ResidentsFormValues>;
-  onSave?: (data: ResidentsFormValues) => Promise<void>;
 }
 
-export function ResidentsForm({
-  projectId,
-  initialData,
-  onSave,
-}: ResidentsFormProps) {
+export function ResidentsForm({ projectId, initialData }: ResidentsFormProps) {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+
   const form = useForm<ResidentsFormValues>({
     resolver: zodResolver(ResidentsSchema),
     defaultValues: initialData || {
@@ -49,8 +57,6 @@ export function ResidentsForm({
       petDetails: "",
     },
   });
-
-  
 
   const {
     fields: adultsFields,
@@ -70,224 +76,228 @@ export function ResidentsForm({
     name: "children",
   });
 
-
   const handleSubmit = async (data: ResidentsFormValues) => {
-    if (onSave) {
-      await onSave(data);
+    if (!projectId) {
+      toast.error("Project ID missing");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+
+      await projectsService.updateProjectBrief(projectId, {
+        residents: data,
+      });
+
+      toast.success("Данные о проживающих сохранены");
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      toast.error("Ошибка при сохранении данных");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        {/* Взрослые */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium">Взрослые</h3>
-          </div>
-
-          {adultsFields.map((field, index) => (
-            <div key={field.id} className="flex gap-2 items-end">
-              <FormField
-                control={form.control}
-                name={`adults.${index}.height`}
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Рост (см)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="Рост (см)"
-                        min={80}
-                        max={280}
-                        {...field}
-                        onFocus={(e) => e.target.select()}
-                        onChange={(e) =>
-                          field.onChange(parseFloat(e.target.value))
-                        }
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name={`adults.${index}.gender`}
-                render={({ field }) => (
-                  <FormItem className="grow">
-                    <FormLabel>Пол</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Выберите" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="male">Мужской</SelectItem>
-                        <SelectItem value="female">Женский</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {adultsFields.length > 1 && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => removeAdult(index)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-          ))}
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            className="w-full"
-            onClick={() => appendAdult({ height: 170, gender: "male" })}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Добавить
-          </Button>
-        </div>
-
-        {/* Дети */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium">Дети</h3>
-          </div>
-
-          {childrenFields.map((field, index) => (
-            <div key={field.id} className="flex gap-2 items-end">
-              <FormField
-                control={form.control}
-                name={`children.${index}.age`}
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Возраст</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="Возраст"
-                        {...field}
-                        min={1}
-                        max={18}
-                        onFocus={(e) => e.target.select()}
-                        onChange={(e) =>
-                          field.onChange(parseFloat(e.target.value))
-                        }
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => removeChild(index)}
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-10">
+        <SubBlockCard title="Взрослые">
+          {/* Взрослые */}
+          <div className="space-y-5">
+            {adultsFields.map((field, index) => (
+              <div
+                key={field.id}
+                className="flex gap-4 items-end animate-fade-in"
               >
-                <Trash2 className="size-4" />
-              </Button>
-            </div>
-          ))}
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            className="w-full"
-            onClick={() => appendChild({ age: 5 })}
-          >
-            <Plus className="size-4 mr-2 " />
-            Добавить
-          </Button>
-        </div>
-
-        {/* Хобби */}
-        <FormField
-          control={form.control}
-          name="hobbies"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Хобби и увлечения</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Опишите хобби и увлечения жильцов..."
-                  {...field}
+                <FormField
+                  control={form.control}
+                  name={`adults.${index}.height`}
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>Рост (см)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="Рост (см)"
+                          min={80}
+                          max={280}
+                          {...field}
+                          onFocus={(e) => e.target.select()}
+                          onChange={(e) =>
+                            field.onChange(parseFloat(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
-        {/* Проблемы со здоровьем */}
-        <FormField
-          control={form.control}
-          name="healthIssues"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Проблемы со здоровьем</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Укажите особые требования по здоровью..."
-                  {...field}
+                <FormField
+                  control={form.control}
+                  name={`adults.${index}.gender`}
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>Пол</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Выберите" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="male">Мужской</SelectItem>
+                          <SelectItem value="female">Женский</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
-        {/* Питомцы */}
-        <FormField
-          control={form.control}
-          name="hasPets"
-          render={({ field }) => (
-            <FormItem className="flex items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <FormLabel className="text-base">Есть питомцы?</FormLabel>
+                {adultsFields.length > 1 && (
+                  <DeleteIconButton onClick={() => removeAdult(index)} />
+                )}
               </div>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+            ))}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="cursor-pointer"
+              onClick={() => appendAdult({ height: 170, gender: "male" })}
+            >
+              <Plus className="size-4 mr-2" />
+              Добавить взрослого
+            </Button>
+          </div>
+        </SubBlockCard>
 
-        {form.watch("hasPets") && (
+        <SubBlockCard title="Дети">
+          {/* Дети */}
+          <div className="space-y-5">
+            {childrenFields.length === 0 && (
+              <p className="text-sm text-zinc-400 mb-2">Нет детей</p>
+            )}
+            {childrenFields.map((field, index) => (
+              <div key={field.id} className="flex gap-4 items-end">
+                <FormField
+                  control={form.control}
+                  name={`children.${index}.age`}
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>Возраст</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="Возраст"
+                          {...field}
+                          min={1}
+                          max={18}
+                          onFocus={(e) => e.target.select()}
+                          onChange={(e) =>
+                            field.onChange(parseFloat(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {childrenFields.length > 0 && (
+                  <DeleteIconButton onClick={() => removeChild(index)} />
+                )}
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="cursor-pointer"
+              onClick={() => appendChild({ age: 5 })}
+            >
+              <Plus className="size-4 mr-2 " />
+              Добавить ребенка
+            </Button>
+          </div>
+        </SubBlockCard>
+        <SubBlockCard title="Образ жизни">
+          {/* Хобби */}
           <FormField
             control={form.control}
-            name="petDetails"
+            name="hobbies"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Информация о питомцах</FormLabel>
+                <FormLabel>Увлечения</FormLabel>
                 <FormControl>
-                  <Textarea
-                    placeholder="Укажите вид, породу, особенности..."
-                    {...field}
-                  />
+                  <InputGroup>
+                    <InputGroupAddon>
+                      <Heart className="size-5" />
+                    </InputGroupAddon>
+                    <InputGroupTextarea
+                      placeholder="Что необходимо предусмотреть для хобби (хранение лыж, мольберт, библиотека)?"
+                      {...field}
+                    />
+                  </InputGroup>
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-        )}
+
+          {/* Проблемы со здоровьем */}
+          <FormField
+            control={form.control}
+            name="healthIssues"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Ограничения по здоровью</FormLabel>
+                <FormControl>
+                  <InputGroup>
+                    <InputGroupAddon>
+                      <Activity className="size-5" />
+                    </InputGroupAddon>
+                    <InputGroupTextarea
+                      placeholder="Аллергии, необходимость безбарьерной среды и т.д."
+                      {...field}
+                    />
+                  </InputGroup>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </SubBlockCard>
+        <SubBlockCard title="Питомцы">
+          {/* Питомцы */}
+          <FormField
+            control={form.control}
+            name="petDetails"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Описание питомцев</FormLabel>
+                <FormControl>
+                  <InputGroup>
+                    <InputGroupAddon>
+                      <PawPrint className="size-5" />
+                    </InputGroupAddon>
+                    <InputGroupTextarea
+                      placeholder="Вид, порода, где спят, где едят, нужно ли мыть лапы?"
+                      {...field}
+                    />
+                  </InputGroup>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </SubBlockCard>
+        <FormSubmitButton isLoading={isLoading} />
       </form>
     </Form>
   );

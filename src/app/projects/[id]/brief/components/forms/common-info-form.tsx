@@ -17,11 +17,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import SubBlockCard from "@/components/ui/sub-block-card";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { projectsService } from "@/lib/services/projects";
 import { contactsService } from "@/lib/services/contacts";
 import { useRouter } from "next/navigation";
+import FormSubmitButton from './form-submit-button';
 
 interface CommonInfoFormProps {
   projectId: string;
@@ -270,11 +270,7 @@ export function CommonInfoForm({
             />
           </div>
         </SubBlockCard>
-        <div className="w-full flex justify-end border-t pt-4">
-          <Button type="submit" size={"lg"} disabled={isLoading}>
-            {isLoading ? "Сохранение..." : "Сохранить"}
-          </Button>
-        </div>
+        <FormSubmitButton isLoading={isLoading} />
       </form>
     </Form>
   );

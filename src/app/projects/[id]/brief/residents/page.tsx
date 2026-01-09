@@ -12,6 +12,11 @@ import {
 import { SlashIcon } from "lucide-react";
 import PageHeader from "@/components/ui/page-header";
 import PageContainer from "@/components/ui/page-container";
+import { ResidentsForm } from "../components/forms/residents-form";
+import MainBlockCard from "@/components/ui/main-block-card";
+
+import { createClient } from "@/lib/supabase/server";
+import { ResidentsFormValues } from "@/lib/schemas/brief-schema";
 
 export default async function BriefResidentsPage({
   params,
@@ -19,11 +24,18 @@ export default async function BriefResidentsPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const project = await projectsService.getProjectById(id);
+  const supabase = await createClient();
+  const [project, brief] = await Promise.all([
+    projectsService.getProjectById(id, supabase),
+    projectsService.getProjectBrief(id, supabase),
+  ]);
 
   if (!project) {
     notFound();
   }
+
+  const initialData =
+    (brief?.residents as Partial<ResidentsFormValues>) || undefined;
 
   return (
     <PageContainer>
@@ -53,14 +65,12 @@ export default async function BriefResidentsPage({
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
+      </div>
 
+      <MainBlockCard className="space-y-6 p-8 md:p-12">
         <PageHeader title="Проживающие" />
-      </div>
-
-      <div className="mt-8">
-        {/* Form content will go here */}
-        <p className="text-gray-500">Form content placeholder</p>
-      </div>
+        <ResidentsForm projectId={id} initialData={initialData} />
+      </MainBlockCard>
     </PageContainer>
   );
 }

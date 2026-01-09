@@ -13,7 +13,7 @@ const MainBlockCard = ({
   return (
     <div
       className={cn(
-        "rounded-3xl transition-all duration-300  ",
+        "rounded-4xl transition-all duration-300  ",
         isLocked
           ? "opacity-60"
           : "shadow-sm bg-background border border-gray-100",
