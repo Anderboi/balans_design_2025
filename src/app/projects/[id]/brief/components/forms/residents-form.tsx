@@ -36,6 +36,7 @@ import { useState } from "react";
 import { projectsService } from "@/lib/services/projects";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import AddItemButton from "@/components/ui/add-item-button";
 
 interface ResidentsFormProps {
   projectId?: string;
@@ -164,16 +165,11 @@ export function ResidentsForm({ projectId, initialData }: ResidentsFormProps) {
                 )}
               </div>
             ))}
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="cursor-pointer"
+            <AddItemButton
               onClick={() => appendAdult({ height: 170, gender: "male" })}
             >
-              <Plus className="size-4 mr-2" />
               Добавить взрослого
-            </Button>
+            </AddItemButton>
           </div>
         </SubBlockCard>
 
@@ -214,16 +210,9 @@ export function ResidentsForm({ projectId, initialData }: ResidentsFormProps) {
                 )}
               </div>
             ))}
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="cursor-pointer"
-              onClick={() => appendChild({ age: 5 })}
-            >
-              <Plus className="size-4 mr-2 " />
+            <AddItemButton onClick={() => appendChild({ age: 5 })}>
               Добавить ребенка
-            </Button>
+            </AddItemButton>
           </div>
         </SubBlockCard>
         <SubBlockCard title="Образ жизни">

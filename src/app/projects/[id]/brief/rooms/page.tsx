@@ -12,6 +12,8 @@ import {
 import { SlashIcon } from "lucide-react";
 import PageHeader from "@/components/ui/page-header";
 import PageContainer from "@/components/ui/page-container";
+import MainBlockCard from '@/components/ui/main-block-card';
+import { PremisesForm } from '../components/forms/premises-form';
 
 export default async function BriefRoomsPage({
   params,
@@ -54,13 +56,14 @@ export default async function BriefRoomsPage({
           </BreadcrumbList>
         </Breadcrumb>
 
-        <PageHeader title="Состав помещений" />
+        {/* <PageHeader title="Состав помещений" /> */}
       </div>
 
-      <div className="mt-8">
-        {/* Form content will go here */}
-        <p className="text-gray-500">Form content placeholder</p>
-      </div>
+      <MainBlockCard className="space-y-6 p-8 md:p-12">
+        <PageHeader title="Состав помещений" />
+        <PremisesForm projectId={id}/>
+      </MainBlockCard>
+      
     </PageContainer>
   );
 }

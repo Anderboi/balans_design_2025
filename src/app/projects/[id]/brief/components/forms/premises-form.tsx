@@ -11,9 +11,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useEffect } from "react";
 import StyledSelect from "@/components/ui/styled-select";
 import { Button } from "@/components/ui/button";
-import { Trash2Icon } from "lucide-react";
+import { Plus } from "lucide-react";
 import { roomsService } from "@/lib/services/rooms";
 import { toast } from "sonner";
+import SubBlockCard from "@/components/ui/sub-block-card";
+import DeleteIconButton from "@/components/ui/delete-button";
+import FormSubmitButton from "./form-submit-button";
+import AddItemButton from "@/components/ui/add-item-button";
 
 interface PremisesFormProps {
   projectId?: string;
@@ -244,8 +248,9 @@ export function PremisesForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)}>
-        <div className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <SubBlockCard title="Помещения">
+          {/* <div className="space-y-4"> */}
           {isLoading ? (
             <div className="text-center py-4">Загрузка...</div>
           ) : (
@@ -279,24 +284,15 @@ export function PremisesForm({
                       </FormItem>
                     )}
                   />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    onClick={() => remove(index)}
-                    size="sm"
-                  >
-                    <Trash2Icon size={20} />
-                  </Button>
+                  <DeleteIconButton onClick={() => remove(index)} />
                 </article>
               );
             })
           )}
-        </div>
+          {/* </div> */}
+        </SubBlockCard>
         <div className="pt-4">
-          <Button
-            type="button"
-            variant="default"
-            className="w-full"
+          <AddItemButton
             onClick={() =>
               append({
                 name: "",
@@ -306,11 +302,12 @@ export function PremisesForm({
             }
           >
             Добавить помещение
-          </Button>
+          </AddItemButton>
 
           {/* Скрытая кнопка для сабмита формы из родительского компонента */}
           <button type="submit" className="hidden" />
         </div>
+        <FormSubmitButton isLoading={isLoading} />
       </form>
     </Form>
   );

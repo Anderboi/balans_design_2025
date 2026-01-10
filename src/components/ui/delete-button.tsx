@@ -7,7 +7,7 @@ const DeleteIconButton = ({ onClick }: { onClick: () => void }) => {
       type="button"
       variant="ghost"
       size="icon"
-      className="bg-red-50 text-red-500 hover:bg-red-100 transition-colors"
+      className="bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 cursor-pointer transition-colors"
       onClick={onClick}
     >
       <Trash2 className="size-4" />
