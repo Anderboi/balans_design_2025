@@ -1,15 +1,5 @@
 import { projectsService } from "@/lib/services/projects";
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { SlashIcon } from "lucide-react";
 import PageHeader from "@/components/ui/page-header";
 import PageContainer from "@/components/ui/page-container";
 import { ResidentsForm } from "../components/forms/residents-form";
@@ -17,6 +7,7 @@ import MainBlockCard from "@/components/ui/main-block-card";
 
 import { createClient } from "@/lib/supabase/server";
 import { ResidentsFormValues } from "@/lib/schemas/brief-schema";
+import { BriefBreadcrumb } from "../components/brief-breadcrumb";
 
 export default async function BriefResidentsPage({
   params,
@@ -40,31 +31,11 @@ export default async function BriefResidentsPage({
   return (
     <PageContainer>
       <div className="space-y-8">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href={`/projects/${id}`}>{project.name}</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator>
-              <SlashIcon className="w-3 h-3" />
-            </BreadcrumbSeparator>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href={`/projects/${id}/brief`}>Техническое задание</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator>
-              <SlashIcon className="w-3 h-3" />
-            </BreadcrumbSeparator>
-            <BreadcrumbItem>
-              <BreadcrumbPage className="font-bold text-black">
-                Проживающие
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+        <BriefBreadcrumb
+          projectId={id}
+          projectName={project.name}
+          currentPage="Проживающие"
+        />
       </div>
 
       <MainBlockCard className="space-y-6 p-8 md:p-12">

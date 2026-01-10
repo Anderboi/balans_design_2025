@@ -15,7 +15,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -23,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Activity, Heart, PawPrint, Plus } from "lucide-react";
+import { Activity, Heart, PawPrint } from "lucide-react";
 import SubBlockCard from "@/components/ui/sub-block-card";
 import DeleteIconButton from "@/components/ui/delete-button";
 import {

@@ -8,21 +8,19 @@ import {
 } from "@/lib/schemas/brief-schema";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import StyledSelect from "@/components/ui/styled-select";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import { roomsService } from "@/lib/services/rooms";
 import { toast } from "sonner";
 import SubBlockCard from "@/components/ui/sub-block-card";
 import DeleteIconButton from "@/components/ui/delete-button";
 import FormSubmitButton from "./form-submit-button";
 import AddItemButton from "@/components/ui/add-item-button";
+import { useRouter } from "next/navigation";
 
 interface PremisesFormProps {
-  projectId?: string;
+  projectId: string;
   initialData?: PremisesFormValues;
-  onSave?: (data: PremisesFormValues) => Promise<void>;
 }
 
 export type Option = {
@@ -74,20 +72,27 @@ export const roomList: Option[] = [
   },
 ];
 
-export function PremisesForm({
-  projectId,
-  initialData,
-  onSave,
-}: PremisesFormProps) {
-  const [options, setOptions] = useState(roomList);
+export function PremisesForm({ projectId, initialData }: PremisesFormProps) {
+  const router = useRouter();
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Initialize options with custom rooms from initialData
+  const [options, setOptions] = useState(() => {
+    if (!initialData?.rooms) return roomList;
+
+    const customOptions = initialData.rooms
+      .filter((r) => !roomList.some((opt) => opt.value === r.name))
+      .map((r) => ({ value: r.name, label: r.name }));
+
+    return customOptions.length > 0
+      ? [...roomList, ...customOptions]
+      : roomList;
+  });
 
   const form = useForm<PremisesFormValues>({
     resolver: zodResolver(PremisesSchema),
-    defaultValues: {
-      rooms:
-        initialData && initialData.rooms && initialData.rooms.length > 0
-          ? initialData.rooms
-          : [{ name: "", order: 1, type: undefined }],
+    defaultValues: initialData || {
+      rooms: [{ name: "", order: 1, type: undefined }],
     },
   });
 
@@ -177,56 +182,6 @@ export function PremisesForm({
     }
   };
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-
-  useEffect(() => {
-    const loadRooms = async () => {
-      if (!projectId) return;
-
-      setIsLoading(true);
-      try {
-        const rooms = await roomsService.getRoomsByProjectId(projectId);
-        if (rooms.length > 0) {
-          // 1. Подготавливаем данные для формы
-          const formRooms = rooms.map((r) => ({
-            name: r.name,
-            order: r.order,
-            type: r.type,
-            area: r.area,
-          }));
-
-          // 2. Находим кастомные комнаты (которых нет в стандартном списке)
-          const customOptions = rooms
-            .filter((r) => !roomList.some((opt) => opt.value === r.name))
-            .map((r) => ({ value: r.name, label: r.name }));
-
-          // 3. Обновляем список опций, добавляя кастомные
-          if (customOptions.length > 0) {
-            setOptions((prev) => {
-              const existingValues = new Set(prev.map((p) => p.value));
-              const newUniqueOptions = customOptions.filter(
-                (o) => !existingValues.has(o.value)
-              );
-              return [...prev, ...newUniqueOptions];
-            });
-          }
-
-          form.reset({
-            rooms: formRooms,
-          });
-        }
-      } catch (error) {
-        console.error("Failed to load rooms:", error);
-        toast.error("Не удалось загрузить помещения");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadRooms();
-  }, [projectId, form]);
-
   const handleSubmit = async (data: PremisesFormValues) => {
     if (!projectId) {
       toast.error("ID проекта не найден");
@@ -237,7 +192,7 @@ export function PremisesForm({
     try {
       await roomsService.bulkUpsertRooms(projectId, data.rooms);
       toast.success("Помещения успешно сохранены");
-      if (onSave) await onSave(data);
+      router.refresh();
     } catch (error) {
       console.error("Failed to save rooms:", error);
       toast.error("Ошибка при сохранении помещений");
@@ -250,46 +205,40 @@ export function PremisesForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <SubBlockCard title="Помещения">
-          {/* <div className="space-y-4"> */}
-          {isLoading ? (
-            <div className="text-center py-4">Загрузка...</div>
-          ) : (
-            roomFields.map((room, index) => {
-              return (
-                <article
-                  key={index}
-                  className="flex items-center gap-2 pb-4 border-b last:border-b-0"
-                >
-                  <span className="px-2">{room.order}</span>
-                  <FormField
-                    control={form.control}
-                    name={`rooms.${index}.name`}
-                    render={({ field }) => (
-                      <FormItem className="relative w-full">
-                        <FormControl>
-                          <StyledSelect
-                            options={options}
-                            value={
-                              options.find(
-                                (option) => option.value === field.value
-                              ) || null
-                            }
-                            onChange={(val) => handleRoomNameChange(val, index)}
-                            placeholder="Помещение..."
-                            onCreateOption={(inputValue) =>
-                              handleCreateOption(inputValue, index)
-                            }
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <DeleteIconButton onClick={() => remove(index)} />
-                </article>
-              );
-            })
-          )}
-          {/* </div> */}
+          {roomFields.map((room, index) => {
+            return (
+              <article
+                key={index}
+                className="flex items-center gap-2 pb-4 border-b last:border-b-0"
+              >
+                <span className="px-2">{room.order}</span>
+                <FormField
+                  control={form.control}
+                  name={`rooms.${index}.name`}
+                  render={({ field }) => (
+                    <FormItem className="relative w-full">
+                      <FormControl>
+                        <StyledSelect
+                          options={options}
+                          value={
+                            options.find(
+                              (option) => option.value === field.value
+                            ) || null
+                          }
+                          onChange={(val) => handleRoomNameChange(val, index)}
+                          placeholder="Помещение..."
+                          onCreateOption={(inputValue) =>
+                            handleCreateOption(inputValue, index)
+                          }
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <DeleteIconButton onClick={() => remove(index)} />
+              </article>
+            );
+          })}
         </SubBlockCard>
         <div className="pt-4">
           <AddItemButton
@@ -303,11 +252,8 @@ export function PremisesForm({
           >
             Добавить помещение
           </AddItemButton>
-
-          {/* Скрытая кнопка для сабмита формы из родительского компонента */}
-          <button type="submit" className="hidden" />
         </div>
-        <FormSubmitButton isLoading={isLoading} />
+        <FormSubmitButton isLoading={isSaving} />
       </form>
     </Form>
   );
