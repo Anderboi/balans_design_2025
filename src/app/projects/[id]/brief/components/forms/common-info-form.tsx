@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -21,7 +20,7 @@ import { toast } from "sonner";
 import { projectsService } from "@/lib/services/projects";
 import { contactsService } from "@/lib/services/contacts";
 import { useRouter } from "next/navigation";
-import FormSubmitButton from './form-submit-button';
+import FormSubmitButton from "./form-submit-button";
 
 interface CommonInfoFormProps {
   projectId: string;
@@ -39,7 +38,6 @@ export function CommonInfoForm({
   onNext,
 }: CommonInfoFormProps) {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<CommonFormValues>({
     resolver: zodResolver(CommonDataSchema),
@@ -53,8 +51,6 @@ export function CommonInfoForm({
     }
 
     try {
-      setIsLoading(true);
-      console.log(data);
       // 1. Update Project Data
       await projectsService.updateProject(projectId, {
         address: data.address,
@@ -105,8 +101,6 @@ export function CommonInfoForm({
     } catch (error) {
       console.error(error);
       toast.error("Ошибка при сохранении данных");
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -122,7 +116,11 @@ export function CommonInfoForm({
                 <FormItem>
                   <FormLabel>Имя</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Иван" disabled={isLoading} />
+                    <Input
+                      {...field}
+                      placeholder="Иван"
+                      disabled={form.formState.isSubmitting}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -138,7 +136,7 @@ export function CommonInfoForm({
                     <Input
                       {...field}
                       placeholder="Иванов"
-                      disabled={isLoading}
+                      disabled={form.formState.isSubmitting}
                     />
                   </FormControl>
                   <FormMessage />
@@ -158,7 +156,7 @@ export function CommonInfoForm({
                     <Input
                       {...field}
                       placeholder="example@mail.com"
-                      disabled={isLoading}
+                      disabled={form.formState.isSubmitting}
                     />
                   </FormControl>
                   <FormMessage />
@@ -175,7 +173,7 @@ export function CommonInfoForm({
                     <Input
                       {...field}
                       placeholder="+7 (999) 000-00-00"
-                      disabled={isLoading}
+                      disabled={form.formState.isSubmitting}
                     />
                   </FormControl>
                   <FormMessage />
@@ -195,7 +193,7 @@ export function CommonInfoForm({
                   <Input
                     {...field}
                     placeholder="г. Москва, ул. Примерная, д. 1, кв. 1"
-                    disabled={isLoading}
+                    disabled={form.formState.isSubmitting}
                   />
                 </FormControl>
                 <FormMessage />
@@ -218,7 +216,7 @@ export function CommonInfoForm({
                       onChange={(e) =>
                         field.onChange(parseFloat(e.target.value))
                       }
-                      disabled={isLoading}
+                      disabled={form.formState.isSubmitting}
                     />
                   </FormControl>
                   <FormMessage />
@@ -235,7 +233,7 @@ export function CommonInfoForm({
                     <Input
                       {...field}
                       placeholder="№ 123-45"
-                      disabled={isLoading}
+                      disabled={form.formState.isSubmitting}
                     />
                   </FormControl>
                   <FormMessage />
@@ -249,7 +247,11 @@ export function CommonInfoForm({
                 <FormItem>
                   <FormLabel>Дата начала</FormLabel>
                   <FormControl>
-                    <Input {...field} type="date" disabled={isLoading} />
+                    <Input
+                      {...field}
+                      type="date"
+                      disabled={form.formState.isSubmitting}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -262,7 +264,11 @@ export function CommonInfoForm({
                 <FormItem>
                   <FormLabel>Дата завершения</FormLabel>
                   <FormControl>
-                    <Input {...field} type="date" disabled={isLoading} />
+                    <Input
+                      {...field}
+                      type="date"
+                      disabled={form.formState.isSubmitting}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -270,7 +276,7 @@ export function CommonInfoForm({
             />
           </div>
         </SubBlockCard>
-        <FormSubmitButton isLoading={isLoading} />
+        <FormSubmitButton isLoading={form.formState.isSubmitting} />
       </form>
     </Form>
   );

@@ -1,11 +1,13 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import DeleteIconButton from "@/components/ui/delete-button";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -16,13 +18,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import SubBlockCard from "@/components/ui/sub-block-card";
 import {
   ConstructionFormValues,
   ConstructionInfoSchema,
 } from "@/lib/schemas/brief-schema";
 import { Room } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronDown, ChevronUp, Trash2Icon } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import {
   FieldArrayWithId,
@@ -33,11 +36,14 @@ import {
   Path,
 } from "react-hook-form";
 import { toast } from "sonner";
+import FormSubmitButton from "./form-submit-button";
+import AddItemButton from "@/components/ui/add-item-button";
+import { projectsService } from "@/lib/services/projects";
+import { useRouter } from "next/navigation";
 
 interface ConstructionFormProps {
-  projectId?: string;
+  projectId: string;
   initialData?: Partial<ConstructionFormValues>;
-  onSave?: (data: ConstructionFormValues) => Promise<void>;
   roomList: Room[];
 }
 
@@ -65,18 +71,18 @@ const wallTypes = [
 ];
 
 export function ConstructionForm({
-  // projectId,
-  // initialData,
-  // onSave,
+  projectId,
+  initialData,
   roomList,
 }: ConstructionFormProps) {
+  const router = useRouter();
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set(["walls", "ceiling", "floor"])
   );
 
   const form = useForm<ConstructionFormValues>({
     resolver: zodResolver(ConstructionInfoSchema),
-    defaultValues: {
+    defaultValues: initialData || {
       floor: [{ type: "", material: "", rooms: [] }],
       ceiling: [{ type: "", material: "", rooms: [] }],
       walls: [{ type: "", material: "", rooms: [] }],
@@ -88,12 +94,19 @@ export function ConstructionForm({
     sectionIndex: number
   ) => {
     const currentSections = form.getValues(category);
+    if (!currentSections) return;
     const section = currentSections[sectionIndex];
 
     if (!section) return;
 
     const allRoomIds = roomList.map((room: Room) => room.id);
-    section.rooms = allRoomIds;
+    const currentRooms = section.rooms || [];
+
+    // Check if all rooms are already selected
+    const allSelected = allRoomIds.every((id) => currentRooms.includes(id));
+
+    // Toggle: if all selected, deselect all; otherwise select all
+    section.rooms = allSelected ? [] : allRoomIds;
 
     form.setValue(category, currentSections, { shouldValidate: true });
   };
@@ -143,6 +156,7 @@ export function ConstructionForm({
     roomId: string
   ) => {
     const currentSections = form.getValues(category);
+    if (!currentSections) return;
     const section = currentSections[sectionIndex];
 
     if (!section) return;
@@ -166,7 +180,12 @@ export function ConstructionForm({
     );
   };
 
-  function onSubmit(data: ConstructionFormValues) {
+  async function onSubmit(data: ConstructionFormValues) {
+    if (!projectId) {
+      toast.error("Project ID missing");
+      return;
+    }
+
     try {
       // Filter out empty sections
       const cleanedData = {
@@ -184,8 +203,12 @@ export function ConstructionForm({
           ) || [],
       };
 
-      localStorage.setItem("constructionData", JSON.stringify(cleanedData));
+      await projectsService.updateProjectBrief(projectId, {
+        construction: cleanedData,
+      });
+
       toast.success("Информация по монтажу сохранена");
+      router.refresh();
     } catch (error) {
       console.error(error);
       toast.error("Ошибка при попытке сохранения данных");
@@ -212,8 +235,7 @@ export function ConstructionForm({
     const itemCount = getCategoryItemCount(category);
 
     return (
-      <section className="p-4 space-y-4 rounded-xl shadow-xl bg-background dark:border dark:shadow-none">
-        <h3 className="font-bold text-lg">Информация по монтажу</h3>
+      <SubBlockCard>
         <div className="space-y-4">
           {/* Category Header */}
           <button
@@ -248,7 +270,7 @@ export function ConstructionForm({
                         <FormItem className="w-full">
                           <Select
                             onValueChange={field.onChange}
-                            value={field.value || ""}
+                            value={(field.value as string) || ""}
                           >
                             <FormControl>
                               <SelectTrigger className="w-full">
@@ -268,18 +290,11 @@ export function ConstructionForm({
                       )}
                     />
                     {fields.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="default"
-                        onClick={() => remove(index)}
-                      >
-                        <Trash2Icon size={20} />
-                      </Button>
+                      <DeleteIconButton onClick={() => remove(index)} />
                     )}
                   </div>
 
-                  {sections[index]?.type === "Другое" && (
+                  {sections?.[index]?.type === "Другое" && (
                     <FormField
                       control={form.control}
                       name={
@@ -291,7 +306,7 @@ export function ConstructionForm({
                             <Input
                               placeholder="Укажите материал"
                               {...field}
-                              value={field.value || ""}
+                              value={(field.value as string) || ""}
                             />
                           </FormControl>
                           <FormMessage />
@@ -302,31 +317,32 @@ export function ConstructionForm({
 
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Помещения:</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
+                      <FormLabel>Помещения</FormLabel>
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
                         onClick={() => selectAllRooms(category, index)}
-                        className="text-xs h-7"
+                        className="text-xs h-7 cursor-pointer font-bold text-zinc-400 hover:text-zinc-900 transition-colors uppercase tracking-wide"
                       >
-                        Все комнаты
+                        Выбрать все
                       </Button>
+                      {/* <span className="text-sm font-medium">Помещения</span> */}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
                       {roomList.map((room) => {
                         const isSelected =
-                          sections[index]?.rooms?.includes(room.id) || false;
+                          sections?.[index]?.rooms?.includes(room.id) || false;
                         return (
                           <Button
                             key={room.id}
                             type="button"
                             size="sm"
                             onClick={() => toggleRoom(category, index, room.id)}
-                            className={`${
+                            className={`cursor-pointer ${
                               isSelected
-                                ? "bg-black text-white hover:bg-black/80"
-                                : "bg-neutral-100 text-black border border-gray-300"
+                                ? "bg-zinc-900 text-white border-zinc-900 shadow-sm hover:bg-zinc-900/80"
+                                : "//bg-neutral-100 border bg-white text-zinc-500 hover:bg-zinc-100 border-zinc-200 hover:border-zinc-300 hover:text-zinc-700"
                             }`}
                           >
                             <span className="opacity-60">{room.order}.</span>
@@ -344,19 +360,15 @@ export function ConstructionForm({
                   )}
                 </div>
               ))}
-
-              <Button
-                type="button"
-                variant="default"
+              <AddItemButton
                 onClick={() => append({ type: "", material: "", rooms: [] })}
-                className="w-full"
               >
                 Добавить материал
-              </Button>
+              </AddItemButton>
             </div>
           )}
         </div>
-      </section>
+      </SubBlockCard>
     );
   };
 
@@ -368,6 +380,7 @@ export function ConstructionForm({
       >
         <div className="space-y-4">
           <h2 className="text-2xl font-bold">Информация по монтажу</h2>
+
           {renderMaterialSection(
             "walls",
             "Стены",
@@ -376,6 +389,7 @@ export function ConstructionForm({
             appendWalls,
             removeWalls
           )}
+
           {renderMaterialSection(
             "ceiling",
             "Потолок",
@@ -393,11 +407,7 @@ export function ConstructionForm({
             removeFloor
           )}
         </div>
-        <div className="pt-4">
-          <Button type="submit" variant="default" className="w-full">
-            Сохранить
-          </Button>
-        </div>
+        <FormSubmitButton isLoading={form.formState.isSubmitting} />
       </form>
     </Form>
   );

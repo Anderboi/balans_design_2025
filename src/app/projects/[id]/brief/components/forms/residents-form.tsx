@@ -31,7 +31,6 @@ import {
   InputGroupTextarea,
 } from "@/components/ui/input-group";
 import FormSubmitButton from "./form-submit-button";
-import { useState } from "react";
 import { projectsService } from "@/lib/services/projects";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -44,7 +43,6 @@ interface ResidentsFormProps {
 
 export function ResidentsForm({ projectId, initialData }: ResidentsFormProps) {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<ResidentsFormValues>({
     resolver: zodResolver(ResidentsSchema),
@@ -83,8 +81,6 @@ export function ResidentsForm({ projectId, initialData }: ResidentsFormProps) {
     }
 
     try {
-      setIsLoading(true);
-
       await projectsService.updateProjectBrief(projectId, {
         residents: data,
       });
@@ -94,8 +90,6 @@ export function ResidentsForm({ projectId, initialData }: ResidentsFormProps) {
     } catch (error) {
       console.error(error);
       toast.error("Ошибка при сохранении данных");
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -285,7 +279,7 @@ export function ResidentsForm({ projectId, initialData }: ResidentsFormProps) {
             )}
           />
         </SubBlockCard>
-        <FormSubmitButton isLoading={isLoading} />
+        <FormSubmitButton isLoading={form.formState.isSubmitting} />
       </form>
     </Form>
   );
