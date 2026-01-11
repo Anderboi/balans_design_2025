@@ -11,6 +11,8 @@ import {
   Home,
 } from "lucide-react";
 import { BriefSectionCard } from "./brief-section-card";
+import { useParams } from "next/navigation";
+import Link from "next/link";
 
 const sections = [
   {
@@ -62,9 +64,6 @@ const sections = [
     icon: Home,
   },
 ];
-
-import { useParams } from "next/navigation";
-import Link from "next/link";
 
 export function BriefSectionsGrid() {
   const params = useParams();

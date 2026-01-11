@@ -1,17 +1,12 @@
 import { projectsService } from "@/lib/services/projects";
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { SlashIcon } from "lucide-react";
-import PageHeader from "@/components/ui/page-header";
 import PageContainer from "@/components/ui/page-container";
+import { BriefBreadcrumb } from "../components/brief-breadcrumb";
+import MainBlockCard from "@/components/ui/main-block-card";
+import { EngineeringForm } from "../components/forms/engineering-form";
+import { createClient } from "@/lib/supabase/server";
+import { roomsService } from "@/lib/services/rooms";
+import { EngineeringSystemsType } from "@/lib/schemas/brief-schema";
 
 export default async function BriefEngineeringPage({
   params,
@@ -19,48 +14,33 @@ export default async function BriefEngineeringPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const project = await projectsService.getProjectById(id);
+  const supabase = await createClient();
+  const [project, rooms, brief] = await Promise.all([
+    projectsService.getProjectById(id, supabase),
+    roomsService.getRoomsByProjectId(id, supabase),
+    projectsService.getProjectBrief(id, supabase),
+  ]);
 
   if (!project) {
     notFound();
   }
 
+  const initialData =
+    (brief?.engineering as Partial<EngineeringSystemsType>) || undefined;
+
   return (
     <PageContainer>
       <div className="space-y-8">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href={`/projects/${id}`}>{project.name}</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator>
-              <SlashIcon className="w-3 h-3" />
-            </BreadcrumbSeparator>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href={`/projects/${id}/brief`}>Техническое задание</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator>
-              <SlashIcon className="w-3 h-3" />
-            </BreadcrumbSeparator>
-            <BreadcrumbItem>
-              <BreadcrumbPage className="font-bold text-black">
-                Инженерные системы
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-
-        <PageHeader title="Инженерные системы" />
+        <BriefBreadcrumb
+          projectId={id}
+          projectName={project.name}
+          currentPage="Инженерные системы"
+        />
       </div>
 
-      <div className="mt-8">
-        {/* Form content will go here */}
-        <p className="text-gray-500">Form content placeholder</p>
-      </div>
+      <MainBlockCard className="space-y-6 p-8 md:p-12">
+        <EngineeringForm projectId={id} initialData={initialData} />
+      </MainBlockCard>
     </PageContainer>
   );
 }

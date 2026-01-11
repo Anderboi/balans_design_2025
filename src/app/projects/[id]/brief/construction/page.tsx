@@ -1,6 +1,5 @@
 import { projectsService } from "@/lib/services/projects";
 import { notFound } from "next/navigation";
-import PageHeader from "@/components/ui/page-header";
 import PageContainer from "@/components/ui/page-container";
 import { BriefBreadcrumb } from "../components/brief-breadcrumb";
 import MainBlockCard from "@/components/ui/main-block-card";
