@@ -29,7 +29,7 @@ export function BriefBreadcrumb({
           </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator>
-          <SlashIcon className="w-3 h-3" />
+          <SlashIcon className="size-3" />
         </BreadcrumbSeparator>
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
@@ -39,7 +39,7 @@ export function BriefBreadcrumb({
           </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator>
-          <SlashIcon className="w-3 h-3" />
+          <SlashIcon className="size-3" />
         </BreadcrumbSeparator>
         <BreadcrumbItem>
           <BreadcrumbPage className="font-bold text-black">

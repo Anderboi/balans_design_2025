@@ -9,12 +9,14 @@ const SubBlockCard = ({
 }) => {
   return (
     <article className="bg-zinc-50 p-6 rounded-3xl border border-zinc-100/50 space-y-6">
-    
-      <h3 className="text-lg font-bold text-zinc-900 flex items-center gap-2">
+      <h3
+        className={`text-lg font-bold text-zinc-900 flex items-center gap-2 ${
+          !title && "hidden"
+        }`}
+      >
         {title}
       </h3>
       {children}
-    
     </article>
   );
 };

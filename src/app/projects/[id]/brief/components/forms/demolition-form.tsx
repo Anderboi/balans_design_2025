@@ -1,6 +1,8 @@
 "use client";
 
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   DemolitionSchema,
@@ -13,29 +15,27 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import SubBlockCard from "@/components/ui/sub-block-card";
+import { DoorOpen, Grid2x2, Hammer, Sofa } from "lucide-react";
+import FormSubmitButton from "./form-submit-button";
+import { projectsService } from "@/lib/services/projects";
+import { toast } from "sonner";
 
 interface DemolitionFormProps {
-  projectId?: string;
+  projectId: string;
   initialData?: Partial<DemolitionType>;
-  onSave?: (data: DemolitionType) => Promise<void>;
 }
 
 export function DemolitionForm({
   projectId,
   initialData,
-  onSave,
 }: DemolitionFormProps) {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+
   const form = useForm<DemolitionType>({
     resolver: zodResolver(DemolitionSchema),
     defaultValues: initialData || {
@@ -52,31 +52,49 @@ export function DemolitionForm({
   });
 
   const handleSubmit = async (data: DemolitionType) => {
-    if (onSave) {
-      await onSave(data);
+    if (!projectId) {
+      toast.error("Project ID missing");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+
+      await projectsService.updateProjectBrief(projectId, {
+        demolition: data,
+      });
+
+      toast.success("Данные по демонтажу сохранены");
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      toast.error("Ошибка при сохранении данных");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        {/* Изменение планировки */}
-        <article className="rounded-lg border p-4 space-y-6">
+        <SubBlockCard>
           <FormField
             control={form.control}
             name="planChange"
             render={({ field }) => (
-              <FormItem className="flex items-center justify-between ">
-                <div className="space-y-0.5">
-                  <FormLabel className="text-base">
-                    Изменение планировки
-                  </FormLabel>
-                  <FormDescription>
-                    Требуется ли перепланировка помещения?
-                  </FormDescription>
+              <FormItem className="flex items-center justify-between">
+                <div className="gap-2 flex items-center">
+                  <Hammer className="size-5 text-zinc-600" />
+                  <label
+                    className="text-zinc-800 font-semibold "
+                    htmlFor="planChange"
+                  >
+                    Демонтаж перегородок
+                  </label>
                 </div>
                 <FormControl>
                   <Switch
+                    id="planChange"
                     checked={field.value}
                     onCheckedChange={field.onChange}
                   />
@@ -91,10 +109,10 @@ export function DemolitionForm({
               name="planChangeInfo"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Описание изменений планировки</FormLabel>
+                  <FormLabel>Описание работ</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Опишите планируемые изменения..."
+                      placeholder="Подробная информация по необходимому демонтажу стен и перегородок..."
                       {...field}
                     />
                   </FormControl>
@@ -103,25 +121,26 @@ export function DemolitionForm({
               )}
             />
           )}
-        </article>
+        </SubBlockCard>
 
-        {/* Входная дверь */}
-        <article className="rounded-lg border p-4 space-y-6">
+        <SubBlockCard>
           <FormField
             control={form.control}
             name="entranceDoorChange"
             render={({ field }) => (
               <FormItem className="flex items-center justify-between ">
-                <div className="space-y-0.5">
-                  <FormLabel className="text-base">
+                <div className="gap-2 flex items-center">
+                  <DoorOpen className="size-5 text-zinc-600" />
+                  <label
+                    className="text-zinc-800 font-semibold"
+                    htmlFor="entranceDoorChange"
+                  >
                     Замена входной двери
-                  </FormLabel>
-                  <FormDescription>
-                    Планируется ли замена входной двери?
-                  </FormDescription>
+                  </label>
                 </div>
                 <FormControl>
                   <Switch
+                    id="entranceDoorChange"
                     checked={field.value}
                     onCheckedChange={field.onChange}
                   />
@@ -136,44 +155,40 @@ export function DemolitionForm({
               name="enteranceDoorType"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Тип входной двери</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Выберите тип двери" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="metal">Металлическая</SelectItem>
-                      <SelectItem value="wood">Деревянная</SelectItem>
-                      <SelectItem value="mdf">МДФ</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <FormLabel>Тип двери</FormLabel>
+
+                  <FormControl>
+                    <Textarea
+                      placeholder="Предпочтительный тип входной двери, требования к безопасности и дизайну..."
+                      {...field}
+                    ></Textarea>
+                  </FormControl>
+
                   <FormMessage />
                 </FormItem>
               )}
             />
           )}
-        </article>
+        </SubBlockCard>
 
-        {/* Окна */}
-        <article className="rounded-lg border p-4 space-y-6">
+        <SubBlockCard>
           <FormField
             control={form.control}
             name="windowsChange"
             render={({ field }) => (
               <FormItem className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <FormLabel className="text-base">Замена окон</FormLabel>
-                  <FormDescription>
-                    Планируется ли замена оконных блоков?
-                  </FormDescription>
+                <div className="gap-2 flex items-center">
+                  <Grid2x2 className="size-5 text-zinc-600" />
+                  <label
+                    className="text-zinc-800 font-semibold"
+                    htmlFor="windowsChange"
+                  >
+                    Замена окон
+                  </label>
                 </div>
                 <FormControl>
                   <Switch
+                    id="windowsChange"
                     checked={field.value}
                     onCheckedChange={field.onChange}
                   />
@@ -188,44 +203,40 @@ export function DemolitionForm({
               name="windowsType"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Тип окон</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Выберите тип окон" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="pvc">ПВХ</SelectItem>
-                      <SelectItem value="wood">Деревянные</SelectItem>
-                      <SelectItem value="aluminum">Алюминиевые</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <FormLabel>Тип остекления</FormLabel>
+
+                  <FormControl>
+                    <Textarea
+                      placeholder="Материал профиля (алюминий/дерево/пластик), цвет, количество камер..."
+                      {...field}
+                    ></Textarea>
+                  </FormControl>
+
                   <FormMessage />
                 </FormItem>
               )}
             />
           )}
-        </article>
+        </SubBlockCard>
 
-        {/* Демонтаж мебели */}
-        <article className="rounded-lg border p-4 space-y-6">
+        <SubBlockCard>
           <FormField
             control={form.control}
             name="furnitureDemolition"
             render={({ field }) => (
               <FormItem className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <FormLabel className="text-base">Демонтаж мебели</FormLabel>
-                  <FormDescription>
-                    Требуется ли демонтаж существующей мебели?
-                  </FormDescription>
+                <div className="flex items-center gap-2">
+                  <Sofa className="size-5 text-zinc-600" />
+                  <label
+                    className="text-zinc-800 font-semibold"
+                    htmlFor="furnitureDemolition"
+                  >
+                    Демонтаж мебели
+                  </label>
                 </div>
                 <FormControl>
                   <Switch
+                    id="furnitureDemolition"
                     checked={field.value}
                     onCheckedChange={field.onChange}
                   />
@@ -240,10 +251,10 @@ export function DemolitionForm({
               name="furnitureToDemolish"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Мебель для демонтажа</FormLabel>
+                  <FormLabel>Что демонтируем?</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Перечислите мебель, подлежащую демонтажу..."
+                      placeholder="Шкафы, антресоли, кухни, которые необходимо разобрать..."
                       {...field}
                     />
                   </FormControl>
@@ -252,7 +263,8 @@ export function DemolitionForm({
               )}
             />
           )}
-        </article>
+        </SubBlockCard>
+        <FormSubmitButton isLoading={isLoading} />
       </form>
     </Form>
   );
