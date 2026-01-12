@@ -7,7 +7,7 @@ import {
 } from "@/lib/schemas/brief-schema";
 import { Room } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import {
   FieldArrayWithId,
   UseFieldArrayAppend,
@@ -23,7 +23,6 @@ import { projectsService } from "@/lib/services/projects";
 import { useRouter } from "next/navigation";
 import { CONSTRUCTION_TYPES } from "../../constants/construction-options";
 import { MaterialSection } from "./construction-material-section";
-import { useDebounce } from "@/hooks/useDebounce";
 
 interface ConstructionFormProps {
   projectId: string;

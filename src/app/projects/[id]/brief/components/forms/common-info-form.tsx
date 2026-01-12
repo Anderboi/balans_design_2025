@@ -75,8 +75,7 @@ export function CommonInfoForm({
           phone: data.phone,
         });
       } else if (clientId) {
-        // If client_id exists but contact fetch failed, we might need a way to find contact by client_id?
-        // This logic remains similar to before but using props
+       
       }
 
       // 3. Mark stage item as completed

@@ -15,6 +15,7 @@ export default async function BriefEngineeringPage({
 }) {
   const { id } = await params;
   const supabase = await createClient();
+  
   const [project, rooms, brief] = await Promise.all([
     projectsService.getProjectById(id, supabase),
     roomsService.getRoomsByProjectId(id, supabase),
@@ -39,7 +40,11 @@ export default async function BriefEngineeringPage({
       </div>
 
       <MainBlockCard className="space-y-6 p-8 md:p-12">
-        <EngineeringForm projectId={id} initialData={initialData} />
+        <EngineeringForm
+          roomList={rooms}
+          projectId={id}
+          initialData={initialData}
+        />
       </MainBlockCard>
     </PageContainer>
   );

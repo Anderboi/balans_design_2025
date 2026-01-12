@@ -1,14 +1,20 @@
 "use client";
 
+import { useForm, FieldErrors } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import {
   EngineeringSystemsSchema,
   EngineeringSystemsType,
 } from "@/lib/schemas/brief-schema";
 import { Room } from "@/types";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Form } from "@/components/ui/form";
+import FormSubmitButton from "./form-submit-button";
+import { projectsService } from "@/lib/services/projects";
+import { EngineeringSection } from "./engineering-section";
+import { ENGINEERING_OPTIONS } from "../../constants/engineering-options";
 
 interface EngineeringFormProps {
   projectId: string;
@@ -17,221 +23,171 @@ interface EngineeringFormProps {
 }
 
 export function EngineeringForm({
+  projectId,
   initialData,
-  roomList,
+  roomList = [],
 }: EngineeringFormProps) {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(
+    new Set([
+      "heatingSystem",
+      "warmFloorRooms",
+      "conditioningSystem",
+      "purificationSystem",
+      "electricSystem",
+    ])
+  );
 
   const form = useForm<EngineeringSystemsType>({
     resolver: zodResolver(EngineeringSystemsSchema),
     defaultValues: initialData || {
-      heatingSystem: [{ id: Date.now(), system: "", rooms: [] }],
-      warmFloorRooms: [{ id: Date.now() + 1, system: "", rooms: [] }],
-      conditioningSystem: [{ id: Date.now() + 2, system: "", rooms: [] }],
-      purificationSystem: [{ id: Date.now() + 3, system: "", rooms: [] }],
-      electricSystem: [{ id: Date.now() + 4, system: "", rooms: [] }],
+      heatingSystem: [{ system: "", rooms: [] }],
+      warmFloorRooms: [{ system: "", rooms: [] }],
+      conditioningSystem: [{ system: "", rooms: [] }],
+      purificationSystem: [{ system: "", rooms: [] }],
+      electricSystem: [{ system: "", rooms: [] }],
     },
   });
 
-  const [expandedSections, setExpandedSections] = useState({
-    heatingSystem: true,
-    warmFloorRooms: false,
-    conditioningSystem: false,
-    purificationSystem: false,
-    electricSystem: false,
-  });
-
-  type SystemKey = keyof typeof expandedSections;
-
-  const toggleSection = (section: SystemKey) => {
-    setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
-  };
-
-  const addItem = (category: SystemKey) => {
-    setData((prev: any) => ({
-      ...prev,
-      [category]: [
-        ...prev[category],
-        { id: Date.now(), system: "", rooms: [] },
-      ],
-    }));
-  };
-
-  const removeItem = (category: SystemKey, idx: number) => {
-    setData((prev: any) => ({
-      ...prev,
-      [category]: prev[category].filter((_: any, i: number) => i !== idx),
-    }));
-  };
-
-  const updateItem = (category: SystemKey, idx: number, value: any) => {
-    setData((prev: any) => {
-      const updated = [...prev[category]];
-      updated[idx] = { ...updated[idx], system: value };
-      return { ...prev, [category]: updated };
+  const toggleSection = (section: string) => {
+    setExpandedSections((prev) => {
+      const newSet = new Set(prev);
+      newSet.has(section) ? newSet.delete(section) : newSet.add(section);
+      return newSet;
     });
   };
 
-  const toggleRoom = (category: SystemKey, idx: number, roomId: string) => {
-    setData((prev: any) => {
-      const updated = [...prev[category]];
-      const currentRooms = updated[idx].rooms || [];
-      if (currentRooms.includes(roomId)) {
-        updated[idx].rooms = currentRooms.filter((r: string) => r !== roomId);
-      } else {
-        updated[idx].rooms = [...currentRooms, roomId];
+  const getCategoryItemCount = (
+    category: keyof EngineeringSystemsType
+  ): number => {
+    const sections = form.watch(category);
+    return sections?.filter((s) => s?.system).length || 0;
+  };
+
+  async function onSubmit(data: EngineeringSystemsType) {
+    startTransition(async () => {
+      try {
+        // Фильтруем пустые секции
+        const cleanedData: Partial<EngineeringSystemsType> = {
+          heatingSystem:
+            data.heatingSystem?.filter((item) => item?.system) || [],
+          warmFloorRooms:
+            data.warmFloorRooms?.filter((item) => item?.system) || [],
+          conditioningSystem:
+            data.conditioningSystem?.filter((item) => item?.system) || [],
+          purificationSystem:
+            data.purificationSystem?.filter((item) => item?.system) || [],
+          electricSystem:
+            data.electricSystem?.filter((item) => item?.system) || [],
+        };
+
+        await projectsService.updateProjectBrief(projectId, {
+          engineering: cleanedData,
+        });
+
+        toast.success("Инженерные системы сохранены");
+        router.push(`/projects/${projectId}/brief`);
+        router.refresh();
+      } catch (error) {
+        console.error("Error saving engineering data:", error);
+        toast.error("Ошибка при попытке сохранения данных");
       }
-      return { ...prev, [category]: updated };
     });
-  };
+  }
 
-  const selectAllRooms = (category: SystemKey, idx: number) => {
-    setData((prev: any) => {
-      const updated = [...prev[category]];
-      updated[idx].rooms = rooms.map((r) => r.id);
-      return { ...prev, [category]: updated };
-    });
-  };
+  function onError(errors: FieldErrors<EngineeringSystemsType>) {
+    console.error("Form validation errors:", errors);
 
-  const renderSection = (
-    category: SystemKey,
-    title: string,
-    typeOptions: string[],
-    icon: any
-  ) => {
-    const items = data[category];
-    const isExpanded = expandedSections[category];
-    const Icon = icon;
+    // Находим первое сообщение об ошибке
+    const firstErrorMessage = Object.values(errors).find(
+      (error) => error?.message
+    )?.message;
 
-    return (
-      <FormBlock
-        title={title}
-        rightElement={
-          <button
-            onClick={() => toggleSection(category)}
-            className="p-1 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-600 transition-colors"
-          >
-            {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-          </button>
-        }
-      >
-        {isExpanded && (
-          <div className="space-y-6">
-            {items.map((item: any, idx: number) => (
-              <div
-                key={item.id}
-                className="pb-6 border-b border-zinc-100 last:border-0 last:pb-0 animate-fade-in"
-              >
-                <div className="flex gap-4 items-start mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-500 shrink-0 mt-1">
-                    <Icon size={18} />
-                  </div>
-                  <div className="flex-1">
-                    <Select
-                      value={item.system}
-                      onChange={(val) => updateItem(category, idx, val)}
-                      options={typeOptions.map((t) => ({ value: t, label: t }))}
-                      placeholder="Выберите систему"
-                    />
-                  </div>
-                  {items.length > 1 && (
-                    <button
-                      onClick={() => removeItem(category, idx)}
-                      className="p-3.5 bg-red-50 text-red-500 hover:bg-red-100 rounded-xl transition-colors mt-1"
-                    >
-                      <Trash2 size={20} />
-                    </button>
-                  )}
-                </div>
-
-                <div className="space-y-2 pl-14">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">
-                      Помещения
-                    </span>
-                    <button
-                      onClick={() => selectAllRooms(category, idx)}
-                      className="text-[10px] font-bold text-zinc-400 hover:text-zinc-900 transition-colors uppercase tracking-wide"
-                    >
-                      Выбрать все
-                    </button>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {rooms.map((room) => {
-                      const isSelected = item.rooms?.includes(room.id);
-                      return (
-                        <button
-                          key={room.id}
-                          onClick={() => toggleRoom(category, idx, room.id)}
-                          className={`
-                            px-3 py-1.5 rounded-lg text-xs font-medium transition-all border
-                            ${
-                              isSelected
-                                ? "bg-zinc-900 text-white border-zinc-900 shadow-sm"
-                                : "bg-white text-zinc-500 border-zinc-200 hover:border-zinc-300 hover:text-zinc-700"
-                            }
-                          `}
-                        >
-                          {room.name || `Помещение ${room.id}`}
-                        </button>
-                      );
-                    })}
-                    {rooms.length === 0 && (
-                      <span className="text-xs text-zinc-400 italic">
-                        Сначала добавьте помещения в разделе "Состав помещений"
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            <button
-              onClick={() => addItem(category)}
-              className="w-full py-3 rounded-xl border border-dashed border-zinc-200 text-zinc-400 font-medium text-sm hover:bg-zinc-50 hover:text-zinc-600 hover:border-zinc-300 transition-all flex items-center justify-center gap-2"
-            >
-              <Plus size={16} />
-              Добавить систему
-            </button>
-          </div>
-        )}
-      </FormBlock>
-    );
-  };
+    if (firstErrorMessage) {
+      toast.error(firstErrorMessage);
+    } else {
+      toast.error("Проверьте правильность заполнения формы");
+    }
+  }
 
   return (
-    <BriefBlockMain title="Инженерные системы" onBack={onBack}>
-      {renderSection(
-        "heatingSystem",
-        "Отопление",
-        ENGINEERING_OPTIONS.heating,
-        Thermometer
-      )}
-      {renderSection(
-        "warmFloorRooms",
-        "Тёплый пол",
-        ENGINEERING_OPTIONS.warmFloor,
-        Thermometer
-      )}
-      {renderSection(
-        "conditioningSystem",
-        "Кондиционирование и вентиляция",
-        ENGINEERING_OPTIONS.conditioning,
-        Fan
-      )}
-      {renderSection(
-        "purificationSystem",
-        "Очистка воды",
-        ENGINEERING_OPTIONS.purification,
-        Droplets
-      )}
-      {renderSection(
-        "electricSystem",
-        "Электрика и слаботочка",
-        ENGINEERING_OPTIONS.electric,
-        Zap
-      )}
-      <BottomButtonBlock onSave={() => onSave(data)} />
-    </BriefBlockMain>
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit, onError)}
+        className="flex h-full w-full flex-col"
+      >
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold">Инженерные системы</h2>
+          {/* Показываем предупреждение если нет комнат */}
+          {roomList.length === 0 && (
+            <div className="px-3 py-1.5 bg-amber-100 text-amber-800 text-xs font-medium rounded-lg">
+              Добавьте помещения
+            </div>
+          )}
+          <EngineeringSection
+            category="heatingSystem"
+            title="Отопление"
+            icon="thermometer"
+            options={ENGINEERING_OPTIONS.heating}
+            control={form.control}
+            roomList={roomList}
+            expanded={expandedSections.has("heatingSystem")}
+            onToggleExpanded={() => toggleSection("heatingSystem")}
+            itemCount={getCategoryItemCount("heatingSystem")}
+          />
+
+          <EngineeringSection
+            category="warmFloorRooms"
+            title="Тёплый пол"
+            icon="thermometer"
+            options={ENGINEERING_OPTIONS.warmFloor}
+            control={form.control}
+            roomList={roomList}
+            expanded={expandedSections.has("warmFloorRooms")}
+            onToggleExpanded={() => toggleSection("warmFloorRooms")}
+            itemCount={getCategoryItemCount("warmFloorRooms")}
+          />
+
+          <EngineeringSection
+            category="conditioningSystem"
+            title="Кондиционирование и вентиляция"
+            icon="fan"
+            options={ENGINEERING_OPTIONS.conditioning}
+            control={form.control}
+            roomList={roomList}
+            expanded={expandedSections.has("conditioningSystem")}
+            onToggleExpanded={() => toggleSection("conditioningSystem")}
+            itemCount={getCategoryItemCount("conditioningSystem")}
+          />
+
+          <EngineeringSection
+            category="purificationSystem"
+            title="Очистка воды"
+            icon="droplets"
+            options={ENGINEERING_OPTIONS.purification}
+            control={form.control}
+            roomList={roomList}
+            expanded={expandedSections.has("purificationSystem")}
+            onToggleExpanded={() => toggleSection("purificationSystem")}
+            itemCount={getCategoryItemCount("purificationSystem")}
+          />
+
+          <EngineeringSection
+            category="electricSystem"
+            title="Электрика и слаботочка"
+            icon="zap"
+            options={ENGINEERING_OPTIONS.electric}
+            control={form.control}
+            roomList={roomList}
+            expanded={expandedSections.has("electricSystem")}
+            onToggleExpanded={() => toggleSection("electricSystem")}
+            itemCount={getCategoryItemCount("electricSystem")}
+          />
+        </div>
+
+        <FormSubmitButton isLoading={isPending} />
+      </form>
+    </Form>
   );
 }

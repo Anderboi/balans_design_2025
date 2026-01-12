@@ -263,52 +263,19 @@ export const DemolitionSchema = z.object({
 export type DemolitionType = z.infer<typeof DemolitionSchema>;
 
 // ? Инженерные Системы
+
+const EngineeringSystemItemSchema = z.object({
+  id: z.union([z.number(), z.string()]).optional(),
+  system: z.string().optional(),
+  rooms: z.array(z.string()).optional(),
+});
+
 export const EngineeringSystemsSchema = z.object({
-  heatingSystem: z
-    .array(
-      z.object({
-        id: z.coerce.number(),
-        system: z.string(),
-        rooms: z.array(z.string()),
-      })
-    )
-    .optional(),
-  warmFloorRooms: z
-    .array(
-      z.object({
-        id: z.coerce.number(),
-        system: z.string(),
-        rooms: z.array(z.string()),
-      })
-    )
-    .optional(),
-  conditioningSystem: z
-    .array(
-      z.object({
-        id: z.coerce.number(),
-        system: z.string(),
-        rooms: z.array(z.string()),
-      })
-    )
-    .optional(),
-  purificationSystem: z
-    .array(
-      z.object({
-        id: z.coerce.number(),
-        system: z.string(),
-        rooms: z.array(z.string()),
-      })
-    )
-    .optional(),
-  electricSystem: z
-    .array(
-      z.object({
-        id: z.coerce.number(),
-        system: z.string(),
-        rooms: z.array(z.string()),
-      })
-    )
-    .optional(),
+  heatingSystem: z.array(EngineeringSystemItemSchema).optional(),
+  warmFloorRooms: z.array(EngineeringSystemItemSchema).optional(),
+  conditioningSystem: z.array(EngineeringSystemItemSchema).optional(),
+  purificationSystem: z.array(EngineeringSystemItemSchema).optional(),
+  electricSystem: z.array(EngineeringSystemItemSchema).optional(),
 });
 export type EngineeringSystemsType = z.infer<typeof EngineeringSystemsSchema>;
 

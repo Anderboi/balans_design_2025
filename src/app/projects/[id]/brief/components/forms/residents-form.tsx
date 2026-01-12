@@ -102,7 +102,7 @@ export function ResidentsForm({ projectId, initialData }: ResidentsFormProps) {
             {adultsFields.map((field, index) => (
               <div
                 key={field.id}
-                className="flex gap-4 items-end animate-fade-in"
+                className="flex gap-4 items-start animate-fade-in"
               >
                 <FormField
                   control={form.control}

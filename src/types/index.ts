@@ -41,7 +41,7 @@ export interface Room {
   id: string;
   name: string;
   area: number;
-  order: number;
+  order?: number;
   type?: "living" | "wet" | "utility" | "technical";
   furniture_equipment: string[];
   preferred_finishes?: string;
