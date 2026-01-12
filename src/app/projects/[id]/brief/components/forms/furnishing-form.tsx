@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { toast } from "sonner";
-import { ChevronDown, ChevronUp, X, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronUp, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -116,11 +116,11 @@ export function FurnishingForm({
     }));
   };
 
-  const updateEquipment = (
+  const updateEquipment = <K extends keyof Equipment>(
     roomId: string,
     equipmentId: string,
-    field: keyof Equipment,
-    value: any
+    field: K,
+    value: Equipment[K]
   ) => {
     setRoomsEquipment((prev) => ({
       ...prev,

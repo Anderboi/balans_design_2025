@@ -235,34 +235,16 @@ export const ResidentsSchema = z.object({
 export type ResidentsFormValues = z.infer<typeof ResidentsSchema>;
 
 // ? Монтаж
+const MaterialItemSchema = z.object({
+  type: z.string(),
+  material: z.string(),
+  rooms: z.array(z.string()),
+});
+
 export const ConstructionInfoSchema = z.object({
-  floor: z
-    .array(
-      z.object({
-        type: z.string(),
-        material: z.string(),
-        rooms: z.array(z.string()),
-      })
-    )
-    .optional(),
-  ceiling: z
-    .array(
-      z.object({
-        type: z.string(),
-        material: z.string(),
-        rooms: z.array(z.string()),
-      })
-    )
-    .optional(),
-  walls: z
-    .array(
-      z.object({
-        type: z.string(),
-        material: z.string(),
-        rooms: z.array(z.string()),
-      })
-    )
-    .optional(),
+  floor: z.array(MaterialItemSchema).optional(),
+  ceiling: z.array(MaterialItemSchema).optional(),
+  walls: z.array(MaterialItemSchema).optional(),
 });
 export type ConstructionFormValues = z.infer<typeof ConstructionInfoSchema>;
 
