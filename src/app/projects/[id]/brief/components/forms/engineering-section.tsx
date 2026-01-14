@@ -223,7 +223,7 @@ export function EngineeringSection({
                               "px-3 py-1.5 rounded-lg text-xs font-medium transition-all border",
                               isSelected
                                 ? "bg-zinc-900 text-white border-zinc-900 shadow-sm"
-                                : "bg-white text-zinc-500 border-zinc-200 hover:border-zinc-300 hover:text-zinc-700"
+                                : "bg-background text-zinc-500 border-zinc-200 hover:border-zinc-300 hover:text-zinc-700"
                             )}
                           >
                             {room.order && (

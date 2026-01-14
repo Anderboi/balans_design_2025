@@ -26,7 +26,6 @@ import { EditMaterialDrawer } from "../edit-material-drawer";
 import { AssignMaterialDialog } from "../assign-material-dialog";
 import { materialsService } from "@/lib/services/materials";
 import { Material } from "@/types";
-import Image from "next/image";
 
 interface MaterialCardProps {
   material: Material;
@@ -66,20 +65,22 @@ export function MaterialCard({
   if (viewMode === "list") {
     return (
       <>
-        <div className="w-full border rounded-md overflow-clip">
+        <div className="w-full border rounded-xl overflow-clip bg-background p-2">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4 flex-1">
-              {material.image_url ? (
-                <img
-                  src={material.image_url}
-                  alt={material.name}
-                  className="size-24 object-cover"
-                />
-              ) : (
-                <div className="size-24 bg-muted flex items-center justify-center">
-                  <Package className="size-8 text-muted-foreground" />
-                </div>
-              )}
+            <div className="flex items-center space-x-4 flex-1 ">
+              <div className="rounded-md overflow-clip">
+                {material.image_url ? (
+                  <img
+                    src={material.image_url}
+                    alt={material.name}
+                    className="size-24 object-cover "
+                  />
+                ) : (
+                  <div className="size-24 bg-muted flex items-center justify-center">
+                    <Package className="size-8 text-muted-foreground" />
+                  </div>
+                )}
+              </div>
 
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-xl truncate ">
@@ -166,8 +167,8 @@ export function MaterialCard({
             <AlertDialogHeader>
               <AlertDialogTitle>Удалить материал?</AlertDialogTitle>
               <AlertDialogDescription>
-                Вы уверены, что хотите удалить материал "{material.name}"? Это
-                действие нельзя отменить.
+                Вы уверены, что хотите удалить материал &rdquo;{material.name}
+                &ldquo;? Это действие нельзя отменить.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

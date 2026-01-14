@@ -1,7 +1,15 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Plus, Search, Grid, List } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Grid,
+  List,
+  LayoutGrid,
+  Funnel,
+  SlidersHorizontal,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,6 +27,7 @@ import { getMaterials } from "../actions";
 import { toast } from "sonner";
 import PageContainer from "@/components/ui/page-container";
 import PageHeader from "@/components/ui/page-header";
+import { cn } from "@/lib/utils";
 
 interface MaterialsPageClientProps {
   initialMaterials: Material[];
@@ -96,10 +105,11 @@ export function MaterialsPageClient({
   return (
     <PageContainer>
       {/* Заголовок */}
-      <div className="flex items-start justify-between mb-6">
+
+      <div className="flex items-end justify-between mb-6">
         <PageHeader
-          title="Библиотека материалов"
-          description="Управление материалами для ваших проектов"
+          title="Библиотека"
+          description="Каталог материалов, оборудования и мебели."
         />
         <Button onClick={() => setIsAddDialogOpen(true)}>
           <Plus className="size-4 mr-2" />
@@ -108,18 +118,55 @@ export function MaterialsPageClient({
       </div>
 
       {/* Фильтры и поиск */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6 w-full">
-        <div className="relative flex-1">
+      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-background p-2 rounded-2xl border border-zinc-200 shadow-sm">
+        <div className="relative w-full md:w-96 group">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground size-4" />
           <Input
             placeholder="Поиск материалов..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
+            className="pl-10 w-full"
           />
         </div>
+        <div className="flex items-center gap-2 sm:w-full md:w-auto overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-1 bg-zinc-100 p-1 rounded-lg mr-2">
+            <Button
+              variant={viewMode === "grid" ? "default" : "ghost"}
+              size="icon"
+              onClick={() => setViewMode("grid")}
+              className={cn(
+                viewMode === "grid" && "bg-background ",
+                "cursor-pointer hover:bg-zinc-50 hover:text-zinc-800 text-zinc-600"
+              )}
+            >
+              <LayoutGrid className="size-4" />
+            </Button>
+            <Button
+              variant={viewMode === "list" ? "default" : "ghost"}
+              size="icon"
+              onClick={() => setViewMode("list")}
+              className={cn(
+                viewMode === "list" && "bg-background",
+                "cursor-pointer hover:bg-zinc-50 hover:text-zinc-800 text-zinc-600"
+              )}
+            >
+              <List className="size-4" />
+            </Button>
+          </div>
+          <div className="h-6 w-px bg-zinc-200 mx-2 hidden md:block" />
 
-        <Select
+          <Button variant={"ghost"} className="cursor-pointer ">
+            <Funnel className="size-4" />
+            Фильтры
+          </Button>
+
+          <Button variant={"ghost"} className="cursor-pointer ">
+            <SlidersHorizontal className="size-4" />
+            Сортировка
+          </Button>
+        </div>
+
+        {/* <Select
           value={selectedType}
           onValueChange={(value) =>
             setSelectedType(value as MaterialType | "all")
@@ -150,24 +197,7 @@ export function MaterialsPageClient({
               </SelectItem>
             ))}
           </SelectContent>
-        </Select>
-
-        <div className="flex gap-2">
-          <Button
-            variant={viewMode === "grid" ? "default" : "outline"}
-            size="icon"
-            onClick={() => setViewMode("grid")}
-          >
-            <Grid className="w-4 h-4" />
-          </Button>
-          <Button
-            variant={viewMode === "list" ? "default" : "outline"}
-            size="icon"
-            onClick={() => setViewMode("list")}
-          >
-            <List className="w-4 h-4" />
-          </Button>
-        </div>
+        </Select> */}
       </div>
 
       {/* Статистика */}
@@ -184,7 +214,7 @@ export function MaterialsPageClient({
           </div>
           {materials.length === 0 && (
             <Button onClick={() => setIsAddDialogOpen(true)}>
-              <Plus className="w-4 h-4 mr-2" />
+              <Plus className="size-4 mr-2" />
               Добавить первый материал
             </Button>
           )}
@@ -194,7 +224,7 @@ export function MaterialsPageClient({
           className={
             viewMode === "grid"
               ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-              : "space-y-4"
+              : "space-y-2"
           }
         >
           {filteredMaterials.map((material) => (
