@@ -189,7 +189,7 @@ export function MaterialCard({
   return (
     <>
       <Card className="w-full h-full flex flex-col">
-        <CardContent className="/p-4 flex-1">
+        <CardContent className="flex-1">
           {material.image_url ? (
             <img
               src={material.image_url}
@@ -203,6 +203,9 @@ export function MaterialCard({
           )}
 
           <div className="space-y-2">
+            <p className="text-sm text-muted-foreground/80">
+              {material.description ? material.description : "-"}
+            </p>
             <h3 className="font-semibold text-xl line-clamp-2">
               {material.name}
             </h3>
@@ -258,19 +261,19 @@ export function MaterialCard({
               onClick={handleAssignMaterial}
               className="flex-1"
             >
-              <Plus className="w-4 h-4 mr-1" />
+              <Plus className="size-4 mr-1" />
               Присвоить
             </Button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm">
-                  <MoreHorizontal className="w-4 h-4" />
+                  <MoreHorizontal className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => setShowEditDrawer(true)}>
-                  <Edit className="w-4 h-4 mr-2" />
+                  <Edit className="size-4 mr-2" />
                   Редактировать
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -278,7 +281,7 @@ export function MaterialCard({
                   onClick={() => setShowDeleteDialog(true)}
                   className="text-destructive"
                 >
-                  <Trash2 className="w-4 h-4 mr-2" />
+                  <Trash2 className="size-4 mr-2" />
                   Удалить
                 </DropdownMenuItem>
               </DropdownMenuContent>
