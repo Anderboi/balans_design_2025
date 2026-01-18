@@ -2,7 +2,9 @@
 
 import { projectsService } from "@/lib/services/projects";
 import { materialsService } from "@/lib/services/materials";
-import { Material } from "@/types";
+import { contactsService } from "@/lib/services/contacts";
+import { companiesService } from "@/lib/services/companies";
+import { Material, ContactType, CompanyType } from "@/types";
 import { revalidatePath } from "next/cache";
 
 export async function getProjects() {
@@ -29,6 +31,24 @@ export async function getCategories() {
   } catch (error) {
     console.error("Ошибка при загрузке категорий:", error);
     // Возвращаем пустой массив вместо выброса ошибки
+    return [];
+  }
+}
+
+export async function getSuppliers() {
+  try {
+    return await contactsService.getContactsByType(ContactType.SUPPLIER);
+  } catch (error) {
+    console.error("Ошибка при загрузке поставщиков:", error);
+    return [];
+  }
+}
+
+export async function getSupplierCompanies() {
+  try {
+    return await companiesService.getCompaniesByType(CompanyType.SUPPLIER);
+  } catch (error) {
+    console.error("Ошибка при загрузке компаний:", error);
     return [];
   }
 }

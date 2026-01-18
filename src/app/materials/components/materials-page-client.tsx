@@ -22,7 +22,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { MaterialCard } from "@/app/materials/components/card/material-card";
 import { AddMaterialDialog } from "@/app/materials/components/add-material-dialog";
-import { Material, MaterialType, Project } from "@/types";
+import { Material, MaterialType, Project, Contact, Company } from "@/types";
 import { getMaterials } from "../actions";
 import { toast } from "sonner";
 import PageContainer from "@/components/ui/page-container";
@@ -33,16 +33,22 @@ interface MaterialsPageClientProps {
   initialMaterials: Material[];
   initialCategories: string[];
   initialProjects: Project[];
+  initialSuppliers: Contact[];
+  initialSupplierCompanies: Company[];
 }
 
 export function MaterialsPageClient({
   initialMaterials,
   initialCategories,
   initialProjects,
+  initialSuppliers,
+  initialSupplierCompanies,
 }: MaterialsPageClientProps) {
   const [materials, setMaterials] = useState<Material[]>(initialMaterials);
   const [categories] = useState<string[]>(initialCategories);
   const [projects] = useState<Project[]>(initialProjects);
+  const [suppliers] = useState<Contact[]>(initialSuppliers);
+  const [supplierCompanies] = useState<Company[]>(initialSupplierCompanies);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<MaterialType | "all">("all");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -248,6 +254,8 @@ export function MaterialsPageClient({
         open={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
         onMaterialAdded={handleMaterialAdded}
+        initialSuppliers={suppliers}
+        initialSupplierCompanies={supplierCompanies}
       />
     </PageContainer>
   );

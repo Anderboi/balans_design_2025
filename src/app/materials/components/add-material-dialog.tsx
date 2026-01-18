@@ -14,7 +14,7 @@ import {
   AddMaterialSchema,
   AddMaterialFormValues,
 } from "@/lib/schemas/materials";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { ChevronDownIcon, Plus, X } from "lucide-react";
 import {
   Dialog,
@@ -37,8 +37,8 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { materialsService } from "@/lib/services/materials";
-import { MaterialType, Contact, ContactType } from "@/types";
-import { CompanyType } from "@/types";
+import { useMemo } from "react";
+import { MaterialType, Contact, ContactType, Company } from "@/types";
 
 import {
   DropdownMenu,
@@ -49,31 +49,39 @@ import {
 import { FileDropzone } from "../../../components/ui/dropzone";
 import { storageService } from "@/lib/services/storage";
 import { contactsService } from "@/lib/services/contacts";
-import { companiesService } from "@/lib/services/companies";
 import AddContactDialog from "@/app/contacts/components/add-contact-dialog";
 
 interface AddMaterialDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onMaterialAdded: () => void;
+  initialSuppliers: Contact[];
+  initialSupplierCompanies: Company[];
 }
 
 export function AddMaterialDialog({
   open,
   onOpenChange,
   onMaterialAdded,
+  initialSuppliers,
+  initialSupplierCompanies,
 }: AddMaterialDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [tagInput, setTagInput] = useState("");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [suppliers, setSuppliers] = useState<Contact[]>([]);
+  const [suppliers, setSuppliers] = useState<Contact[]>(initialSuppliers);
   const [isAddSupplierOpen, setIsAddSupplierOpen] = useState(false);
   const [supplierQuery, setSupplierQuery] = useState("");
-  const [supplierCompaniesMap, setSupplierCompaniesMap] = useState<
-    Record<string, string>
-  >({});
+
+  const supplierCompaniesMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    initialSupplierCompanies.forEach((c) => {
+      if (c && c.id) map[c.id] = c.name;
+    });
+    return map;
+  }, [initialSupplierCompanies]);
 
   const form = useForm<AddMaterialFormValues>({
     resolver: zodResolver(AddMaterialSchema) as Resolver<AddMaterialFormValues>,
@@ -159,40 +167,6 @@ export function AddMaterialDialog({
     }
     onOpenChange(newOpen);
   };
-
-  // Загрузка списка поставщиков
-  useEffect(() => {
-    const loadSuppliers = async () => {
-      try {
-        const data = await contactsService.getContactsByType(
-          ContactType.SUPPLIER
-        );
-        setSuppliers(data);
-      } catch (error) {
-        console.error("Ошибка при загрузке поставщиков:", error);
-      }
-    };
-    loadSuppliers();
-  }, []);
-
-  // Загрузка компаний
-  useEffect(() => {
-    const loadCompanies = async () => {
-      try {
-        const companies = await companiesService.getCompaniesByType(
-          CompanyType.SUPPLIER
-        );
-        const map: Record<string, string> = {};
-        (companies as any[]).forEach((c) => {
-          if (c && c.id) map[c.id] = c.name;
-        });
-        setSupplierCompaniesMap(map);
-      } catch (error) {
-        console.error("Ошибка при загрузке компаний:", error);
-      }
-    };
-    loadCompanies();
-  }, []);
 
   const handleCreateSupplier = async (
     contact: Omit<Contact, "id" | "created_at" | "updated_at">
