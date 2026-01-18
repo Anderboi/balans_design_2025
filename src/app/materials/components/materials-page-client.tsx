@@ -4,7 +4,6 @@ import { useState, useMemo } from "react";
 import {
   Plus,
   Search,
-  Grid,
   List,
   LayoutGrid,
   Funnel,
@@ -12,13 +11,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { MaterialCard } from "@/app/materials/components/card/material-card";
 import { AddMaterialDialog } from "@/app/materials/components/add-material-dialog";
@@ -31,7 +23,6 @@ import { cn } from "@/lib/utils";
 
 interface MaterialsPageClientProps {
   initialMaterials: Material[];
-  initialCategories: string[];
   initialProjects: Project[];
   initialSuppliers: Contact[];
   initialSupplierCompanies: Company[];
@@ -39,19 +30,16 @@ interface MaterialsPageClientProps {
 
 export function MaterialsPageClient({
   initialMaterials,
-  initialCategories,
   initialProjects,
   initialSuppliers,
   initialSupplierCompanies,
 }: MaterialsPageClientProps) {
   const [materials, setMaterials] = useState<Material[]>(initialMaterials);
-  const [categories] = useState<string[]>(initialCategories);
   const [projects] = useState<Project[]>(initialProjects);
   const [suppliers] = useState<Contact[]>(initialSuppliers);
   const [supplierCompanies] = useState<Company[]>(initialSupplierCompanies);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedType, setSelectedType] = useState<MaterialType | "all">("all");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedType] = useState<MaterialType | "all">("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
@@ -77,7 +65,7 @@ export function MaterialsPageClient({
             .includes(searchQuery.toLowerCase()) ||
           material.manufacturer
             ?.toLowerCase()
-            .includes(searchQuery.toLowerCase())
+            .includes(searchQuery.toLowerCase()),
       );
     }
 
@@ -108,8 +96,6 @@ export function MaterialsPageClient({
   const handleMaterialDeleted = () => {
     loadMaterials();
   };
-
-  const materialTypes = Object.values(MaterialType);
 
   return (
     <PageContainer>
@@ -145,7 +131,7 @@ export function MaterialsPageClient({
               onClick={() => setViewMode("grid")}
               className={cn(
                 viewMode === "grid" && "bg-background ",
-                "cursor-pointer hover:bg-zinc-50 hover:text-zinc-800 text-zinc-600"
+                "cursor-pointer hover:bg-zinc-50 hover:text-zinc-800 text-zinc-600",
               )}
             >
               <LayoutGrid className="size-4" />
@@ -156,7 +142,7 @@ export function MaterialsPageClient({
               onClick={() => setViewMode("list")}
               className={cn(
                 viewMode === "list" && "bg-background",
-                "cursor-pointer hover:bg-zinc-50 hover:text-zinc-800 text-zinc-600"
+                "cursor-pointer hover:bg-zinc-50 hover:text-zinc-800 text-zinc-600",
               )}
             >
               <List className="size-4" />
@@ -244,6 +230,8 @@ export function MaterialsPageClient({
               viewMode={viewMode}
               onMaterialUpdated={handleMaterialUpdated}
               onMaterialDeleted={handleMaterialDeleted}
+              initialSuppliers={suppliers}
+              initialSupplierCompanies={supplierCompanies}
             />
           ))}
         </div>

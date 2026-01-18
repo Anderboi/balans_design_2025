@@ -53,7 +53,7 @@ export function ImageUploadSection({
                 <img
                   src={imagePreview}
                   alt="Предпросмотр"
-                  className="w-full h-48 object-cover rounded-md"
+                  className="w-full h-48 object-contain rounded-md"
                 />
                 <Button
                   type="button"

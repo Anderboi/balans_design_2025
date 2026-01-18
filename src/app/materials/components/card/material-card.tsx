@@ -25,7 +25,7 @@ import {
 import { EditMaterialDrawer } from "../edit-material-drawer";
 import { AssignMaterialDialog } from "../assign-material-dialog";
 import { materialsService } from "@/lib/services/materials";
-import { Material, Project } from "@/types";
+import { Material, Project, Contact, Company } from "@/types";
 
 interface MaterialCardProps {
   material: Material;
@@ -33,6 +33,8 @@ interface MaterialCardProps {
   viewMode: "grid" | "list";
   onMaterialUpdated: () => void;
   onMaterialDeleted: () => void;
+  initialSuppliers: Contact[];
+  initialSupplierCompanies: Company[];
 }
 
 export function MaterialCard({
@@ -41,6 +43,8 @@ export function MaterialCard({
   viewMode,
   onMaterialUpdated,
   onMaterialDeleted,
+  initialSuppliers,
+  initialSupplierCompanies,
 }: MaterialCardProps) {
   const [showEditDrawer, setShowEditDrawer] = useState(false);
   const [showAssignDialog, setShowAssignDialog] = useState(false);
@@ -69,7 +73,7 @@ export function MaterialCard({
       <>
         <div className="w-full border rounded-xl overflow-clip bg-background p-2">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4 flex-1 ">
+            <div className="flex items-end space-x-4 flex-1 ">
               <div className="rounded-md overflow-clip">
                 {material.image_url ? (
                   <img
@@ -85,32 +89,35 @@ export function MaterialCard({
               </div>
 
               <div className="flex-1 min-w-0">
+                <p className="text-sm text-muted-foreground">
+                  {material.description?.toUpperCase()}
+                </p>
                 <h3 className="font-semibold text-xl truncate ">
                   {material.name}
                 </h3>
                 <p className="text-xs text-muted-foreground/80 capitalize">
                   {material.manufacturer?.toUpperCase()}
                 </p>
-                <div className="flex items-center space-x-2 mt-1">
+                <div className="flex items-center space-x-2 mt-2">
                   <Badge variant="secondary">{material.type}</Badge>
 
-                  {!material.in_stock && (
+                  {/* {!material.in_stock && (
                     <Badge variant="destructive">Нет в наличии</Badge>
-                  )}
+                  )} */}
                 </div>
               </div>
 
-              <div className="text-right">
+              <div className="text-right flex flex-col justify-between h-full">
                 {material.price && (
                   <p className="font-semibold text-lg">
                     {material.price} ₽{material.unit ? `/${material.unit}` : ""}
                   </p>
                 )}
-                {material.article && (
+                {/* {material.article && (
                   <p className="text-sm text-muted-foreground">
                     Арт: {material.article}
                   </p>
-                )}
+                )} */}
               </div>
             </div>
 
@@ -155,6 +162,8 @@ export function MaterialCard({
           open={showEditDrawer}
           onOpenChange={setShowEditDrawer}
           onMaterialUpdated={onMaterialUpdated}
+          initialSuppliers={initialSuppliers}
+          initialSupplierCompanies={initialSupplierCompanies}
         />
 
         <AssignMaterialDialog
@@ -295,6 +304,8 @@ export function MaterialCard({
         open={showEditDrawer}
         onOpenChange={setShowEditDrawer}
         onMaterialUpdated={onMaterialUpdated}
+        initialSuppliers={initialSuppliers}
+        initialSupplierCompanies={initialSupplierCompanies}
       />
 
       <AssignMaterialDialog
