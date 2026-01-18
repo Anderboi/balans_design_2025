@@ -140,6 +140,7 @@ export function AddMaterialDialog({
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             {/* Обложка материала */}
             <ImageUploadSection
+              control={control}
               imagePreview={imageUpload.imagePreview}
               onImageSelect={imageUpload.handleImageSelect}
               onImageRemove={imageUpload.handleImageRemove}
