@@ -1,5 +1,19 @@
 "use client";
 
+import { useForm, Resolver } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  AddMaterialSchema,
+  AddMaterialFormValues,
+} from "@/lib/schemas/materials";
 import { useEffect, useRef, useState } from "react";
 import { ChevronDownIcon, Plus, X } from "lucide-react";
 import {
@@ -60,48 +74,45 @@ export function AddMaterialDialog({
   const [supplierCompaniesMap, setSupplierCompaniesMap] = useState<
     Record<string, string>
   >({});
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    manufacturer: "",
-    article: "",
-    lead_time: 0,
-    product_url: "",
-    size: "",
-    color: "",
-    finish: "",
-    material: "",
-    type: "" as MaterialType,
-    supplier: "",
-    price: 0,
-    unit: "",
-    image_url: "",
-    in_stock: true,
-    tags: [] as string[],
+
+  const form = useForm<AddMaterialFormValues>({
+    resolver: zodResolver(AddMaterialSchema) as Resolver<AddMaterialFormValues>,
+    defaultValues: {
+      name: "",
+      description: "",
+      manufacturer: "",
+      article: "",
+      lead_time: 0,
+      product_url: "",
+      size: "",
+      color: "",
+      finish: "",
+      material: "",
+      type: undefined,
+      supplier: "",
+      price: 0,
+      unit: "шт",
+      image_url: "",
+      in_stock: true,
+      tags: [],
+    },
   });
 
-  const handleInputChange = (field: string, value: any) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
+  const { watch, setValue, control } = form;
+  const currentTags = watch("tags");
 
   const handleAddTag = () => {
-    if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
-      setFormData((prev) => ({
-        ...prev,
-        tags: [...prev.tags, tagInput.trim()],
-      }));
+    if (tagInput.trim() && !currentTags.includes(tagInput.trim())) {
+      setValue("tags", [...currentTags, tagInput.trim()]);
       setTagInput("");
     }
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      tags: prev.tags.filter((tag) => tag !== tagToRemove),
-    }));
+    setValue(
+      "tags",
+      currentTags.filter((tag) => tag !== tagToRemove)
+    );
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -111,51 +122,42 @@ export function AddMaterialDialog({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!formData.name || !formData.manufacturer) {
-      return;
-    }
-
+  const onSubmit = async (values: AddMaterialFormValues) => {
     try {
       setIsLoading(true);
-      // Если выбрано изображение, загружаем в Storage и подставляем URL
-      if (imageFile) {
-        const publicUrl = await storageService.uploadMaterialImage(imageFile);
-        handleInputChange("image_url", publicUrl);
-      }
-      await materialsService.createMaterial(formData);
-      onMaterialAdded();
 
-      // Сброс формы
-      setFormData({
-        name: "",
-        type: "" as MaterialType,
-        product_url: "",
-        lead_time: 0,
-        finish: "",
-        material: "",
-        manufacturer: "",
-        supplier: "",
-        price: 0,
-        unit: "",
-        description: "",
-        image_url: "",
-        color: "",
-        size: "",
-        article: "",
-        in_stock: true,
-        tags: [],
+      let finalImageUrl = values.image_url;
+      // Если выбрано изображение, загружаем в Storage
+      if (imageFile) {
+        finalImageUrl = await storageService.uploadMaterialImage(imageFile);
+      }
+
+      await materialsService.createMaterial({
+        ...values,
+        image_url: finalImageUrl || "",
       });
-      setTagInput("");
+
+      onMaterialAdded();
+      onOpenChange(false);
+      form.reset();
       setImageFile(null);
       setImagePreview(null);
+      setTagInput("");
     } catch (error) {
       console.error("Ошибка при создании материала:", error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleOpenChangeWrapper = (newOpen: boolean) => {
+    if (!newOpen) {
+      form.reset();
+      setImageFile(null);
+      setImagePreview(null);
+      setTagInput("");
+    }
+    onOpenChange(newOpen);
   };
 
   // Загрузка списка поставщиков
@@ -173,7 +175,7 @@ export function AddMaterialDialog({
     loadSuppliers();
   }, []);
 
-  // Загрузка компаний (для отображения названия рядом с контактом)
+  // Загрузка компаний
   useEffect(() => {
     const loadCompanies = async () => {
       try {
@@ -201,7 +203,7 @@ export function AddMaterialDialog({
         type: ContactType.SUPPLIER,
       });
       setSuppliers((prev) => [created, ...prev]);
-      handleInputChange("supplier", created.name);
+      setValue("supplier", created.name);
       setIsAddSupplierOpen(false);
     } catch (error) {
       console.error("Ошибка при создании поставщика:", error);
@@ -218,21 +220,9 @@ export function AddMaterialDialog({
 
   const materialTypes = Object.values(MaterialType);
   const commonUnits = ["шт", "м.п.", "м²", "м³", "кг", "л", "упак", "комплект"];
-  const commonCategories = [
-    "Напольные покрытия",
-    "Настенные покрытия",
-    "Потолочные материалы",
-    "Сантехника",
-    "Электрика",
-    "Мебель",
-    "Аксессуары",
-    "Краски и лаки",
-    "Клеи и герметики",
-    "Инструменты",
-  ];
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChangeWrapper}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Добавить новый материал</DialogTitle>
@@ -241,357 +231,428 @@ export function AddMaterialDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-10">
-          {/* Обложка материала (изображение) */}
-          <div className="space-y-3">
-            <Label>Обложка (изображение)</Label>
-            {imagePreview ? (
-              <div className="relative">
-                <img
-                  src={imagePreview}
-                  alt="Предпросмотр"
-                  className="w-full h-48 object-cover rounded-md"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            {/* Обложка материала */}
+            <div className="space-y-3">
+              <Label>Обложка (изображение)</Label>
+              {imagePreview ? (
+                <div className="relative">
+                  <img
+                    src={imagePreview}
+                    alt="Предпросмотр"
+                    className="w-full h-48 object-cover rounded-md"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-2"
+                    onClick={() => {
+                      setImageFile(null);
+                      setImagePreview(null);
+                    }}
+                  >
+                    Удалить изображение
+                  </Button>
+                </div>
+              ) : (
+                <FileDropzone
+                  fileInputRef={fileInputRef}
+                  handleBoxClick={() => fileInputRef.current?.click()}
+                  handleDragOver={(e) => {
+                    e.preventDefault();
+                  }}
+                  handleDrop={(e) => {
+                    e.preventDefault();
+                    const files = e.dataTransfer.files;
+                    if (!files || files.length === 0) return;
+                    const file = files[0];
+                    if (!file.type.startsWith("image/")) return;
+                    setImageFile(file);
+                    setImagePreview(URL.createObjectURL(file));
+                  }}
+                  handleFileSelect={(files) => {
+                    if (!files || files.length === 0) return;
+                    const file = files[0];
+                    if (!file.type.startsWith("image/")) return;
+                    setImageFile(file);
+                    setImagePreview(URL.createObjectURL(file));
+                  }}
+                />
+              )}
+            </div>
+
+            {/* Основная информация */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Наименование *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Наименование материала" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Категория *</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Выберите категорию" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {materialTypes.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Описание</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Описание материала" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={control}
+                name="manufacturer"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Производитель</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Название производителя" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Поставщик */}
+              <FormField
+                control={control}
+                name="supplier"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Поставщик</FormLabel>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            className="w-full justify-between font-normal"
+                          >
+                            <span>{field.value || "Выберите поставщика"}</span>
+                            <ChevronDownIcon className="h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-[300px]">
+                        <div className="p-2">
+                          <Input
+                            placeholder="Поиск или создание..."
+                            value={supplierQuery}
+                            onChange={(e) => setSupplierQuery(e.target.value)}
+                          />
+                        </div>
+                        {filteredSuppliers.map((s) => {
+                          const companyName = s.company_id
+                            ? supplierCompaniesMap[s.company_id]
+                            : undefined;
+                          const displayName = companyName
+                            ? `${s.name} — ${companyName}`
+                            : s.name;
+                          return (
+                            <DropdownMenuItem
+                              key={s.id}
+                              onSelect={() => field.onChange(displayName)}
+                            >
+                              {displayName}
+                            </DropdownMenuItem>
+                          );
+                        })}
+                        {filteredSuppliers.length === 0 && supplierQuery && (
+                          <DropdownMenuItem
+                            onSelect={() => setIsAddSupplierOpen(true)}
+                          >
+                            <Plus className="mr-2 h-4 w-4" />
+                            Добавить &quot;{supplierQuery}&quot;
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={control}
+                name="article"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Артикул</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Артикул материала" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={control}
+                name="lead_time"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Срок поставки (дней)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min="0"
+                        placeholder="0"
+                        {...field}
+                        onFocus={(e) => e.target.select()}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* В наличии */}
+            <FormField
+              control={control}
+              name="in_stock"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormLabel className="font-normal">В наличии</FormLabel>
+                </FormItem>
+              )}
+            />
+
+            {/* Цена и единица измерения */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Цена (₽)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="0.00"
+                        {...field}
+                        onFocus={(e) => e.target.select()}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={control}
+                name="unit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Единица измерения</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Выберите единицу" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {commonUnits.map((unit) => (
+                          <SelectItem key={unit} value={unit}>
+                            {unit}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Дополнительные характеристики */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={control}
+                name="color"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Цвет</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Цвет материала" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={control}
+                name="material"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Материал</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Материал" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={control}
+                name="finish"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Покрытие</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Покрытие" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={control}
+                name="size"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Размер</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Размер материала" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* URL изображения */}
+            <FormField
+              control={control}
+              name="product_url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>URL продукта</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="https://example.com"
+                      {...field}
+                      value={field.value || ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Теги */}
+            <div className="space-y-2">
+              <Label>Теги</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Добавить тег"
+                  className="flex-1"
                 />
                 <Button
                   type="button"
+                  onClick={handleAddTag}
+                  size="icon"
                   variant="outline"
-                  size="sm"
-                  className="mt-2"
-                  onClick={() => {
-                    setImageFile(null);
-                    setImagePreview(null);
-                    handleInputChange("image_url", "");
-                  }}
                 >
-                  Удалить изображение
+                  <Plus className="w-4 h-4" />
                 </Button>
               </div>
-            ) : (
-              <FileDropzone
-                fileInputRef={fileInputRef}
-                handleBoxClick={() => fileInputRef.current?.click()}
-                handleDragOver={(e) => {
-                  e.preventDefault();
-                }}
-                handleDrop={(e) => {
-                  e.preventDefault();
-                  const files = e.dataTransfer.files;
-                  if (!files || files.length === 0) return;
-                  const file = files[0];
-                  if (!file.type.startsWith("image/")) return;
-                  setImageFile(file);
-                  setImagePreview(URL.createObjectURL(file));
-                }}
-                handleFileSelect={(files) => {
-                  if (!files || files.length === 0) return;
-                  const file = files[0];
-                  if (!file.type.startsWith("image/")) return;
-                  setImageFile(file);
-                  setImagePreview(URL.createObjectURL(file));
-                }}
-              />
-            )}
-          </div>
-          {/* Основная информация */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Наименование *</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => handleInputChange("name", e.target.value)}
-                placeholder="Наименование материала"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="type">Категория *</Label>
-              <Select
-                value={formData.type}
-                onValueChange={(value) => handleInputChange("type", value)}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Выберите категорию" />
-                </SelectTrigger>
-                <SelectContent>
-                  {materialTypes.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Описание</Label>
-              <Input
-                id="description"
-                value={formData.description}
-                onChange={(e) =>
-                  handleInputChange("description", e.target.value)
-                }
-                placeholder="Описание материала"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="manufacturer">Производитель</Label>
-              <Input
-                id="manufacturer"
-                value={formData.manufacturer}
-                onChange={(e) =>
-                  handleInputChange("manufacturer", e.target.value)
-                }
-                placeholder="Название производителя"
-              />
-            </div>
-
-            {/* Поставщик */}
-            <div className="space-y-2">
-              <Label htmlFor="supplier">Поставщик</Label>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-full justify-between">
-                    <span>{formData.supplier || "Выберите поставщика"}</span>
-                    <ChevronDownIcon className="h-4 w-4 opacity-50" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]">
-                  <div className="p-2">
-                    <Input
-                      placeholder="Поиск или создание..."
-                      value={supplierQuery}
-                      onChange={(e) => setSupplierQuery(e.target.value)}
-                    />
-                  </div>
-                  {filteredSuppliers.map((s) => {
-                    const companyName = s.company_id
-                      ? supplierCompaniesMap[s.company_id]
-                      : undefined;
-                    return (
-                      <DropdownMenuItem
-                        key={s.id}
-                        onSelect={() =>
-                          handleInputChange(
-                            "supplier",
-                            companyName ? `${s.name} — ${companyName}` : s.name
-                          )
-                        }
-                      >
-                        {companyName ? `${s.name} — ${companyName}` : s.name}
-                      </DropdownMenuItem>
-                    );
-                  })}
-                  {filteredSuppliers.length === 0 && supplierQuery && (
-                    <DropdownMenuItem
-                      onSelect={() => {
-                        setIsAddSupplierOpen(true);
-                      }}
+              {currentTags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {currentTags.map((tag, index) => (
+                    <Badge
+                      key={index}
+                      variant="secondary"
+                      className="flex items-center gap-1"
                     >
-                      <Plus className="mr-2 h-4 w-4" />
-                      Добавить '{supplierQuery}'
-                    </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="article">Артикул</Label>
-              <Input
-                id="article"
-                value={formData.article}
-                onChange={(e) => handleInputChange("article", e.target.value)}
-                placeholder="Артикул материала"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="lead_time">Срок поставки</Label>
-              <Input
-                id="lead_time"
-                value={formData.lead_time}
-                onFocus={(e) => e.target.select()}
-                onChange={(e) =>
-                  handleInputChange("lead_time", parseInt(e.target.value) || 0)
-                }
-                placeholder="Срок поставки"
-              />
-            </div>
-          </div>
-
-          {/* В наличии */}
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="in_stock"
-              checked={formData.in_stock}
-              onCheckedChange={(checked) =>
-                handleInputChange("in_stock", checked)
-              }
-            />
-            <Label htmlFor="in_stock">В наличии</Label>
-          </div>
-
-          {/* Цена и единица измерения */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="price">Цена (₽)</Label>
-              <Input
-                id="price"
-                type="number"
-                min="0"
-                step="0.01"
-                value={formData.price}
-                onFocus={(e) => e.target.select()}
-                onChange={(e) =>
-                  handleInputChange("price", parseFloat(e.target.value) || 0)
-                }
-                placeholder="0.00"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="unit">Единица измерения</Label>
-              <Select
-                defaultValue={commonUnits[0]}
-                value={formData.unit}
-                onValueChange={(value) => handleInputChange("unit", value)}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Выберите единицу" />
-                </SelectTrigger>
-                <SelectContent>
-                  {commonUnits.map((unit) => (
-                    <SelectItem key={unit} value={unit}>
-                      {unit}
-                    </SelectItem>
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveTag(tag)}
+                        className="ml-1 hover:text-destructive"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </Badge>
                   ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Дополнительные характеристики */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="color">Цвет</Label>
-              <Input
-                id="color"
-                value={formData.color}
-                onChange={(e) => handleInputChange("color", e.target.value)}
-                placeholder="Цвет материала"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="material">Материал</Label>
-              <Input
-                id="material"
-                value={formData.material}
-                onChange={(e) => handleInputChange("material", e.target.value)}
-                placeholder="Материал"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="finish">Покрытие</Label>
-              <Input
-                id="finish"
-                value={formData.finish}
-                onChange={(e) => handleInputChange("finish", e.target.value)}
-                placeholder="Покрытие"
-              />
+                </div>
+              )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="size">Размер</Label>
-              <Input
-                id="size"
-                value={formData.size}
-                onChange={(e) => handleInputChange("size", e.target.value)}
-                placeholder="Размер материала"
-              />
-            </div>
-          </div>
-
-          {/* Описание */}
-          {/* <div className="space-y-2">
-            <Label htmlFor="description">Описание</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => handleInputChange("description", e.target.value)}
-              placeholder="Подробное описание материала"
-              rows={3}
-            />
-          </div> */}
-
-          {/* URL изображения */}
-          <div className="space-y-2">
-            <Label htmlFor="product_url">URL продукта</Label>
-            <Input
-              id="product_url"
-              type="url"
-              value={formData.product_url}
-              onChange={(e) => handleInputChange("product_url", e.target.value)}
-              placeholder="https://example.com"
-            />
-          </div>
-
-          {/* Теги */}
-          <div className="space-y-2">
-            <Label>Теги</Label>
-            <div className="flex gap-2">
-              <Input
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Добавить тег"
-                className="flex-1"
-              />
+            <DialogFooter>
               <Button
                 type="button"
-                onClick={handleAddTag}
-                size="icon"
                 variant="outline"
+                onClick={() => handleOpenChangeWrapper(false)}
               >
-                <Plus className="w-4 h-4" />
+                Отмена
               </Button>
-            </div>
-            {formData.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-2">
-                {formData.tags.map((tag, index) => (
-                  <Badge
-                    key={index}
-                    variant="secondary"
-                    className="flex items-center gap-1"
-                  >
-                    {tag}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveTag(tag)}
-                      className="ml-1 hover:text-destructive"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Отмена
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Создание..." : "Создать материал"}
-            </Button>
-          </DialogFooter>
-        </form>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "Создание..." : "Создать материал"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
         <AddContactDialog
           isOpen={isAddSupplierOpen}
           onOpenChange={setIsAddSupplierOpen}

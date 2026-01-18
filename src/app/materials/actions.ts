@@ -1,8 +1,18 @@
 "use server";
 
+import { projectsService } from "@/lib/services/projects";
 import { materialsService } from "@/lib/services/materials";
 import { Material } from "@/types";
 import { revalidatePath } from "next/cache";
+
+export async function getProjects() {
+  try {
+    return await projectsService.getProjects();
+  } catch (error) {
+    console.error("Ошибка при загрузке проектов:", error);
+    return [];
+  }
+}
 
 export async function getMaterials() {
   try {

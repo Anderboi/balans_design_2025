@@ -25,10 +25,11 @@ import {
 import { EditMaterialDrawer } from "../edit-material-drawer";
 import { AssignMaterialDialog } from "../assign-material-dialog";
 import { materialsService } from "@/lib/services/materials";
-import { Material } from "@/types";
+import { Material, Project } from "@/types";
 
 interface MaterialCardProps {
   material: Material;
+  projects: Project[];
   viewMode: "grid" | "list";
   onMaterialUpdated: () => void;
   onMaterialDeleted: () => void;
@@ -36,6 +37,7 @@ interface MaterialCardProps {
 
 export function MaterialCard({
   material,
+  projects,
   viewMode,
   onMaterialUpdated,
   onMaterialDeleted,
@@ -157,6 +159,7 @@ export function MaterialCard({
 
         <AssignMaterialDialog
           material={material}
+          projects={projects}
           open={showAssignDialog}
           onOpenChange={setShowAssignDialog}
           onMaterialAssigned={onMaterialUpdated}
@@ -213,22 +216,21 @@ export function MaterialCard({
               {/* {!material.in_stock && (
                 <Badge variant="destructive">Нет в наличии</Badge>
               )} */}
-            {material.tags && material.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1">
-                {material.tags.slice(0, 3).map((tag, index) => (
-                  <Badge key={index} variant="outline" className="text-xs">
-                    {tag}
-                  </Badge>
-                ))}
-                {material.tags.length > 3 && (
-                  <Badge variant="outline" className="text-xs">
-                    +{material.tags.length - 3}
-                  </Badge>
-                )}
-              </div>
-            )}
+              {material.tags && material.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {material.tags.slice(0, 3).map((tag, index) => (
+                    <Badge key={index} variant="outline" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                  {material.tags.length > 3 && (
+                    <Badge variant="outline" className="text-xs">
+                      +{material.tags.length - 3}
+                    </Badge>
+                  )}
+                </div>
+              )}
             </div>
-
           </div>
         </CardContent>
 
@@ -294,6 +296,7 @@ export function MaterialCard({
 
       <AssignMaterialDialog
         material={material}
+        projects={projects}
         open={showAssignDialog}
         onOpenChange={setShowAssignDialog}
         onMaterialAssigned={onMaterialUpdated}
@@ -304,8 +307,8 @@ export function MaterialCard({
           <AlertDialogHeader>
             <AlertDialogTitle>Удалить материал?</AlertDialogTitle>
             <AlertDialogDescription>
-              Вы уверены, что хотите удалить материал "{material.name}"? Это
-              действие нельзя отменить.
+              Вы уверены, что хотите удалить материал &quot;{material.name}
+              &quot;? Это действие нельзя отменить.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

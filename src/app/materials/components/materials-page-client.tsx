@@ -22,7 +22,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { MaterialCard } from "@/app/materials/components/card/material-card";
 import { AddMaterialDialog } from "@/app/materials/components/add-material-dialog";
-import { Material, MaterialType } from "@/types";
+import { Material, MaterialType, Project } from "@/types";
 import { getMaterials } from "../actions";
 import { toast } from "sonner";
 import PageContainer from "@/components/ui/page-container";
@@ -32,14 +32,17 @@ import { cn } from "@/lib/utils";
 interface MaterialsPageClientProps {
   initialMaterials: Material[];
   initialCategories: string[];
+  initialProjects: Project[];
 }
 
 export function MaterialsPageClient({
   initialMaterials,
   initialCategories,
+  initialProjects,
 }: MaterialsPageClientProps) {
   const [materials, setMaterials] = useState<Material[]>(initialMaterials);
   const [categories] = useState<string[]>(initialCategories);
+  const [projects] = useState<Project[]>(initialProjects);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<MaterialType | "all">("all");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -231,6 +234,7 @@ export function MaterialsPageClient({
             <MaterialCard
               key={material.id}
               material={material}
+              projects={projects}
               viewMode={viewMode}
               onMaterialUpdated={handleMaterialUpdated}
               onMaterialDeleted={handleMaterialDeleted}

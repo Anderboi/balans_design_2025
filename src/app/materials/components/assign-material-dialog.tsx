@@ -1,6 +1,5 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -8,79 +7,68 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { projectsService } from '@/lib/services/projects';
-import { materialsService } from '@/lib/services/materials';
-import { Material, Project, Room } from '@/types';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { materialsService } from "@/lib/services/materials";
+import { Material, Project } from "@/types";
+import { useForm, Resolver } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  AssignMaterialSchema,
+  AssignMaterialFormValues,
+} from "@/lib/schemas/materials";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 
 interface AssignMaterialDialogProps {
   material: Material;
+  projects: Project[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onMaterialAssigned: () => void;
 }
 
-export function AssignMaterialDialog({ material, open, onOpenChange, onMaterialAssigned }: AssignMaterialDialogProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [projects, setProjects] = useState<Project[]>([]);
-  // const [rooms, setRooms] = useState<Room[]>([]);
-  const [selectedProjectId, setSelectedProjectId] = useState<string>('');
-  // const [selectedRoomId, setSelectedRoomId] = useState<string>('');
-  const [quantity, setQuantity] = useState<number>(1);
-  const [notes, setNotes] = useState<string>('');
+export function AssignMaterialDialog({
+  material,
+  projects,
+  open,
+  onOpenChange,
+  onMaterialAssigned,
+}: AssignMaterialDialogProps) {
+  const form = useForm<AssignMaterialFormValues>({
+    resolver: zodResolver(
+      AssignMaterialSchema
+    ) as Resolver<AssignMaterialFormValues>,
+    defaultValues: {
+      projectId: "",
+      quantity: 1,
+    },
+  });
 
-  useEffect(() => {
-    if (open) {
-      loadProjects();
-    }
-  }, [open]);
-
-  // useEffect(() => {
-  //   if (selectedProjectId) {
-  //     loadRooms(selectedProjectId);
-  //   } else {
-  //     // setRooms([]);
-  //     setSelectedRoomId('');
-  //   }
-  // }, [selectedProjectId]);
-
-  const loadProjects = async () => {
+  const onSubmit = async (values: AssignMaterialFormValues) => {
     try {
-      const projectsData = await projectsService.getProjects();
-      setProjects(projectsData);
-    } catch (error) {
-      console.error('Ошибка при загрузке проектов:', error);
-    }
-  };
-
-  // const loadRooms = async (projectId: string) => {
-  //   try {
-  //     const roomsData = await projectsService.getRooms(projectId);
-  //     // setRooms(roomsData);
-  //   } catch (error) {
-  //     console.error('Ошибка при загрузке помещений:', error);
-  //   }
-  // };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedProjectId || quantity <= 0) {
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      
       await materialsService.addSpecification({
-        project_id: selectedProjectId,
-        // room_id: selectedRoomId,
+        project_id: values.projectId,
         material_id: material.id,
-        quantity,
+        quantity: values.quantity,
         name: material.name,
         description: material.description,
         manufacturer: material.manufacturer,
@@ -96,123 +84,127 @@ export function AssignMaterialDialog({ material, open, onOpenChange, onMaterialA
         price: material.price,
         unit: material.unit,
         image_url: material.image_url,
-        notes: notes.trim() || '',
+        notes: "",
       });
 
       onMaterialAssigned();
       onOpenChange(false);
-      
-      // Сброс формы
-      setSelectedProjectId('');
-      // setSelectedRoomId('');
-      setQuantity(1);
-      setNotes('');
+      form.reset();
     } catch (error) {
-      console.error('Ошибка при присвоении материала:', error);
-    } finally {
-      setIsLoading(false);
+      console.error("Ошибка при присвоении материала:", error);
     }
   };
 
-  const handleCancel = () => {
-    onOpenChange(false);
-    // Сброс формы
-    setSelectedProjectId('');
-    // setSelectedRoomId('');
-    setQuantity(1);
-    setNotes('');
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      form.reset();
+    }
+    onOpenChange(newOpen);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Присвоить материал проекту</DialogTitle>
           <DialogDescription>
-            Выберите проект и помещение для материала "{material.name}"
+            Выберите проект для материала &quot;{material.name}&quot;
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Выбор проекта */}
-          <div className="space-y-2">
-            <Label htmlFor="project">Проект *</Label>
-            <Select value={selectedProjectId} onValueChange={setSelectedProjectId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Выберите проект" />
-              </SelectTrigger>
-              <SelectContent>
-                {projects.map((project) => (
-                  <SelectItem key={project.id} value={project.id}>
-                    {project.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-        
-
-          {/* Количество */}
-          <div className="space-y-2">
-            <Label htmlFor="quantity">Количество *</Label>
-            <div className="flex items-center space-x-2">
-              <Input
-                id="quantity"
-                type="number"
-                min="0.01"
-                step="0.01"
-                value={quantity}
-                onFocus={(e) => e.target.select()}
-                onChange={(e) => setQuantity(parseFloat(e.target.value) || 1)}
-                placeholder="1"
-                className="flex-1"
-                required
-              />
-              {material.unit && (
-                <span className="text-sm text-muted-foreground min-w-fit">
-                  {material.unit}
-                </span>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {/* Выбор проекта */}
+            <FormField
+              control={form.control}
+              name="projectId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Проект *</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    value={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Выберите проект" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {projects.map((project) => (
+                        <SelectItem key={project.id} value={project.id}>
+                          {project.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
               )}
-            </div>
-          </div>
-
-          {/* Примечания */}
-          <div className="space-y-2">
-            <Label htmlFor="notes">Примечания</Label>
-            <Textarea
-              id="notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Дополнительные заметки о применении материала"
-              rows={3}
             />
-          </div>
 
-          {/* Информация о материале */}
-          <div className="bg-muted/50 p-3 rounded-lg">
-            <div className="text-sm space-y-1">
-              <div><strong>Материал:</strong> {material.name}</div>
-              <div><strong>Тип:</strong> {material.type}</div>
-              <div><strong>Производитель:</strong> {material.manufacturer}</div>
-              {material.price && (
-                <div><strong>Цена:</strong> {material.price} ₽{material.unit ? `/${material.unit}` : ''}</div>
+            {/* Количество */}
+            <FormField
+              control={form.control}
+              name="quantity"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Количество *</FormLabel>
+                  <div className="flex items-center space-x-2">
+                    <FormControl>
+                      <InputGroup>
+                        <InputGroupInput
+                          type="number"
+                          min={material.unit === "шт" ? 1 : 0.01}
+                          step={material.unit === "шт" ? 1 : 0.01}
+                          placeholder="1"
+                          className="flex-1"
+                          {...field}
+                          onFocus={(e) => e.target.select()}
+                        />
+                        <InputGroupAddon align="inline-end">
+                          {material.unit}
+                        </InputGroupAddon>
+                      </InputGroup>
+                    </FormControl>
+                  </div>
+                  <FormMessage />
+                </FormItem>
               )}
-            </div>
-          </div>
-        </form>
+            />
 
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={handleCancel}>
-            Отмена
-          </Button>
-          <Button 
-            onClick={handleSubmit} 
-            disabled={isLoading || !selectedProjectId || quantity <= 0}
-          >
-            {isLoading ? 'Присваивание...' : 'Присвоить материал'}
-          </Button>
-        </DialogFooter>
+            {/* Информация о материале */}
+            <div className="bg-muted/50 p-3 rounded-lg">
+              <div className="text-sm space-y-1">
+                <div>
+                  <strong>Материал:</strong> {material.name}
+                </div>
+                <div>
+                  <strong>Тип:</strong> {material.type}
+                </div>
+                <div>
+                  <strong>Производитель:</strong> {material.manufacturer}
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => handleOpenChange(false)}
+              >
+                Отмена
+              </Button>
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting
+                  ? "Присваивание..."
+                  : "Присвоить материал"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
