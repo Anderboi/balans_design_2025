@@ -1,21 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { useForm, Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import {
   AddMaterialSchema,
   AddMaterialFormValues,
 } from "@/lib/schemas/materials";
-import { useRef, useState } from "react";
-import { ChevronDownIcon, Plus, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -25,31 +17,23 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
 import { materialsService } from "@/lib/services/materials";
-import { useMemo } from "react";
 import { MaterialType, Contact, ContactType, Company } from "@/types";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../../../components/ui/dropdown-menu";
-import { FileDropzone } from "../../../components/ui/dropzone";
-import { storageService } from "@/lib/services/storage";
-import { contactsService } from "@/lib/services/contacts";
 import AddContactDialog from "@/app/contacts/components/add-contact-dialog";
+
+// Custom hooks
+import { useImageUpload } from "@/app/materials/hooks/use-image-upload";
+import { useTagManagement } from "@/app/materials/hooks/use-tag-management";
+import { useSupplierSelection } from "@/app/materials/hooks/use-supplier-selection";
+
+// Sub-components
+import { ImageUploadSection } from "./add-material-dialog/image-upload-section";
+import { BasicInfoSection } from "./add-material-dialog/basic-info-section";
+import { SupplierSection } from "./add-material-dialog/supplier-section";
+import { DeliveryInfoSection } from "./add-material-dialog/delivery-info-section";
+import { PricingSection } from "./add-material-dialog/pricing-section";
+import { SpecificationsSection } from "./add-material-dialog/specifications-section";
+import { AdditionalInfoSection } from "./add-material-dialog/additional-info-section";
 
 interface AddMaterialDialogProps {
   open: boolean;
@@ -67,21 +51,6 @@ export function AddMaterialDialog({
   initialSupplierCompanies,
 }: AddMaterialDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [tagInput, setTagInput] = useState("");
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [suppliers, setSuppliers] = useState<Contact[]>(initialSuppliers);
-  const [isAddSupplierOpen, setIsAddSupplierOpen] = useState(false);
-  const [supplierQuery, setSupplierQuery] = useState("");
-
-  const supplierCompaniesMap = useMemo(() => {
-    const map: Record<string, string> = {};
-    initialSupplierCompanies.forEach((c) => {
-      if (c && c.id) map[c.id] = c.name;
-    });
-    return map;
-  }, [initialSupplierCompanies]);
 
   const form = useForm<AddMaterialFormValues>({
     resolver: zodResolver(AddMaterialSchema) as Resolver<AddMaterialFormValues>,
@@ -106,29 +75,16 @@ export function AddMaterialDialog({
     },
   });
 
-  const { watch, setValue, control } = form;
-  const currentTags = watch("tags");
+  const { setValue, watch, control } = form;
 
-  const handleAddTag = () => {
-    if (tagInput.trim() && !currentTags.includes(tagInput.trim())) {
-      setValue("tags", [...currentTags, tagInput.trim()]);
-      setTagInput("");
-    }
-  };
-
-  const handleRemoveTag = (tagToRemove: string) => {
-    setValue(
-      "tags",
-      currentTags.filter((tag) => tag !== tagToRemove)
-    );
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleAddTag();
-    }
-  };
+  // Custom hooks
+  const imageUpload = useImageUpload();
+  const tagManagement = useTagManagement({ setValue, watch });
+  const supplierSelection = useSupplierSelection({
+    initialSuppliers,
+    initialSupplierCompanies,
+    setValue,
+  });
 
   const onSubmit = async (values: AddMaterialFormValues) => {
     try {
@@ -136,8 +92,9 @@ export function AddMaterialDialog({
 
       let finalImageUrl = values.image_url;
       // Если выбрано изображение, загружаем в Storage
-      if (imageFile) {
-        finalImageUrl = await storageService.uploadMaterialImage(imageFile);
+      if (imageUpload.imageFile) {
+        const uploadedUrl = await imageUpload.uploadImage();
+        if (uploadedUrl) finalImageUrl = uploadedUrl;
       }
 
       await materialsService.createMaterial({
@@ -148,9 +105,8 @@ export function AddMaterialDialog({
       onMaterialAdded();
       onOpenChange(false);
       form.reset();
-      setImageFile(null);
-      setImagePreview(null);
-      setTagInput("");
+      imageUpload.resetImage();
+      tagManagement.resetTags();
     } catch (error) {
       console.error("Ошибка при создании материала:", error);
     } finally {
@@ -161,36 +117,11 @@ export function AddMaterialDialog({
   const handleOpenChangeWrapper = (newOpen: boolean) => {
     if (!newOpen) {
       form.reset();
-      setImageFile(null);
-      setImagePreview(null);
-      setTagInput("");
+      imageUpload.resetImage();
+      tagManagement.resetTags();
     }
     onOpenChange(newOpen);
   };
-
-  const handleCreateSupplier = async (
-    contact: Omit<Contact, "id" | "created_at" | "updated_at">
-  ) => {
-    try {
-      const created = await contactsService.createContact({
-        ...contact,
-        type: ContactType.SUPPLIER,
-      });
-      setSuppliers((prev) => [created, ...prev]);
-      setValue("supplier", created.name);
-      setIsAddSupplierOpen(false);
-    } catch (error) {
-      console.error("Ошибка при создании поставщика:", error);
-    }
-  };
-
-  const filteredSuppliers = suppliers.filter((s) => {
-    const companyName = s.company_id
-      ? supplierCompaniesMap[s.company_id] || ""
-      : "";
-    const hay = `${s.name} ${companyName}`.toLowerCase();
-    return hay.includes(supplierQuery.toLowerCase());
-  });
 
   const materialTypes = Object.values(MaterialType);
   const commonUnits = ["шт", "м.п.", "м²", "м³", "кг", "л", "упак", "комплект"];
@@ -208,410 +139,45 @@ export function AddMaterialDialog({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             {/* Обложка материала */}
-            <div className="space-y-3">
-              <Label>Обложка (изображение)</Label>
-              {imagePreview ? (
-                <div className="relative">
-                  <img
-                    src={imagePreview}
-                    alt="Предпросмотр"
-                    className="w-full h-48 object-cover rounded-md"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="mt-2"
-                    onClick={() => {
-                      setImageFile(null);
-                      setImagePreview(null);
-                    }}
-                  >
-                    Удалить изображение
-                  </Button>
-                </div>
-              ) : (
-                <FileDropzone
-                  fileInputRef={fileInputRef}
-                  handleBoxClick={() => fileInputRef.current?.click()}
-                  handleDragOver={(e) => {
-                    e.preventDefault();
-                  }}
-                  handleDrop={(e) => {
-                    e.preventDefault();
-                    const files = e.dataTransfer.files;
-                    if (!files || files.length === 0) return;
-                    const file = files[0];
-                    if (!file.type.startsWith("image/")) return;
-                    setImageFile(file);
-                    setImagePreview(URL.createObjectURL(file));
-                  }}
-                  handleFileSelect={(files) => {
-                    if (!files || files.length === 0) return;
-                    const file = files[0];
-                    if (!file.type.startsWith("image/")) return;
-                    setImageFile(file);
-                    setImagePreview(URL.createObjectURL(file));
-                  }}
-                />
-              )}
-            </div>
+            <ImageUploadSection
+              imagePreview={imageUpload.imagePreview}
+              onImageSelect={imageUpload.handleImageSelect}
+              onImageRemove={imageUpload.handleImageRemove}
+              fileInputRef={imageUpload.fileInputRef}
+            />
 
             {/* Основная информация */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Наименование *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Наименование материала" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <BasicInfoSection control={control} materialTypes={materialTypes} />
 
-              <FormField
-                control={control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Категория *</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Выберите категорию" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {materialTypes.map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Описание</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Описание материала" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={control}
-                name="manufacturer"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Производитель</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Название производителя" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Поставщик */}
-              <FormField
-                control={control}
-                name="supplier"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Поставщик</FormLabel>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            className="w-full justify-between font-normal"
-                          >
-                            <span>{field.value || "Выберите поставщика"}</span>
-                            <ChevronDownIcon className="h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-[300px]">
-                        <div className="p-2">
-                          <Input
-                            placeholder="Поиск или создание..."
-                            value={supplierQuery}
-                            onChange={(e) => setSupplierQuery(e.target.value)}
-                          />
-                        </div>
-                        {filteredSuppliers.map((s) => {
-                          const companyName = s.company_id
-                            ? supplierCompaniesMap[s.company_id]
-                            : undefined;
-                          const displayName = companyName
-                            ? `${s.name} — ${companyName}`
-                            : s.name;
-                          return (
-                            <DropdownMenuItem
-                              key={s.id}
-                              onSelect={() => field.onChange(displayName)}
-                            >
-                              {displayName}
-                            </DropdownMenuItem>
-                          );
-                        })}
-                        {filteredSuppliers.length === 0 && supplierQuery && (
-                          <DropdownMenuItem
-                            onSelect={() => setIsAddSupplierOpen(true)}
-                          >
-                            <Plus className="mr-2 h-4 w-4" />
-                            Добавить &quot;{supplierQuery}&quot;
-                          </DropdownMenuItem>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={control}
-                name="article"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Артикул</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Артикул материала" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={control}
-                name="lead_time"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Срок поставки (дней)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min="0"
-                        placeholder="0"
-                        {...field}
-                        onFocus={(e) => e.target.select()}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {/* В наличии */}
-            <FormField
+            {/* Поставщик */}
+            <SupplierSection
               control={control}
-              name="in_stock"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormLabel className="font-normal">В наличии</FormLabel>
-                </FormItem>
-              )}
+              filteredSuppliers={supplierSelection.filteredSuppliers}
+              supplierCompaniesMap={supplierSelection.supplierCompaniesMap}
+              supplierQuery={supplierSelection.supplierQuery}
+              setSupplierQuery={supplierSelection.setSupplierQuery}
+              setIsAddSupplierOpen={supplierSelection.setIsAddSupplierOpen}
             />
+
+            {/* Доставка и наличие */}
+            <DeliveryInfoSection control={control} />
 
             {/* Цена и единица измерения */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Цена (₽)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        placeholder="0.00"
-                        {...field}
-                        onFocus={(e) => e.target.select()}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={control}
-                name="unit"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Единица измерения</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Выберите единицу" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {commonUnits.map((unit) => (
-                          <SelectItem key={unit} value={unit}>
-                            {unit}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <PricingSection control={control} commonUnits={commonUnits} />
 
             {/* Дополнительные характеристики */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={control}
-                name="color"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Цвет</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Цвет материала" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <SpecificationsSection control={control} />
 
-              <FormField
-                control={control}
-                name="material"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Материал</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Материал" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={control}
-                name="finish"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Покрытие</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Покрытие" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={control}
-                name="size"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Размер</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Размер материала" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {/* URL изображения */}
-            <FormField
+            {/* URL и теги */}
+            <AdditionalInfoSection
               control={control}
-              name="product_url"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>URL продукта</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="https://example.com"
-                      {...field}
-                      value={field.value || ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              tagInput={tagManagement.tagInput}
+              setTagInput={tagManagement.setTagInput}
+              currentTags={tagManagement.currentTags}
+              handleAddTag={tagManagement.handleAddTag}
+              handleRemoveTag={tagManagement.handleRemoveTag}
+              handleKeyPress={tagManagement.handleKeyPress}
             />
-
-            {/* Теги */}
-            <div className="space-y-2">
-              <Label>Теги</Label>
-              <div className="flex gap-2">
-                <Input
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Добавить тег"
-                  className="flex-1"
-                />
-                <Button
-                  type="button"
-                  onClick={handleAddTag}
-                  size="icon"
-                  variant="outline"
-                >
-                  <Plus className="w-4 h-4" />
-                </Button>
-              </div>
-              {currentTags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {currentTags.map((tag, index) => (
-                    <Badge
-                      key={index}
-                      variant="secondary"
-                      className="flex items-center gap-1"
-                    >
-                      {tag}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveTag(tag)}
-                        className="ml-1 hover:text-destructive"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </div>
 
             <DialogFooter>
               <Button
@@ -628,10 +194,10 @@ export function AddMaterialDialog({
           </form>
         </Form>
         <AddContactDialog
-          isOpen={isAddSupplierOpen}
-          onOpenChange={setIsAddSupplierOpen}
-          onSubmit={handleCreateSupplier}
-          defaultCompanyName={supplierQuery}
+          isOpen={supplierSelection.isAddSupplierOpen}
+          onOpenChange={supplierSelection.setIsAddSupplierOpen}
+          onSubmit={supplierSelection.handleCreateSupplier}
+          defaultCompanyName={supplierSelection.supplierQuery}
           defaultType={ContactType.SUPPLIER}
         />
       </DialogContent>
