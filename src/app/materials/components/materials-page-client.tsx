@@ -8,10 +8,18 @@ import {
   LayoutGrid,
   Funnel,
   SlidersHorizontal,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { MaterialCard } from "@/app/materials/components/card/material-card";
 import { AddMaterialDialog } from "@/app/materials/components/add-material-dialog";
 import FilterMaterialDrawer, { FilterValues } from "./filter-material-drawer";
@@ -32,13 +40,11 @@ interface MaterialsPageClientProps {
 
 export function MaterialsPageClient({
   initialMaterials,
-  initialCategories,
   initialProjects,
   initialSuppliers,
   initialSupplierCompanies,
 }: MaterialsPageClientProps) {
   const [materials, setMaterials] = useState<Material[]>(initialMaterials);
-  const [categories] = useState<string[]>(initialCategories);
   const [projects] = useState<Project[]>(initialProjects);
   const [suppliers] = useState<Contact[]>(initialSuppliers);
   const [supplierCompanies] = useState<Company[]>(initialSupplierCompanies);
@@ -46,6 +52,21 @@ export function MaterialsPageClient({
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+
+  type SortField =
+    | "name"
+    | "description"
+    | "price"
+    | "manufacturer"
+    | "type"
+    | null;
+  const [sortConfig, setSortConfig] = useState<{
+    field: SortField;
+    direction: "asc" | "desc";
+  }>({
+    field: null,
+    direction: "asc",
+  });
 
   const [activeFilters, setActiveFilters] = useState<FilterValues>({
     priceMin: "",
@@ -110,8 +131,58 @@ export function MaterialsPageClient({
       );
     }
 
+    // Сортировка
+    if (sortConfig.field) {
+      filtered.sort((a, b) => {
+        let aValue: string | number | undefined | null = "";
+        let bValue: string | number | undefined | null = "";
+
+        switch (sortConfig.field) {
+          case "name":
+            aValue = a.name;
+            bValue = b.name;
+            break;
+          case "description":
+            aValue = a.description;
+            bValue = b.description;
+            break;
+          case "price":
+            aValue = a.price;
+            bValue = b.price;
+            break;
+          case "manufacturer":
+            aValue = a.manufacturer;
+            bValue = b.manufacturer;
+            break;
+          case "type":
+            aValue = a.type;
+            bValue = b.type;
+            break;
+        }
+
+        if (aValue === bValue) return 0;
+        if (aValue === undefined || aValue === null) return 1;
+        if (bValue === undefined || bValue === null) return -1;
+
+        const comparison =
+          typeof aValue === "string" && typeof bValue === "string"
+            ? aValue.localeCompare(bValue)
+            : (aValue as number) - (bValue as number);
+
+        return sortConfig.direction === "asc" ? comparison : -comparison;
+      });
+    }
+
     return filtered;
-  }, [materials, searchQuery, activeFilters]);
+  }, [materials, searchQuery, activeFilters, sortConfig]);
+
+  const handleSort = (field: SortField) => {
+    setSortConfig((current) => ({
+      field,
+      direction:
+        current.field === field && current.direction === "asc" ? "desc" : "asc",
+    }));
+  };
 
   // Derive available options and counts from *all* materials (or filtered? usually all for options)
   const { availableTypes, availableSuppliers, filterCounts } = useMemo(() => {
@@ -229,10 +300,43 @@ export function MaterialsPageClient({
             )}
           </Button>
 
-          <Button variant={"ghost"} className="cursor-pointer ">
-            <SlidersHorizontal className="size-4" />
-            Сортировка
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant={"ghost"} className="cursor-pointer">
+                <SlidersHorizontal className="size-4 mr-2" />
+                Сортировка
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              {[
+                { label: "Название", value: "name" },
+                { label: "Описание", value: "description" },
+                { label: "Цена", value: "price" },
+                { label: "Производитель", value: "manufacturer" },
+                { label: "Тип", value: "type" },
+              ].map((option) => (
+                <DropdownMenuItem
+                  key={option.value}
+                  onClick={() => handleSort(option.value as SortField)}
+                  className="justify-between"
+                >
+                  {option.label}
+                  {sortConfig.field === option.value && (
+                    <span className="ml-2">
+                      {sortConfig.direction === "asc" ? (
+                        <ArrowUp className="size-3" />
+                      ) : (
+                        <ArrowDown className="size-3" />
+                      )}
+                    </span>
+                  )}
+                  {sortConfig.field !== option.value && (
+                    <span className="w-3" />
+                  )}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* <Select
