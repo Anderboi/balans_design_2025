@@ -10,6 +10,7 @@ import {
   SlidersHorizontal,
   ArrowUp,
   ArrowDown,
+  Layers,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +30,7 @@ import { toast } from "sonner";
 import PageContainer from "@/components/ui/page-container";
 import PageHeader from "@/components/ui/page-header";
 import { cn } from "@/lib/utils";
+import { ButtonGroup } from '@/components/ui/button-group';
 
 interface MaterialsPageClientProps {
   initialMaterials: Material[];
@@ -67,6 +69,9 @@ export function MaterialsPageClient({
     field: null,
     direction: "asc",
   });
+
+  type GroupField = "manufacturer" | "type" | "supplier" | "description" | null;
+  const [groupBy, setGroupBy] = useState<GroupField>(null);
 
   const [activeFilters, setActiveFilters] = useState<FilterValues>({
     priceMin: "",
@@ -176,6 +181,36 @@ export function MaterialsPageClient({
     return filtered;
   }, [materials, searchQuery, activeFilters, sortConfig]);
 
+  const groupedMaterials = useMemo(() => {
+    if (!groupBy) return { "Все материалы": filteredMaterials };
+
+    const groups: Record<string, Material[]> = {};
+
+    filteredMaterials.forEach((material) => {
+      let key = "Не указано";
+      const value = material[groupBy];
+
+      if (typeof value === "string" && value) {
+        key = value;
+      }
+
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+      groups[key].push(material);
+    });
+
+    return groups;
+  }, [filteredMaterials, groupBy]);
+
+  const sortedGroupKeys = useMemo(() => {
+    return Object.keys(groupedMaterials).sort((a, b) => {
+      if (a === "Не указано") return 1;
+      if (b === "Не указано") return -1;
+      return a.localeCompare(b);
+    });
+  }, [groupedMaterials]);
+
   const handleSort = (field: SortField) => {
     setSortConfig((current) => ({
       field,
@@ -252,8 +287,8 @@ export function MaterialsPageClient({
             className="pl-10 w-full"
           />
         </div>
-        <div className="flex items-center gap-2 sm:w-full md:w-auto overflow-x-auto no-scrollbar">
-          <div className="flex items-center gap-1 bg-zinc-100 p-1 rounded-lg mr-2">
+        <div className="flex items-center //gap-2 sm:w-full md:w-auto overflow-x-auto mr-1 no-scrollbar">
+          <div className="flex items-center gap-1 bg-zinc-100 p-1 rounded-lg ">
             <Button
               variant={viewMode === "grid" ? "default" : "ghost"}
               size="icon"
@@ -279,98 +314,106 @@ export function MaterialsPageClient({
           </div>
           <div className="h-6 w-px bg-zinc-200 mx-2 hidden md:block" />
 
-          <Button
-            variant={"ghost"}
-            className="cursor-pointer"
-            onClick={() => setIsFilterDrawerOpen(true)}
-          >
-            <Funnel className="size-4" />
-            Фильтры
-            {(activeFilters.types.length > 0 ||
-              activeFilters.suppliers.length > 0 ||
-              activeFilters.priceMin ||
-              activeFilters.priceMax) && (
-              <Badge variant="secondary" className="ml-2 h-5 px-1.5 min-w-5">
+          <ButtonGroup>
+            <Button
+              variant={"ghost"}
+              className="cursor-pointer"
+              onClick={() => setIsFilterDrawerOpen(true)}
+            >
+              <Funnel className="size-4" />
+              Фильтры
+              {(activeFilters.types.length > 0 ||
+                activeFilters.suppliers.length > 0 ||
+                activeFilters.priceMin ||
+                activeFilters.priceMax) && (
+                <Badge variant="secondary" className="ml-2 h-5 px-1.5 min-w-5">
+                  {[
+                    activeFilters.types.length,
+                    activeFilters.suppliers.length,
+                    activeFilters.priceMin || activeFilters.priceMax ? 1 : 0,
+                  ].reduce((a, b) => a + b, 0)}
+                </Badge>
+              )}
+            </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant={"ghost"} className="cursor-pointer">
+                  <Layers className="size-4 mr-2" />
+                  Группировка
+                  {groupBy && (
+                    <Badge
+                      variant="secondary"
+                      className="ml-2 h-5 px-1.5 min-w-5"
+                    >
+                      1
+                    </Badge>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
                 {[
-                  activeFilters.types.length,
-                  activeFilters.suppliers.length,
-                  activeFilters.priceMin || activeFilters.priceMax ? 1 : 0,
-                ].reduce((a, b) => a + b, 0)}
-              </Badge>
-            )}
-          </Button>
+                  { label: "Нет", value: null },
+                  { label: "Производитель", value: "manufacturer" },
+                  { label: "Тип", value: "type" },
+                  { label: "Поставщик", value: "supplier" },
+                  { label: "Описание", value: "description" },
+                ].map((option) => (
+                  <DropdownMenuItem
+                    key={option.value || "none"}
+                    onClick={() => setGroupBy(option.value as GroupField)}
+                    className="justify-between"
+                  >
+                    {option.label}
+                    {groupBy === option.value && (
+                      <span className="ml-2">
+                        <ArrowUp className="size-3 rotate-45" />
+                      </span>
+                    )}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant={"ghost"} className="cursor-pointer">
-                <SlidersHorizontal className="size-4 mr-2" />
-                Сортировка
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              {[
-                { label: "Название", value: "name" },
-                { label: "Описание", value: "description" },
-                { label: "Цена", value: "price" },
-                { label: "Производитель", value: "manufacturer" },
-                { label: "Тип", value: "type" },
-              ].map((option) => (
-                <DropdownMenuItem
-                  key={option.value}
-                  onClick={() => handleSort(option.value as SortField)}
-                  className="justify-between"
-                >
-                  {option.label}
-                  {sortConfig.field === option.value && (
-                    <span className="ml-2">
-                      {sortConfig.direction === "asc" ? (
-                        <ArrowUp className="size-3" />
-                      ) : (
-                        <ArrowDown className="size-3" />
-                      )}
-                    </span>
-                  )}
-                  {sortConfig.field !== option.value && (
-                    <span className="w-3" />
-                  )}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant={"ghost"} className="cursor-pointer">
+                  <SlidersHorizontal className="size-4 mr-2" />
+                  Сортировка
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                {[
+                  { label: "Название", value: "name" },
+                  { label: "Описание", value: "description" },
+                  { label: "Цена", value: "price" },
+                  { label: "Производитель", value: "manufacturer" },
+                  { label: "Тип", value: "type" },
+                ].map((option) => (
+                  <DropdownMenuItem
+                    key={option.value}
+                    onClick={() => handleSort(option.value as SortField)}
+                    className="justify-between"
+                  >
+                    {option.label}
+                    {sortConfig.field === option.value && (
+                      <span className="ml-2">
+                        {sortConfig.direction === "asc" ? (
+                          <ArrowUp className="size-3" />
+                        ) : (
+                          <ArrowDown className="size-3" />
+                        )}
+                      </span>
+                    )}
+                    {sortConfig.field !== option.value && (
+                      <span className="w-3" />
+                    )}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </ButtonGroup>
         </div>
-
-        {/* <Select
-          value={selectedType}
-          onValueChange={(value) =>
-            setSelectedType(value as MaterialType | "all")
-          }
-        >
-          <SelectTrigger className="w-full sm:w-48">
-            <SelectValue placeholder="Тип материала" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Все типы</SelectItem>
-            {materialTypes.map((type) => (
-              <SelectItem key={type} value={type}>
-                {type}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-          <SelectTrigger className="w-full sm:w-48">
-            <SelectValue placeholder="Категория" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Все категории</SelectItem>
-            {categories.map((category) => (
-              <SelectItem key={category} value={category}>
-                {category}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select> */}
       </div>
 
       {/* Статистика */}
@@ -393,24 +436,43 @@ export function MaterialsPageClient({
           )}
         </div>
       ) : (
-        <div
-          className={
-            viewMode === "grid"
-              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-              : "space-y-2"
-          }
-        >
-          {filteredMaterials.map((material) => (
-            <MaterialCard
-              key={material.id}
-              material={material}
-              projects={projects}
-              viewMode={viewMode}
-              onMaterialUpdated={handleMaterialUpdated}
-              onMaterialDeleted={handleMaterialDeleted}
-              initialSuppliers={suppliers}
-              initialSupplierCompanies={supplierCompanies}
-            />
+        <div className="space-y-8">
+          {sortedGroupKeys.map((groupKey) => (
+            <div key={groupKey} className="space-y-4">
+              {groupBy && (
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-semibold text-zinc-900">
+                    {groupKey}
+                  </h2>
+                  <Badge
+                    variant="secondary"
+                    className="text-zinc-500 bg-zinc-100"
+                  >
+                    {groupedMaterials[groupKey].length}
+                  </Badge>
+                </div>
+              )}
+              <div
+                className={
+                  viewMode === "grid"
+                    ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                    : "space-y-2"
+                }
+              >
+                {groupedMaterials[groupKey].map((material) => (
+                  <MaterialCard
+                    key={material.id}
+                    material={material}
+                    projects={projects}
+                    viewMode={viewMode}
+                    onMaterialUpdated={handleMaterialUpdated}
+                    onMaterialDeleted={handleMaterialDeleted}
+                    initialSuppliers={suppliers}
+                    initialSupplierCompanies={supplierCompanies}
+                  />
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       )}
