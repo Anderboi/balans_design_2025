@@ -33,7 +33,11 @@ import { SupplierSection } from "./add-material-dialog/supplier-section";
 import { DeliveryInfoSection } from "./add-material-dialog/delivery-info-section";
 import { PricingSection } from "./add-material-dialog/pricing-section";
 import { SpecificationsSection } from "./add-material-dialog/specifications-section";
-import { AdditionalInfoSection } from "./add-material-dialog/additional-info-section";
+import { CustomSpecificationsSection } from "./add-material-dialog/custom-specifications-section";
+import { AdditionalInfoSection } from './add-material-dialog/additional-info-section';
+import SubBlockCard from '@/components/ui/sub-block-card';
+
+// ... existing imports
 
 interface AddMaterialDialogProps {
   open: boolean;
@@ -72,6 +76,7 @@ export function AddMaterialDialog({
       image_url: "",
       in_stock: true,
       tags: [],
+      custom_specifications: [],
     },
   });
 
@@ -128,9 +133,9 @@ export function AddMaterialDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChangeWrapper}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent  className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Добавить новый материал</DialogTitle>
+          <DialogTitle >Добавить новый материал</DialogTitle>
           <DialogDescription>
             Заполните информацию о материале для добавления в библиотеку
           </DialogDescription>
@@ -138,6 +143,7 @@ export function AddMaterialDialog({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            
             {/* Обложка материала */}
             <ImageUploadSection
               control={control}
@@ -147,38 +153,47 @@ export function AddMaterialDialog({
               fileInputRef={imageUpload.fileInputRef}
             />
 
-            {/* Основная информация */}
-            <BasicInfoSection control={control} materialTypes={materialTypes} />
+            <SubBlockCard title="Основная информация">
+              {/* Основная информация */}
+              <BasicInfoSection
+                control={control}
+                materialTypes={materialTypes}
+              />
 
-            {/* Поставщик */}
-            <SupplierSection
-              control={control}
-              filteredSuppliers={supplierSelection.filteredSuppliers}
-              supplierCompaniesMap={supplierSelection.supplierCompaniesMap}
-              supplierQuery={supplierSelection.supplierQuery}
-              setSupplierQuery={supplierSelection.setSupplierQuery}
-              setIsAddSupplierOpen={supplierSelection.setIsAddSupplierOpen}
-            />
+              {/* Поставщик */}
+              <SupplierSection
+                control={control}
+                filteredSuppliers={supplierSelection.filteredSuppliers}
+                supplierCompaniesMap={supplierSelection.supplierCompaniesMap}
+                supplierQuery={supplierSelection.supplierQuery}
+                setSupplierQuery={supplierSelection.setSupplierQuery}
+                setIsAddSupplierOpen={supplierSelection.setIsAddSupplierOpen}
+              />
 
-            {/* Доставка и наличие */}
-            <DeliveryInfoSection control={control} />
+              {/* Доставка и наличие */}
+              <DeliveryInfoSection control={control} />
 
-            {/* Цена и единица измерения */}
-            <PricingSection control={control} commonUnits={commonUnits} />
+              {/* Цена и единица измерения */}
+              <PricingSection control={control} commonUnits={commonUnits} />
 
-            {/* Дополнительные характеристики */}
-            <SpecificationsSection control={control} />
+              {/* Дополнительные характеристики */}
+              <SpecificationsSection control={control} />
 
-            {/* URL и теги */}
-            <AdditionalInfoSection
-              control={control}
-              tagInput={tagManagement.tagInput}
-              setTagInput={tagManagement.setTagInput}
-              currentTags={tagManagement.currentTags}
-              handleAddTag={tagManagement.handleAddTag}
-              handleRemoveTag={tagManagement.handleRemoveTag}
-              handleKeyPress={tagManagement.handleKeyPress}
-            />
+              {/* URL и теги */}
+              <AdditionalInfoSection
+                control={control}
+                tagInput={tagManagement.tagInput}
+                setTagInput={tagManagement.setTagInput}
+                currentTags={tagManagement.currentTags}
+                handleAddTag={tagManagement.handleAddTag}
+                handleRemoveTag={tagManagement.handleRemoveTag}
+                handleKeyPress={tagManagement.handleKeyPress}
+              />
+            </SubBlockCard>
+            <SubBlockCard title="Пользовательские характеристики">
+              {/* Пользовательские характеристики */}
+              <CustomSpecificationsSection control={control} />
+            </SubBlockCard>
 
             <DialogFooter>
               <Button

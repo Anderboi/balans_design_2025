@@ -29,6 +29,15 @@ export const AddMaterialSchema = z.object({
   image_url: z.string().optional(),
   in_stock: z.boolean().default(true),
   tags: z.array(z.string()).default([]),
+  custom_specifications: z
+    .array(
+      z.object({
+        label: z.string().min(1, "Название обязательно"),
+        value: z.string().min(1, "Значение обязательно"),
+      }),
+    )
+    .optional()
+    .default([]),
 });
 
 export type AddMaterialFormValues = z.infer<typeof AddMaterialSchema>;

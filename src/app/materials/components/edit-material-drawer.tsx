@@ -35,6 +35,10 @@ import { DeliveryInfoSection } from "./add-material-dialog/delivery-info-section
 import { PricingSection } from "./add-material-dialog/pricing-section";
 import { SpecificationsSection } from "./add-material-dialog/specifications-section";
 import { AdditionalInfoSection } from "./add-material-dialog/additional-info-section";
+import { CustomSpecificationsSection } from "./add-material-dialog/custom-specifications-section";
+import SubBlockCard from '@/components/ui/sub-block-card';
+
+// ... existing imports
 
 interface EditMaterialDrawerProps {
   material: Material;
@@ -75,6 +79,7 @@ export function EditMaterialDrawer({
       image_url: material.image_url || "",
       in_stock: material.in_stock ?? true,
       tags: material.tags || [],
+      custom_specifications: material.custom_specifications || [],
     },
   });
 
@@ -127,7 +132,11 @@ export function EditMaterialDrawer({
 
   return (
     <>
-      <Drawer open={open} direction='right'  onOpenChange={handleOpenChangeWrapper}>
+      <Drawer
+        open={open}
+        direction="right"
+        onOpenChange={handleOpenChangeWrapper}
+      >
         <DrawerContent className="//max-h-[95vh] min-w-[640px]">
           <DrawerHeader>
             <DrawerTitle>Редактировать материал</DrawerTitle>
@@ -154,45 +163,54 @@ export function EditMaterialDrawer({
                     fileInputRef={imageUpload.fileInputRef}
                   />
 
-                  {/* Основная информация */}
-                  <BasicInfoSection
-                    control={control}
-                    materialTypes={materialTypes}
-                  />
+                  <SubBlockCard title="Основная информация">
+                    {/* Основная информация */}
+                    <BasicInfoSection
+                      control={control}
+                      materialTypes={materialTypes}
+                    />
 
-                  {/* Поставщик */}
-                  <SupplierSection
-                    control={control}
-                    filteredSuppliers={supplierSelection.filteredSuppliers}
-                    supplierCompaniesMap={
-                      supplierSelection.supplierCompaniesMap
-                    }
-                    supplierQuery={supplierSelection.supplierQuery}
-                    setSupplierQuery={supplierSelection.setSupplierQuery}
-                    setIsAddSupplierOpen={
-                      supplierSelection.setIsAddSupplierOpen
-                    }
-                  />
+                    {/* Поставщик */}
+                    <SupplierSection
+                      control={control}
+                      filteredSuppliers={supplierSelection.filteredSuppliers}
+                      supplierCompaniesMap={
+                        supplierSelection.supplierCompaniesMap
+                      }
+                      supplierQuery={supplierSelection.supplierQuery}
+                      setSupplierQuery={supplierSelection.setSupplierQuery}
+                      setIsAddSupplierOpen={
+                        supplierSelection.setIsAddSupplierOpen
+                      }
+                    />
 
-                  {/* Доставка и наличие */}
-                  <DeliveryInfoSection control={control} />
+                    {/* Доставка и наличие */}
+                    <DeliveryInfoSection control={control} />
 
-                  {/* Цена и единица измерения */}
-                  <PricingSection control={control} commonUnits={commonUnits} />
+                    {/* Цена и единица измерения */}
+                    <PricingSection
+                      control={control}
+                      commonUnits={commonUnits}
+                    />
 
-                  {/* Дополнительные характеристики */}
-                  <SpecificationsSection control={control} />
+                    {/* Дополнительные характеристики */}
+                    <SpecificationsSection control={control} />
 
-                  {/* URL и теги */}
-                  <AdditionalInfoSection
-                    control={control}
-                    tagInput={tagManagement.tagInput}
-                    setTagInput={tagManagement.setTagInput}
-                    currentTags={tagManagement.currentTags}
-                    handleAddTag={tagManagement.handleAddTag}
-                    handleRemoveTag={tagManagement.handleRemoveTag}
-                    handleKeyPress={tagManagement.handleKeyPress}
-                  />
+                    {/* URL и теги */}
+                    <AdditionalInfoSection
+                      control={control}
+                      tagInput={tagManagement.tagInput}
+                      setTagInput={tagManagement.setTagInput}
+                      currentTags={tagManagement.currentTags}
+                      handleAddTag={tagManagement.handleAddTag}
+                      handleRemoveTag={tagManagement.handleRemoveTag}
+                      handleKeyPress={tagManagement.handleKeyPress}
+                    />
+                  </SubBlockCard>
+                  <SubBlockCard title="Пользовательские характеристики">
+                    {/* Пользовательские характеристики */}
+                    <CustomSpecificationsSection control={control} />
+                  </SubBlockCard>
                 </div>
               </ScrollArea>
 

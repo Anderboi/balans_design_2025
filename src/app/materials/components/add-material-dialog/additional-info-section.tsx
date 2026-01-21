@@ -53,7 +53,9 @@ export function AdditionalInfoSection({
       />
 
       <div className="space-y-2">
-        <Label>Теги</Label>
+        <Label className="data-[error=true]:text-destructive text-[10.5px] font-bold uppercase tracking-wider text-zinc-500 ml-1">
+          Теги
+        </Label>
         <div className="flex gap-2">
           <Input
             value={tagInput}

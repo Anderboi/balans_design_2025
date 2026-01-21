@@ -149,6 +149,7 @@ export interface Material {
   image_url?: string;
   in_stock?: boolean;
   tags?: string[];
+  custom_specifications?: { label: string; value: string }[];
   created_at?: string;
   updated_at?: string;
 }

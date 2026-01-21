@@ -28,7 +28,7 @@ export function BriefSectionCard({
       <div className="absolute top-6 right-6">
         <div
           className={cn(
-            "w-6 h-6 rounded-full border-2 transition-colors duration-300",
+            "size-6 rounded-full border-2 transition-colors duration-300",
             completed
               ? "bg-black border-black"
               : "border-gray-100 group-hover:border-gray-200"
@@ -42,7 +42,7 @@ export function BriefSectionCard({
               strokeWidth="3"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="w-4 h-4 m-0.5"
+              className="size-4 m-0.5"
             >
               <polyline points="20 6 9 17 4 12" />
             </svg>
@@ -51,8 +51,8 @@ export function BriefSectionCard({
       </div>
 
       {/* Icon */}
-      <div className="w-14 h-14 rounded-full bg-gray-50 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-        <Icon className="w-6 h-6 text-gray-400 group-hover:text-black transition-colors duration-300" />
+      <div className="size-14 rounded-full bg-gray-50 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+        <Icon className="size-6 text-gray-400 group-hover:text-black transition-colors duration-300" />
       </div>
 
       {/* Content */}
@@ -60,7 +60,7 @@ export function BriefSectionCard({
         <h3 className="text-lg font-bold text-gray-900 leading-tight">
           {title}
         </h3>
-        <p className="text-sm text-gray-400 font-medium leading-relaxed">
+        <p className="text-sm text-gray-400 font-medium leading-relaxed h-[36px]">
           {description}
         </p>
       </div>
