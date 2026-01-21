@@ -36,7 +36,8 @@ import { PricingSection } from "./add-material-dialog/pricing-section";
 import { SpecificationsSection } from "./add-material-dialog/specifications-section";
 import { AdditionalInfoSection } from "./add-material-dialog/additional-info-section";
 import { CustomSpecificationsSection } from "./add-material-dialog/custom-specifications-section";
-import SubBlockCard from '@/components/ui/sub-block-card';
+import SubBlockCard from "@/components/ui/sub-block-card";
+import { MaterialFilesSection } from './add-material-dialog/material-files-section';
 
 // ... existing imports
 
@@ -80,6 +81,7 @@ export function EditMaterialDrawer({
       in_stock: material.in_stock ?? true,
       tags: material.tags || [],
       custom_specifications: material.custom_specifications || [],
+      attachments: material.attachments || [],
     },
   });
 
@@ -210,6 +212,9 @@ export function EditMaterialDrawer({
                   <SubBlockCard title="Пользовательские характеристики">
                     {/* Пользовательские характеристики */}
                     <CustomSpecificationsSection control={control} />
+                  </SubBlockCard>
+                  <SubBlockCard title="Прикрепленные файлы">
+                    <MaterialFilesSection control={control} />
                   </SubBlockCard>
                 </div>
               </ScrollArea>

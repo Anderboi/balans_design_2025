@@ -38,6 +38,19 @@ export const AddMaterialSchema = z.object({
     )
     .optional()
     .default([]),
+  attachments: z
+    .array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        url: z.string(),
+        size: z.number(),
+        type: z.string(),
+        created_at: z.string(),
+      }),
+    )
+    .optional()
+    .default([]),
 });
 
 export type AddMaterialFormValues = z.infer<typeof AddMaterialSchema>;

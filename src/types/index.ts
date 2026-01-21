@@ -150,8 +150,18 @@ export interface Material {
   in_stock?: boolean;
   tags?: string[];
   custom_specifications?: { label: string; value: string }[];
+  attachments?: MaterialAttachment[];
   created_at?: string;
   updated_at?: string;
+}
+
+export interface MaterialAttachment {
+  id: string;
+  name: string;
+  url: string;
+  size: number;
+  type: string;
+  created_at: string;
 }
 
 export enum MaterialType {

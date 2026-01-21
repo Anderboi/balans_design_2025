@@ -34,8 +34,9 @@ import { DeliveryInfoSection } from "./add-material-dialog/delivery-info-section
 import { PricingSection } from "./add-material-dialog/pricing-section";
 import { SpecificationsSection } from "./add-material-dialog/specifications-section";
 import { CustomSpecificationsSection } from "./add-material-dialog/custom-specifications-section";
-import { AdditionalInfoSection } from './add-material-dialog/additional-info-section';
-import SubBlockCard from '@/components/ui/sub-block-card';
+import { AdditionalInfoSection } from "./add-material-dialog/additional-info-section";
+import SubBlockCard from "@/components/ui/sub-block-card";
+import { MaterialFilesSection } from "./add-material-dialog/material-files-section";
 
 // ... existing imports
 
@@ -77,6 +78,7 @@ export function AddMaterialDialog({
       in_stock: true,
       tags: [],
       custom_specifications: [],
+      attachments: [],
     },
   });
 
@@ -133,9 +135,9 @@ export function AddMaterialDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChangeWrapper}>
-      <DialogContent  className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle >Добавить новый материал</DialogTitle>
+          <DialogTitle>Добавить новый материал</DialogTitle>
           <DialogDescription>
             Заполните информацию о материале для добавления в библиотеку
           </DialogDescription>
@@ -143,7 +145,6 @@ export function AddMaterialDialog({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            
             {/* Обложка материала */}
             <ImageUploadSection
               control={control}
@@ -193,6 +194,9 @@ export function AddMaterialDialog({
             <SubBlockCard title="Пользовательские характеристики">
               {/* Пользовательские характеристики */}
               <CustomSpecificationsSection control={control} />
+            </SubBlockCard>
+            <SubBlockCard title="Прикрепленные файлы">
+              <MaterialFilesSection control={control} />
             </SubBlockCard>
 
             <DialogFooter>
