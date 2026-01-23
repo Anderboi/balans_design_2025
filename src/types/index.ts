@@ -75,6 +75,25 @@ export interface Participant {
   role?: "executor" | "observer";
 }
 
+// User roles for application-level access control
+export enum AppRole {
+  ADMIN = "admin",
+  ARCHITECT = "architect",
+  MANAGER = "manager",
+  DESIGNER = "designer",
+  CLIENT = "client",
+  CONTRACTOR = "contractor",
+}
+
+export const APP_ROLE_LABELS: Record<AppRole, string> = {
+  [AppRole.ADMIN]: "Администратор",
+  [AppRole.ARCHITECT]: "Архитектор",
+  [AppRole.MANAGER]: "Менеджер",
+  [AppRole.DESIGNER]: "Дизайнер",
+  [AppRole.CLIENT]: "Клиент",
+  [AppRole.CONTRACTOR]: "Подрядчик",
+};
+
 export interface Comment {
   id: string;
   userName: string;

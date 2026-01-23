@@ -18,6 +18,9 @@ import { toast } from "sonner";
 import { updateProfile, uploadAvatar } from "./actions";
 import { useRef, useState, useTransition } from "react";
 import { Loader2 } from "lucide-react";
+import { RoleBadge } from "@/components/ui/role-badge";
+import { AppRole } from "@/types";
+import { Database } from "@/types/supabase";
 
 // Schema for profile validation
 const profileFormSchema = z.object({
@@ -43,7 +46,7 @@ interface ProfileFormProps {
     company: string;
     avatar_url?: string;
     full_name_display?: string;
-    role?: string;
+    role: Database["public"]["Enums"]["app_role"];
   };
 }
 
@@ -121,13 +124,11 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
             {initialData.last_name?.[0]}
           </AvatarFallback>
         </Avatar>
-        <div className="space-y-2">
+        <div className="space-y-2 flex flex-col">
           <h2 className="text-xl font-semibold">
             {initialData.full_name_display}
           </h2>
-          <p className="text-sm text-muted-foreground">
-            {initialData.role || "Пользователь"}
-          </p>
+          <RoleBadge role={initialData.role as AppRole} />
           <Button
             variant="outline"
             size="sm"

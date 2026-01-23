@@ -111,6 +111,7 @@ export type Database = {
           created_at: string | null;
           full_name: string | null;
           id: string;
+          role: Database["public"]["Enums"]["app_role"];
           updated_at: string | null;
           username: string | null;
         };
@@ -123,6 +124,7 @@ export type Database = {
           created_at?: string | null;
           full_name?: string | null;
           id: string;
+          role?: Database["public"]["Enums"]["app_role"];
           updated_at?: string | null;
           username?: string | null;
         };
@@ -135,6 +137,7 @@ export type Database = {
           created_at?: string | null;
           full_name?: string | null;
           id?: string;
+          role?: Database["public"]["Enums"]["app_role"];
           updated_at?: string | null;
           username?: string | null;
         };
@@ -329,7 +332,13 @@ export type Database = {
       [_ in never]: never;
     };
     Enums: {
-      [_ in never]: never;
+      app_role:
+        | "admin"
+        | "architect"
+        | "manager"
+        | "designer"
+        | "client"
+        | "contractor";
     };
     CompositeTypes: {
       [_ in never]: never;

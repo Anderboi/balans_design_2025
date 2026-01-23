@@ -60,7 +60,7 @@ const ProfileSettingsPage = async () => {
     company: profile.company || "",
     avatar_url: profile.avatar_url || undefined,
     full_name_display: profile.full_name || user.email,
-    role: "Администратор", // Placeholder or fetch from somewhere
+    role: profile.role,
   };
 
   return (
