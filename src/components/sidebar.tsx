@@ -37,9 +37,11 @@ export function Sidebar() {
       </nav>
       
       <div className="mt-auto pt-4 border-t">
-        <Button variant="outline" className="w-full">
-          Настройки
-        </Button>
+        <Link href="/settings" passHref>
+          <Button variant="outline" className="w-full">
+            Настройки
+          </Button>
+        </Link>
       </div>
     </div>
   );
