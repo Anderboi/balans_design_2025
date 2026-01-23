@@ -1,8 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import MainBlockCard from "@/components/ui/main-block-card";
-import PageHeader from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { TeamMembersList } from "./team-members-list";
+import { Button } from "@/components/ui/button";
+import { UserPlus } from "lucide-react";
+import PageHeader from "@/components/ui/page-header";
 
 const TeamSettingsPage = async () => {
   const supabase = await createClient();
@@ -34,8 +36,13 @@ const TeamSettingsPage = async () => {
   const isAdmin = currentUserProfile?.role === "admin";
 
   return (
-    <MainBlockCard className="space-y-6 p-8 md:p-12">
-      <PageHeader title="Команда" />
+    <MainBlockCard className="space-y-8 p-8 md:p-12">
+      <PageHeader title="Управление командой">
+        <Button variant="secondary" size="lg" className="gap-2 cursor-pointer">
+          <UserPlus className="size-4" />
+          Пригласить
+        </Button>
+      </PageHeader>
       <TeamMembersList
         members={teamMembers || []}
         currentUserId={user.id}
