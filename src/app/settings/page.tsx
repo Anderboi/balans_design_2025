@@ -1,11 +1,7 @@
-import SubBlockCard from "@/components/ui/sub-block-card";
+import { redirect } from "next/navigation";
 
 const SettingsPage = () => {
-  return (
-    <section className='w-full h-full'>
-      <SubBlockCard  title="Настройки"><div className='w-full'>dfsdf</div></SubBlockCard>
-    </section>
-  );
+  redirect("/settings/profile");
 };
 
 export default SettingsPage;

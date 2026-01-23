@@ -2,8 +2,17 @@ import PageContainer from "@/components/ui/page-container";
 import PageHeader from "@/components/ui/page-header";
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Bell, CreditCard, Globe, Shield, User, Users } from "lucide-react";
+import {
+  Bell,
+  CreditCard,
+  Globe,
+  LogOut,
+  Shield,
+  User,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
+import { signout } from "@/app/login/actions";
 
 const SettingsLayout = ({ children }: { children: React.ReactNode }) => {
   const menuItems = [
@@ -25,13 +34,13 @@ const SettingsLayout = ({ children }: { children: React.ReactNode }) => {
       id: "integrations",
       label: "Интеграции",
       icon: Globe,
-      href: "settings/integrations",
+      href: "/settings/integrations",
     },
     {
       id: "security",
       label: "Безопасность",
       icon: Shield,
-      href: "settings/security",
+      href: "/settings/security",
     },
   ];
 
@@ -64,6 +73,16 @@ const SettingsLayout = ({ children }: { children: React.ReactNode }) => {
                   </Link>
                 );
               })}
+              <form action={signout} className="w-full">
+                <Button
+                  variant={"outline"}
+                  className="cursor-pointer w-full items-center justify-start text-red-500 hover:text-red-600 hover:bg-red-50"
+                  type="submit"
+                >
+                  <LogOut />
+                  Выйти
+                </Button>
+              </form>
             </nav>
           </section>
           <section className="w-full h-full">{children}</section>

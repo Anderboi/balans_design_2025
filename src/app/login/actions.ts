@@ -64,10 +64,17 @@ export async function signup(formData: FormData) {
   if (!session) {
     // Email verification required
     return redirect(
-      "/login?message=Check your email to continue sign in process"
+      "/login?message=Check your email to continue sign in process",
     );
   }
 
   revalidatePath("/", "layout");
   redirect("/");
+}
+
+export async function signout() {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  revalidatePath("/", "layout");
+  redirect("/login");
 }
