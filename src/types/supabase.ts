@@ -98,12 +98,16 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "companies";
             referencedColumns: ["id"];
-          }
+          },
         ];
       };
       profiles: {
         Row: {
           avatar_url: string | null;
+          company: string | null;
+          email: string | null;
+          first_name: string | null;
+          last_name: string | null;
           created_at: string | null;
           full_name: string | null;
           id: string;
@@ -112,6 +116,10 @@ export type Database = {
         };
         Insert: {
           avatar_url?: string | null;
+          company?: string | null;
+          email?: string | null;
+          first_name?: string | null;
+          last_name?: string | null;
           created_at?: string | null;
           full_name?: string | null;
           id: string;
@@ -120,6 +128,10 @@ export type Database = {
         };
         Update: {
           avatar_url?: string | null;
+          company?: string | null;
+          email?: string | null;
+          first_name?: string | null;
+          last_name?: string | null;
           created_at?: string | null;
           full_name?: string | null;
           id?: string;
@@ -172,7 +184,7 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "contacts";
             referencedColumns: ["id"];
-          }
+          },
         ];
       };
       project_briefs: {
@@ -214,7 +226,7 @@ export type Database = {
             isOneToOne: true;
             referencedRelation: "projects";
             referencedColumns: ["id"];
-          }
+          },
         ];
       };
       rooms: {
@@ -252,7 +264,7 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "projects";
             referencedColumns: ["id"];
-          }
+          },
         ];
       };
       tasks: {
@@ -306,7 +318,7 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "projects";
             referencedColumns: ["id"];
-          }
+          },
         ];
       };
     };

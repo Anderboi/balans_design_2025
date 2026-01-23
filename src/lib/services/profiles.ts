@@ -17,17 +17,17 @@ export const profilesService = {
     }
 
     // Adapt database fields to Participant interface
-    return (data || []).map((p: Record<string, any>) => ({
+    return (data || []).map((p) => ({
       id: p.id,
-      name: p.full_name,
-      avatar: p.avatar_url,
+      name: p.full_name || "",
+      avatar: p.avatar_url || undefined,
     }));
   },
 
   // Получение профиля по ID
   async getProfileById(
     id: string,
-    client?: SupabaseClient
+    client?: SupabaseClient,
   ): Promise<Participant | null> {
     const supabaseClient = client || supabase;
     const { data, error } = await supabaseClient
@@ -44,8 +44,33 @@ export const profilesService = {
 
     return {
       id: data.id,
-      name: data.full_name,
-      avatar: data.avatar_url,
+      name: data.full_name || "",
+      avatar: data.avatar_url || undefined,
     };
+  },
+
+  // Обновление профиля
+  async updateProfile(
+    id: string,
+    updates: {
+      full_name?: string;
+      avatar_url?: string;
+      email?: string;
+      company?: string;
+      first_name?: string;
+      last_name?: string;
+    },
+    client?: SupabaseClient,
+  ): Promise<void> {
+    const supabaseClient = client || supabase;
+    const { error } = await supabaseClient
+      .from("profiles")
+      .update(updates)
+      .eq("id", id);
+
+    if (error) {
+      console.error(`Ошибка при обновлении профиля ${id}:`, error);
+      throw error;
+    }
   },
 };
