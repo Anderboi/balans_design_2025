@@ -59,6 +59,11 @@ export const profilesService = {
       company?: string;
       first_name?: string;
       last_name?: string;
+      notifications_new_tasks?: boolean;
+      notifications_comments?: boolean;
+      notifications_project_statuses?: boolean;
+      notifications_file_uploads?: boolean;
+      notifications_marketing?: boolean;
     },
     client?: SupabaseClient,
   ): Promise<void> {
