@@ -22,6 +22,7 @@ import { projectsService } from "@/lib/services/projects";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import DeleteIconButton from "@/components/ui/delete-button";
+import { completeBriefSectionAction } from "@/lib/actions/stages";
 
 interface FurnishingFormProps {
   projectId: string;
@@ -37,8 +38,9 @@ export function FurnishingForm({
   const router = useRouter();
   const [expandedRooms, setExpandedRooms] = useState<Set<string>>(new Set());
   const [expandedEquipment, setExpandedEquipment] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
+  const [action, setAction] = useState<"save" | "complete">("save");
 
   // Initialize equipment state from initialData
   const [roomsEquipment, setRoomsEquipment] = useState<{
@@ -93,7 +95,7 @@ export function FurnishingForm({
   const addEquipmentFromSuggestion = (
     roomId: string,
     name: string,
-    category?: string
+    category?: string,
   ) => {
     const newEquipment: Equipment = {
       id: uuidv4(),
@@ -120,12 +122,12 @@ export function FurnishingForm({
     roomId: string,
     equipmentId: string,
     field: K,
-    value: Equipment[K]
+    value: Equipment[K],
   ) => {
     setRoomsEquipment((prev) => ({
       ...prev,
       [roomId]: prev[roomId].map((eq) =>
-        eq.id === equipmentId ? { ...eq, [field]: value } : eq
+        eq.id === equipmentId ? { ...eq, [field]: value } : eq,
       ),
     }));
   };
@@ -149,6 +151,13 @@ export function FurnishingForm({
         equipment: data,
       });
 
+      if (action === "complete") {
+        await completeBriefSectionAction(projectId, "furnishing", true);
+        toast.success("Раздел завершен");
+        router.push(`/projects/${projectId}/brief`);
+        return;
+      }
+
       toast.success("Наполнение помещений сохранено");
       router.refresh();
     } catch (error) {
@@ -167,11 +176,11 @@ export function FurnishingForm({
       const equipment = roomsEquipment[room.id] || [];
       const allSuggestions = getMemoizedEquipmentSuggestions(
         room.name,
-        room.type
+        room.type,
       );
       const selectedNames = new Set(equipment.map((eq) => eq.name));
       suggestionsMap[room.id] = allSuggestions.filter(
-        (s: { name: string; category: string }) => !selectedNames.has(s.name)
+        (s: { name: string; category: string }) => !selectedNames.has(s.name),
       );
     });
     return suggestionsMap;
@@ -230,7 +239,7 @@ export function FurnishingForm({
                             {suggestions.map(
                               (
                                 suggestion: { name: string; category: string },
-                                idx: number
+                                idx: number,
                               ) => (
                                 <Button
                                   key={idx}
@@ -241,14 +250,14 @@ export function FurnishingForm({
                                     addEquipmentFromSuggestion(
                                       room.id,
                                       suggestion.name,
-                                      suggestion.category
+                                      suggestion.category,
                                     );
                                   }}
                                   className="cursor-pointer"
                                 >
                                   {suggestion.name}
                                 </Button>
-                              )
+                              ),
                             )}
                           </div>
                         </div>
@@ -266,7 +275,7 @@ export function FurnishingForm({
                             addEquipmentFromSuggestion(
                               room.id,
                               e.currentTarget.value.trim(),
-                              "Другое"
+                              "Другое",
                             );
                             e.currentTarget.value = "";
                           }
@@ -281,7 +290,7 @@ export function FurnishingForm({
                           </p>
                           {equipment.map((eq) => {
                             const isDetailsExpanded = expandedEquipment.has(
-                              eq.id
+                              eq.id,
                             );
                             return (
                               <div
@@ -297,7 +306,7 @@ export function FurnishingForm({
                                         room.id,
                                         eq.id,
                                         "name",
-                                        e.target.value
+                                        e.target.value,
                                       )
                                     }
                                     placeholder="Название"
@@ -312,7 +321,7 @@ export function FurnishingForm({
                                         room.id,
                                         eq.id,
                                         "quantity",
-                                        parseInt(e.target.value) || 1
+                                        parseInt(e.target.value) || 1,
                                       )
                                     }
                                     placeholder="Кол-во"
@@ -352,7 +361,7 @@ export function FurnishingForm({
                                             room.id,
                                             eq.id,
                                             "manufacturer",
-                                            e.target.value
+                                            e.target.value,
                                           )
                                         }
                                         placeholder="Производитель (необязательно)"
@@ -364,7 +373,7 @@ export function FurnishingForm({
                                             room.id,
                                             eq.id,
                                             "url",
-                                            e.target.value
+                                            e.target.value,
                                           )
                                         }
                                         placeholder="Ссылка на товар (необязательно)"
@@ -377,7 +386,7 @@ export function FurnishingForm({
                                           room.id,
                                           eq.id,
                                           "description",
-                                          e.target.value
+                                          e.target.value,
                                         )
                                       }
                                       placeholder="Комментарий (необязательно)"
@@ -397,7 +406,10 @@ export function FurnishingForm({
             );
           })}
         </div>
-        <FormSubmitButton isLoading={form.formState.isSubmitting} />
+        <FormSubmitButton
+          isLoading={form.formState.isSubmitting}
+          onActionSelect={setAction}
+        />
       </form>
     </Form>
   );

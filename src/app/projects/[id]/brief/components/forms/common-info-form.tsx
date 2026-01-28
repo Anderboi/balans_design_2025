@@ -21,6 +21,8 @@ import { projectsService } from "@/lib/services/projects";
 import { contactsService } from "@/lib/services/contacts";
 import { useRouter } from "next/navigation";
 import FormSubmitButton from "./form-submit-button";
+import { completeBriefSectionAction } from "@/lib/actions/stages";
+import { useState } from "react";
 
 interface CommonInfoFormProps {
   projectId: string;
@@ -43,6 +45,8 @@ export function CommonInfoForm({
     resolver: zodResolver(CommonDataSchema),
     defaultValues: initialData,
   });
+
+  const [action, setAction] = useState<"save" | "complete">("save");
 
   const handleSubmit = async (data: CommonFormValues) => {
     if (!projectId) {
@@ -75,7 +79,6 @@ export function CommonInfoForm({
           phone: data.phone,
         });
       } else if (clientId) {
-       
       }
 
       // 3. Mark stage item as completed
@@ -84,8 +87,16 @@ export function CommonInfoForm({
         projectId,
         "preproject",
         "object_info",
-        true
+        true,
       );
+
+      // 4. Update brief section status
+      if (action === "complete") {
+        await completeBriefSectionAction(projectId, "general", true);
+        toast.success("Раздел завершен");
+        router.push(`/projects/${projectId}/brief`);
+        return;
+      }
 
       // Update store - RESERVED for future if needed
       // setCommonData(data);
@@ -275,7 +286,10 @@ export function CommonInfoForm({
             />
           </div>
         </SubBlockCard>
-        <FormSubmitButton isLoading={form.formState.isSubmitting} />
+        <FormSubmitButton
+          isLoading={form.formState.isSubmitting}
+          onActionSelect={setAction}
+        />
       </form>
     </Form>
   );

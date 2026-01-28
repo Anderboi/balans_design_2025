@@ -35,6 +35,8 @@ import { projectsService } from "@/lib/services/projects";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import AddItemButton from "@/components/ui/add-item-button";
+import { completeBriefSectionAction } from "@/lib/actions/stages";
+import { useState } from "react";
 
 interface ResidentsFormProps {
   projectId?: string;
@@ -55,6 +57,8 @@ export function ResidentsForm({ projectId, initialData }: ResidentsFormProps) {
       petDetails: "",
     },
   });
+
+  const [action, setAction] = useState<"save" | "complete">("save");
 
   const {
     fields: adultsFields,
@@ -85,6 +89,13 @@ export function ResidentsForm({ projectId, initialData }: ResidentsFormProps) {
         residents: data,
       });
 
+      if (action === "complete") {
+        await completeBriefSectionAction(projectId, "residents", true);
+        toast.success("Раздел завершен");
+        router.push(`/projects/${projectId}/brief`);
+        return;
+      }
+
       toast.success("Данные о проживающих сохранены");
       router.refresh();
     } catch (error) {
@@ -102,7 +113,7 @@ export function ResidentsForm({ projectId, initialData }: ResidentsFormProps) {
             {adultsFields.map((field, index) => (
               <div
                 key={field.id}
-                className="flex gap-4 items-start animate-fade-in"
+                className="flex gap-4 items-end animate-fade-in"
               >
                 <FormField
                   control={form.control}
@@ -279,7 +290,10 @@ export function ResidentsForm({ projectId, initialData }: ResidentsFormProps) {
             )}
           />
         </SubBlockCard>
-        <FormSubmitButton isLoading={form.formState.isSubmitting} />
+        <FormSubmitButton
+          isLoading={form.formState.isSubmitting}
+          onActionSelect={setAction}
+        />
       </form>
     </Form>
   );

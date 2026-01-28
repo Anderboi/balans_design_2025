@@ -23,6 +23,7 @@ import { DoorOpen, Grid2x2, Hammer, Sofa } from "lucide-react";
 import FormSubmitButton from "./form-submit-button";
 import { projectsService } from "@/lib/services/projects";
 import { toast } from "sonner";
+import { completeBriefSectionAction } from "@/lib/actions/stages";
 
 interface DemolitionFormProps {
   projectId: string;
@@ -35,6 +36,7 @@ export function DemolitionForm({
 }: DemolitionFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [action, setAction] = useState<"save" | "complete">("save");
 
   const form = useForm<DemolitionType>({
     resolver: zodResolver(DemolitionSchema),
@@ -63,6 +65,13 @@ export function DemolitionForm({
       await projectsService.updateProjectBrief(projectId, {
         demolition: data,
       });
+
+      if (action === "complete") {
+        await completeBriefSectionAction(projectId, "demolition", true);
+        toast.success("Раздел завершен");
+        router.push(`/projects/${projectId}/brief`);
+        return;
+      }
 
       toast.success("Данные по демонтажу сохранены");
       router.refresh();
@@ -264,7 +273,7 @@ export function DemolitionForm({
             />
           )}
         </SubBlockCard>
-        <FormSubmitButton isLoading={isLoading} />
+        <FormSubmitButton isLoading={isLoading} onActionSelect={setAction} />
       </form>
     </Form>
   );

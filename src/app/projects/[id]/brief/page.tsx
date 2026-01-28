@@ -12,8 +12,10 @@ import {
 import { SlashIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BriefSectionsGrid } from "./components/brief-section-grid";
-import PageHeader from '@/components/ui/page-header';
-import PageContainer from '@/components/ui/page-container';
+import PageHeader from "@/components/ui/page-header";
+import PageContainer from "@/components/ui/page-container";
+
+import { createClient } from "@/lib/supabase/server";
 
 export default async function BriefPage({
   params,
@@ -21,7 +23,12 @@ export default async function BriefPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const project = await projectsService.getProjectById(id);
+  const supabase = await createClient();
+
+  const [project, brief] = await Promise.all([
+    projectsService.getProjectById(id, supabase),
+    projectsService.getProjectBrief(id, supabase),
+  ]);
 
   if (!project) {
     notFound();
@@ -49,7 +56,7 @@ export default async function BriefPage({
           </BreadcrumbList>
         </Breadcrumb>
 
-        <PageHeader title="Техническое задание"/>
+        <PageHeader title="Техническое задание" />
       </div>
 
       {/* Main Content Info */}
@@ -69,13 +76,22 @@ export default async function BriefPage({
         </p>
 
         <div className="pt-4 flex flex-col items-center gap-2">
-          <span className="text-[11px] font-bold text-gray-400">0%</span>
+          <span className="text-[11px] font-bold text-gray-400">
+            {brief?.sections_completed
+              ? Math.round(
+                  ((brief.sections_completed as string[]).length / 8) * 100,
+                )
+              : 0}
+            %
+          </span>
           {/* Progress bar could go here if needed, but the design shows just the percentage for now */}
         </div>
       </div>
 
       {/* Grid */}
-      <BriefSectionsGrid />
+      <BriefSectionsGrid
+        completedSections={(brief?.sections_completed as string[]) || []}
+      />
 
       {/* Footer Action */}
       <div className="flex justify-center pt-10">

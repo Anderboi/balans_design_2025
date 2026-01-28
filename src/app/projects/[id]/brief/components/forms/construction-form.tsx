@@ -23,6 +23,7 @@ import { projectsService } from "@/lib/services/projects";
 import { useRouter } from "next/navigation";
 import { CONSTRUCTION_TYPES } from "../../constants/construction-options";
 import { MaterialSection } from "./construction-material-section";
+import { completeBriefSectionAction } from "@/lib/actions/stages";
 
 interface ConstructionFormProps {
   projectId: string;
@@ -38,8 +39,9 @@ export function ConstructionForm({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    new Set(["walls", "ceiling", "floor"])
+    new Set(["walls", "ceiling", "floor"]),
   );
+  const [action, setAction] = useState<"save" | "complete">("save");
 
   const form = useForm<ConstructionFormValues>({
     resolver: zodResolver(ConstructionInfoSchema),
@@ -78,21 +80,31 @@ export function ConstructionForm({
         const cleanedData = {
           floor:
             data.floor?.filter(
-              (item) => item && item.type && item.rooms && item.rooms.length > 0
+              (item) =>
+                item && item.type && item.rooms && item.rooms.length > 0,
             ) || [],
           ceiling:
             data.ceiling?.filter(
-              (item) => item && item.type && item.rooms && item.rooms.length > 0
+              (item) =>
+                item && item.type && item.rooms && item.rooms.length > 0,
             ) || [],
           walls:
             data.walls?.filter(
-              (item) => item && item.type && item.rooms && item.rooms.length > 0
+              (item) =>
+                item && item.type && item.rooms && item.rooms.length > 0,
             ) || [],
         };
 
         await projectsService.updateProjectBrief(projectId, {
           construction: cleanedData,
         });
+
+        if (action === "complete") {
+          await completeBriefSectionAction(projectId, "construction", true);
+          toast.success("Раздел завершен");
+          router.push(`/projects/${projectId}/brief`);
+          return;
+        }
 
         toast.success("Информация по монтажу сохранена");
         router.refresh();
@@ -108,7 +120,7 @@ export function ConstructionForm({
 
     // Находим первую ошибку с message
     const firstErrorMessage = Object.values(errors).find(
-      (error) => error?.message
+      (error) => error?.message,
     )?.message;
 
     if (firstErrorMessage) {
@@ -160,7 +172,7 @@ export function ConstructionForm({
             itemCount={getCategoryItemCount("floor")}
           />
         </div>
-        <FormSubmitButton isLoading={isPending} />
+        <FormSubmitButton isLoading={isPending} onActionSelect={setAction} />
       </form>
     </Form>
   );

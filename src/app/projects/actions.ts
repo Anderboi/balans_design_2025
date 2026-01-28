@@ -1,10 +1,13 @@
-import { projectsService } from '@/lib/services/projects';
+import { projectsService } from "@/lib/services/projects";
+
+import { createClient } from "@/lib/supabase/server";
 
 export async function getProjects() {
   try {
-      return await projectsService.getProjects();
-    } catch (error) {
-      console.error("Ошибка при загрузке проектов:", error);
-      throw error;
-    }
+    const supabase = await createClient();
+    return await projectsService.getProjects(supabase);
+  } catch (error) {
+    console.error("Ошибка при загрузке проектов:", error);
+    throw error;
+  }
 }

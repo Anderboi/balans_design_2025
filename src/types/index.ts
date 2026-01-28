@@ -8,7 +8,7 @@ export interface Project {
   residents?: string; // Optional/missing in DB main table
   demolition_info?: string; // Optional/missing in DB main table
   construction_info?: string; // Optional/missing in DB main table
-  rooms: Room[];
+  rooms?: Room[]; // Optional as it is not always fetched
   stage: string; // Changed from ProjectStage enum to string to match DB
   created_at: string;
   updated_at: string;

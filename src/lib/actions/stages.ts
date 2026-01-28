@@ -8,7 +8,7 @@ export async function toggleStageItemAction(
   projectId: string,
   stageId: string,
   itemId: string,
-  completed: boolean
+  completed: boolean,
 ) {
   try {
     const supabase = await createClient();
@@ -25,7 +25,7 @@ export async function toggleStageItemAction(
       stageId,
       itemId,
       completed,
-      supabase
+      supabase,
     );
 
     revalidatePath(`/projects/${projectId}`);
@@ -33,5 +33,36 @@ export async function toggleStageItemAction(
   } catch (error) {
     console.error("Error toggling stage item:", error);
     return { success: false, error: "Failed to update stage item" };
+  }
+}
+
+export async function completeBriefSectionAction(
+  projectId: string,
+  sectionId: string,
+  completed: boolean,
+) {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    await projectsService.updateBriefSectionStatus(
+      projectId,
+      sectionId,
+      completed,
+      supabase,
+    );
+
+    revalidatePath(`/projects/${projectId}/brief`);
+    revalidatePath(`/projects/${projectId}`);
+    return { success: true };
+  } catch (error) {
+    console.error("Error completing brief section:", error);
+    return { success: false, error: "Failed to update brief section status" };
   }
 }

@@ -64,7 +64,7 @@ export const EquipmentBlockSchema = z.object({
       room_id: z.string(),
       room_name: z.string(),
       equipment: z.array(EquipmentSchema),
-    })
+    }),
   ),
 });
 export type EquipmentBlockFormValues = z.infer<typeof EquipmentBlockSchema>;
@@ -125,7 +125,7 @@ type EquipmentSuggestionsCache = Map<
 interface GetMemoizedEquipmentSuggestions {
   (
     roomName: string,
-    roomType?: RoomType
+    roomType?: RoomType,
   ): (typeof equipmentTemplates)[keyof typeof equipmentTemplates];
   cache: EquipmentSuggestionsCache;
 }
@@ -133,7 +133,7 @@ interface GetMemoizedEquipmentSuggestions {
 // Функция для получения предложений оборудования
 export const getEquipmentSuggestions = (
   roomName: string,
-  roomType?: RoomType
+  roomType?: RoomType,
 ) => {
   const name = roomName.toLowerCase();
 
@@ -174,7 +174,7 @@ export const getEquipmentSuggestions = (
 export const getMemoizedEquipmentSuggestions: GetMemoizedEquipmentSuggestions =
   (
     roomName: string,
-    roomType?: RoomType
+    roomType?: RoomType,
   ): (typeof equipmentTemplates)[keyof typeof equipmentTemplates] => {
     // Создаем уникальный ключ для кэширования
     const cacheKey = `${roomName}_${roomType || "undefined"}`;
@@ -216,7 +216,7 @@ export const ResidentsSchema = z.object({
           .positive("Рост должен быть положительным")
           .lte(250, "Рост не может быть больше 250 см"),
         gender: z.string(),
-      })
+      }),
     )
     .min(1, "Должен быть хотя бы один взрослый"),
   children: z.array(
@@ -225,7 +225,7 @@ export const ResidentsSchema = z.object({
         .number({ message: "Введите возраст числом" })
         .positive("Возраст должен быть положительным")
         .lte(18, "Возраст должен быть меньше 18 лет"),
-    })
+    }),
   ),
   hobbies: z.string().optional(),
   healthIssues: z.string().optional(),
@@ -291,3 +291,14 @@ export type SystemRecord = {
   type: SystemType;
   rooms: string[];
 };
+
+// ? Стиль
+export const StyleSchema = z.object({
+  preferences: z.string().optional(),
+  pinterestLink: z
+    .string()
+    .url("Введите корректный URL")
+    .optional()
+    .or(z.literal("")),
+});
+export type StyleFormValues = z.infer<typeof StyleSchema>;

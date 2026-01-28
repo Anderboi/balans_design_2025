@@ -21,7 +21,8 @@ export function BriefSectionCard({
       onClick={onClick}
       className={cn(
         "group relative flex flex-col p-8 bg-background rounded-[32px] border border-gray-100/80 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer hover:-translate-y-1",
-        completed && "bg-gray-50/50"
+        completed &&
+          "bg-emerald-50/50 border-emerald-200 hover:border-emerald-300 hover:shadow-emerald-50",
       )}
     >
       {/* Status indicator */}
@@ -30,8 +31,8 @@ export function BriefSectionCard({
           className={cn(
             "size-6 rounded-full border-2 transition-colors duration-300",
             completed
-              ? "bg-black border-black"
-              : "border-gray-100 group-hover:border-gray-200"
+              ? "bg-emerald-500 border-emerald-500"
+              : "border-gray-100 group-hover:border-gray-200",
           )}
         >
           {completed && (

@@ -1,3 +1,4 @@
+import { BRIEF_SECTION_IDS } from "@/config/brief-sections";
 import { supabase } from "@/lib/supabase";
 import { Project, ProjectStageItem } from "@/types";
 import { SupabaseClient } from "@supabase/supabase-js";
@@ -22,7 +23,7 @@ export const projectsService = {
   // Получение проекта по ID
   async getProjectById(
     id: string,
-    client?: SupabaseClient
+    client?: SupabaseClient,
   ): Promise<Project | null> {
     // Проверка на undefined или пустой ID
     if (!id) {
@@ -52,7 +53,7 @@ export const projectsService = {
       Project,
       "id" | "created_at" | "updated_at" | "contacts" | "rooms"
     >,
-    client?: SupabaseClient
+    client?: SupabaseClient,
   ): Promise<Project> {
     const supabaseClient = client || supabase;
 
@@ -68,7 +69,7 @@ export const projectsService = {
         p_residents: project.residents || "",
         p_demolition_info: project.demolition_info || "",
         p_construction_info: project.construction_info || "",
-      }
+      },
     );
 
     if (error) {
@@ -109,7 +110,7 @@ export const projectsService = {
   async updateProject(
     id: string,
     project: Partial<Project>,
-    client?: SupabaseClient
+    client?: SupabaseClient,
   ): Promise<Project> {
     // Проверка на undefined или пустой ID
     if (!id) {
@@ -171,7 +172,7 @@ export const projectsService = {
     if (error) {
       console.error(
         `Ошибка при получении помещений для проекта ${projectId}:`,
-        error
+        error,
       );
       throw error;
     }
@@ -182,7 +183,7 @@ export const projectsService = {
   // Получение проектов по ID клиента
   async getProjectsByClientId(
     clientId: string,
-    client?: SupabaseClient
+    client?: SupabaseClient,
   ): Promise<Project[]> {
     if (!clientId) {
       console.error("Попытка получить проекты с пустым ID клиента");
@@ -198,7 +199,7 @@ export const projectsService = {
     if (error) {
       console.error(
         `Ошибка при получении проектов для клиента с ID ${clientId}:`,
-        error
+        error,
       );
       throw error;
     }
@@ -209,7 +210,7 @@ export const projectsService = {
   // Получение статусов этапов проекта
   async getProjectStageItems(
     projectId: string,
-    client?: SupabaseClient
+    client?: SupabaseClient,
   ): Promise<ProjectStageItem[]> {
     if (!projectId) return [];
 
@@ -234,7 +235,7 @@ export const projectsService = {
     stageId: string,
     itemId: string,
     completed: boolean,
-    client?: SupabaseClient
+    client?: SupabaseClient,
   ): Promise<ProjectStageItem | null> {
     const supabaseClient = client || supabase;
 
@@ -251,7 +252,7 @@ export const projectsService = {
           completed_at: completed ? new Date().toISOString() : null,
           updated_at: new Date().toISOString(),
         },
-        { onConflict: "project_id,stage_id,item_id" }
+        { onConflict: "project_id,stage_id,item_id" },
       )
       .select()
       .single();
@@ -266,6 +267,7 @@ export const projectsService = {
 
   // Получение брифа проекта
   async getProjectBrief(projectId: string, client?: SupabaseClient) {
+    
     if (!projectId) return null;
 
     const supabaseClient = client || supabase;
@@ -288,7 +290,7 @@ export const projectsService = {
   async updateProjectBrief(
     projectId: string,
     data: Record<string, any>, // Allow flexible partial updates
-    client?: SupabaseClient
+    client?: SupabaseClient,
   ) {
     if (!projectId) throw new Error("ID проекта обязателен");
 
@@ -302,7 +304,7 @@ export const projectsService = {
           ...data,
           updated_at: new Date().toISOString(),
         },
-        { onConflict: "project_id" }
+        { onConflict: "project_id" },
       )
       .select()
       .single();
@@ -313,5 +315,72 @@ export const projectsService = {
     }
 
     return result;
+  },
+
+  // Обновление статуса раздела брифа
+  async updateBriefSectionStatus(
+    projectId: string,
+    sectionId: string,
+    completed: boolean,
+    client?: SupabaseClient,
+  ) {
+    const supabaseClient = client || supabase;
+
+    // 1. Получаем текущий бриф
+    const { data: brief, error: fetchError } = await supabaseClient
+      .from("project_briefs")
+      .select("sections_completed")
+      .eq("project_id", projectId)
+      .single();
+
+    if (fetchError) {
+      console.error(
+        `Ошибка при получении брифа для обновления статуса ${sectionId}:`,
+        fetchError,
+      );
+      throw fetchError;
+    }
+
+    const currentSections = (brief?.sections_completed as string[]) || [];
+    let newSections = [...currentSections];
+
+    if (completed) {
+      if (!newSections.includes(sectionId)) {
+        newSections.push(sectionId);
+      }
+    } else {
+      newSections = newSections.filter((id) => id !== sectionId);
+    }
+
+    // 2. Обновляем список завершенных разделов
+    const { error: updateError } = await supabaseClient
+      .from("project_briefs")
+      .update({
+        sections_completed: newSections,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("project_id", projectId);
+
+    if (updateError) {
+      console.error(
+        `Ошибка при обновлении статуса раздела ${sectionId}:`,
+        updateError,
+      );
+      throw updateError;
+    }
+
+    // 3. Проверяем, все ли разделы завершены
+    const allCompleted = BRIEF_SECTION_IDS.every((id) =>
+      newSections.includes(id),
+    );
+
+    // 4. Обновляем статус этапа "Техническое задание" (brief)
+    await this.toggleProjectStageItem(
+      projectId,
+      "preproject",
+      "brief",
+      allCompleted,
+      supabaseClient,
+    );
   },
 };

@@ -40,8 +40,11 @@ const tabs = [
   { value: "team", name: "Команда", icon: Users },
 ];
 
+import { createClient } from "@/lib/supabase/server";
+
 async function getProjectData(id: string) {
-  return await projectsService.getProjectById(id);
+  const supabase = await createClient();
+  return await projectsService.getProjectById(id, supabase);
 }
 
 export default async function ProjectDetailPage({

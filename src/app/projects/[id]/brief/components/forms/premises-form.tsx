@@ -17,6 +17,7 @@ import DeleteIconButton from "@/components/ui/delete-button";
 import FormSubmitButton from "./form-submit-button";
 import AddItemButton from "@/components/ui/add-item-button";
 import { useRouter } from "next/navigation";
+import { completeBriefSectionAction } from "@/lib/actions/stages";
 
 interface PremisesFormProps {
   projectId: string;
@@ -75,6 +76,7 @@ export const roomList: Option[] = [
 export function PremisesForm({ projectId, initialData }: PremisesFormProps) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
+  const [action, setAction] = useState<"save" | "complete">("save");
 
   // Initialize options with custom rooms from initialData
   const [options, setOptions] = useState(() => {
@@ -191,6 +193,14 @@ export function PremisesForm({ projectId, initialData }: PremisesFormProps) {
     setIsSaving(true);
     try {
       await roomsService.bulkUpsertRooms(projectId, data.rooms);
+
+      if (action === "complete") {
+        await completeBriefSectionAction(projectId, "rooms", true);
+        toast.success("Раздел завершен");
+        router.push(`/projects/${projectId}/brief`);
+        return;
+      }
+
       toast.success("Помещения успешно сохранены");
       router.refresh();
     } catch (error) {
@@ -222,7 +232,7 @@ export function PremisesForm({ projectId, initialData }: PremisesFormProps) {
                           options={options}
                           value={
                             options.find(
-                              (option) => option.value === field.value
+                              (option) => option.value === field.value,
                             ) || null
                           }
                           onChange={(val) => handleRoomNameChange(val, index)}
@@ -253,7 +263,7 @@ export function PremisesForm({ projectId, initialData }: PremisesFormProps) {
             Добавить помещение
           </AddItemButton>
         </div>
-        <FormSubmitButton isLoading={isSaving} />
+        <FormSubmitButton isLoading={isSaving} onActionSelect={setAction} />
       </form>
     </Form>
   );

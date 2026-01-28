@@ -199,6 +199,8 @@ export type Database = {
           engineering: Json | null;
           equipment: Json | null;
           general_info: Json | null;
+          sections_completed: Json | null;
+          style: Json | null;
           created_at: string | null;
           updated_at: string | null;
         };
@@ -209,6 +211,9 @@ export type Database = {
           demolition?: Json | null;
           engineering?: Json | null;
           equipment?: Json | null;
+          general_info?: Json | null;
+          sections_completed?: Json | null;
+          style?: Json | null;
           created_at?: string | null;
           updated_at?: string | null;
         };
@@ -219,6 +224,9 @@ export type Database = {
           demolition?: Json | null;
           engineering?: Json | null;
           equipment?: Json | null;
+          general_info?: Json | null;
+          sections_completed?: Json | null;
+          style?: Json | null;
           created_at?: string | null;
           updated_at?: string | null;
         };

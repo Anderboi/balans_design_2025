@@ -1,5 +1,6 @@
 import { projectsService } from "@/lib/services/projects";
 import { notFound } from "next/navigation";
+import { StyleForm } from "../components/forms/style-form";
 import Link from "next/link";
 import {
   Breadcrumb,
@@ -13,13 +14,20 @@ import { SlashIcon } from "lucide-react";
 import PageHeader from "@/components/ui/page-header";
 import PageContainer from "@/components/ui/page-container";
 
+import { createClient } from "@/lib/supabase/server";
+
 export default async function BriefStylePage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const project = await projectsService.getProjectById(id);
+  const supabase = await createClient();
+
+  const [project, brief] = await Promise.all([
+    projectsService.getProjectById(id, supabase),
+    projectsService.getProjectBrief(id, supabase),
+  ]);
 
   if (!project) {
     notFound();
@@ -58,8 +66,7 @@ export default async function BriefStylePage({
       </div>
 
       <div className="mt-8">
-        {/* Form content will go here */}
-        <p className="text-gray-500">Form content placeholder</p>
+        <StyleForm projectId={id} initialData={brief?.style} />
       </div>
     </PageContainer>
   );

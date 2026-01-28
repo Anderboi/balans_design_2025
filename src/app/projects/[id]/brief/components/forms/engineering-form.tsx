@@ -15,6 +15,7 @@ import FormSubmitButton from "./form-submit-button";
 import { projectsService } from "@/lib/services/projects";
 import { EngineeringSection } from "./engineering-section";
 import { ENGINEERING_OPTIONS } from "../../constants/engineering-options";
+import { completeBriefSectionAction } from "@/lib/actions/stages";
 
 interface EngineeringFormProps {
   projectId: string;
@@ -36,8 +37,9 @@ export function EngineeringForm({
       "conditioningSystem",
       "purificationSystem",
       "electricSystem",
-    ])
+    ]),
   );
+  const [action, setAction] = useState<"save" | "complete">("save");
 
   const form = useForm<EngineeringSystemsType>({
     resolver: zodResolver(EngineeringSystemsSchema),
@@ -53,13 +55,17 @@ export function EngineeringForm({
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => {
       const newSet = new Set(prev);
-      newSet.has(section) ? newSet.delete(section) : newSet.add(section);
+      if (newSet.has(section)) {
+        newSet.delete(section);
+      } else {
+        newSet.add(section);
+      }
       return newSet;
     });
   };
 
   const getCategoryItemCount = (
-    category: keyof EngineeringSystemsType
+    category: keyof EngineeringSystemsType,
   ): number => {
     const sections = form.watch(category);
     return sections?.filter((s) => s?.system).length || 0;
@@ -86,6 +92,13 @@ export function EngineeringForm({
           engineering: cleanedData,
         });
 
+        if (action === "complete") {
+          await completeBriefSectionAction(projectId, "engineering", true);
+          toast.success("Раздел завершен");
+          router.push(`/projects/${projectId}/brief`);
+          return;
+        }
+
         toast.success("Инженерные системы сохранены");
         router.push(`/projects/${projectId}/brief`);
         router.refresh();
@@ -101,7 +114,7 @@ export function EngineeringForm({
 
     // Находим первое сообщение об ошибке
     const firstErrorMessage = Object.values(errors).find(
-      (error) => error?.message
+      (error) => error?.message,
     )?.message;
 
     if (firstErrorMessage) {
@@ -186,7 +199,7 @@ export function EngineeringForm({
           />
         </div>
 
-        <FormSubmitButton isLoading={isPending} />
+        <FormSubmitButton isLoading={isPending} onActionSelect={setAction} />
       </form>
     </Form>
   );
