@@ -51,6 +51,15 @@ export default async function ObjectInfoPage({
     logisticsRules: locationData.logisticsRules,
   };
 
+  // Prepare initial data for TechnicalConditionsSection
+  const technicalConditionsData = objectInfo.technicalConditions || {};
+  const technicalConditionsInitialData = {
+    voltageCapacity: technicalConditionsData.voltageCapacity,
+    coolingCapacity: technicalConditionsData.coolingCapacity,
+    recommendations: technicalConditionsData.recommendations,
+    attachments: technicalConditionsData.attachments || [],
+  };
+
   return (
     <PageContainer>
       {/* Header & Breadcrumbs */}
@@ -84,7 +93,10 @@ export default async function ObjectInfoPage({
           projectAddress={project.address || ""}
           initialData={locationLogisticsInitialData}
         />
-        <TechnicalConditionsSection data={objectInfo.technicalConditions} />
+        <TechnicalConditionsSection
+          projectId={id}
+          initialData={technicalConditionsInitialData}
+        />
         <ResponsiblePersonSection data={objectInfo.responsiblePerson} />
         <DocumentationPlansSection data={objectInfo.documents} />
         {/* <PhotoFixationSection data={objectInfo.photos} /> */}

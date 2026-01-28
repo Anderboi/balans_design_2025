@@ -327,3 +327,14 @@ export const LocationLogisticsSchema = z.object({
 export type LocationLogisticsFormValues = z.infer<
   typeof LocationLogisticsSchema
 >;
+
+// ? Technical Conditions
+export const TechnicalConditionsSchema = z.object({
+  voltageCapacity: z.string().optional(),
+  coolingCapacity: z.string().optional(),
+  recommendations: z.string().optional(),
+  attachments: z.array(z.string()).optional(),
+});
+export type TechnicalConditionsFormValues = z.infer<
+  typeof TechnicalConditionsSchema
+>;
