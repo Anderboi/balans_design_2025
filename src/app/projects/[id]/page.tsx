@@ -66,7 +66,7 @@ export default async function ProjectDetailPage({
   const address = project.address || "Адрес не указан";
 
   return (
-    <div className=" //px-6 //py-6 space-y-8">
+    <div className="space-y-8">
       {/* Header Section */}
       <div className="space-y-6">
         {/* Breadcrumb / Back Link */}

@@ -302,3 +302,28 @@ export const StyleSchema = z.object({
     .or(z.literal("")),
 });
 export type StyleFormValues = z.infer<typeof StyleSchema>;
+
+// ? Location & Logistics
+export const LocationLogisticsSchema = z.object({
+  floor: z.number().optional(),
+  entrance: z.number().optional(),
+  code: z.string().optional(),
+  passengerLift: z
+    .object({
+      width: z.number().optional(),
+      depth: z.number().optional(),
+      height: z.number().optional(),
+    })
+    .optional(),
+  freightLift: z
+    .object({
+      width: z.number().optional(),
+      depth: z.number().optional(),
+      height: z.number().optional(),
+    })
+    .optional(),
+  logisticsRules: z.string().optional(),
+});
+export type LocationLogisticsFormValues = z.infer<
+  typeof LocationLogisticsSchema
+>;

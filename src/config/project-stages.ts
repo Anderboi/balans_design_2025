@@ -29,6 +29,12 @@ export const STAGES_CONFIG: StageConfig[] = [
     defaultStatus: "completed",
     items: [
       {
+        id: "documents",
+        title: "Документы",
+        completed: true,
+        icon: FileText,
+      },
+      {
         id: "brief",
         title: "Техническое задание",
         completed: true,
@@ -37,12 +43,6 @@ export const STAGES_CONFIG: StageConfig[] = [
       {
         id: "object_info",
         title: "Информация по объекту",
-        completed: true,
-        icon: FileText,
-      },
-      {
-        id: "documents",
-        title: "Документы",
         completed: true,
         icon: FileText,
       },

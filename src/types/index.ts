@@ -10,6 +10,7 @@ export interface Project {
   construction_info?: string; // Optional/missing in DB main table
   rooms?: Room[]; // Optional as it is not always fetched
   stage: string; // Changed from ProjectStage enum to string to match DB
+  object_info?: ObjectInfo;
   created_at: string;
   updated_at: string;
   contacts?: Contact | null;
@@ -264,4 +265,71 @@ export enum ContactType {
 export enum CompanyType {
   CLIENT = "Клиент",
   SUPPLIER = "Поставщик",
+}
+
+// Типы для информации об объекте
+export interface RoutePoint {
+  floor: number;
+  elevator: number;
+  area: number;
+}
+
+export interface ElevatorEquipment {
+  shaftCount: number;
+  passengerSpeed: number;
+  passengerWeight: number;
+  cargoSpeed: number;
+  cargoWeight: number;
+  cargoHeight: number;
+}
+
+export interface TechnicalConditions {
+  voltageCapacity: number;
+  waterPressure: number;
+  heatingType: string;
+  recommendations?: string;
+}
+
+export interface ResponsiblePerson {
+  fullName: string;
+  position: string;
+  phone: string;
+}
+
+export interface DocumentAttachment {
+  id: string;
+  name: string;
+  url: string;
+  type: string;
+  category: "plan_bti" | "instruction" | "cadastral" | "other";
+}
+
+export interface PhotoAttachment {
+  id: string;
+  url: string;
+  thumbnailUrl?: string;
+}
+
+export interface ObjectInfo {
+  // Location and Logistics
+  address?: string;
+  distance?: string;
+  navigationInstructions?: string;
+  routePoints?: RoutePoint[];
+  loadingSpecs?: string;
+
+  // Elevator Equipment
+  elevatorEquipment?: ElevatorEquipment;
+
+  // Technical Conditions
+  technicalConditions?: TechnicalConditions;
+
+  // Responsible Person
+  responsiblePerson?: ResponsiblePerson;
+
+  // Documentation
+  documents?: DocumentAttachment[];
+
+  // Photos
+  photos?: PhotoAttachment[];
 }

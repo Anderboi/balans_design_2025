@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { StageConfig } from "@/config/project-stages";
 import { StageHeader } from "./stage-header";
 import { StageItem } from "./stage-item";

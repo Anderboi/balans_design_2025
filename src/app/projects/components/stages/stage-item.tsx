@@ -16,18 +16,26 @@ export function StageItem({
   projectId,
 }: Omit<StageItemProps, "onToggle">) {
   const isBrief = item.id === "brief";
+  const isObjectInfo = item.id === "object_info";
+  const isClickable = isBrief || isObjectInfo;
   const Icon = item.icon || FileText;
+
+  const getHref = () => {
+    if (isBrief) return `/projects/${projectId}/brief`;
+    if (isObjectInfo) return `/projects/${projectId}/object-info`;
+    return "#";
+  };
 
   return (
     <Link
-      href={isBrief ? `/projects/${projectId}/brief` : "#"}
+      href={getHref()}
       key={item.id}
       onClick={(e) => {
-        if (!isBrief) e.preventDefault();
+        if (!isClickable) e.preventDefault();
       }}
       className={cn(
         "flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 transition-colors group cursor-pointer",
-        !isBrief && "pointer-events-none"
+        !isClickable && "pointer-events-none",
       )}
     >
       <div className="flex items-center gap-3 text-gray-600 group-hover:text-zinc-900 transition-colors">
@@ -43,10 +51,10 @@ export function StageItem({
         </div> */}
         <div
           className={cn(
-            "w-8 h-8 rounded-lg flex items-center justify-center shrink-0",
+            "size-8 rounded-lg flex items-center justify-center shrink-0",
             item.completed
               ? "bg-green-50 text-green-600"
-              : "bg-gray-100 text-gray-400"
+              : "bg-gray-100 text-gray-400",
           )}
         >
           <Icon className="size-4" />
@@ -56,7 +64,7 @@ export function StageItem({
 
       <div className="flex items-center gap-2">
         {item.completed && <Check className="size-4 text-green-500" />}
-        {isBrief && (
+        {isClickable && (
           <ChevronRight className="size-4 text-gray-300 group-hover:text-black transition-colors" />
         )}
       </div>
