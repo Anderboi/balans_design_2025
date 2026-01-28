@@ -338,3 +338,13 @@ export const TechnicalConditionsSchema = z.object({
 export type TechnicalConditionsFormValues = z.infer<
   typeof TechnicalConditionsSchema
 >;
+
+// ? Responsible Person
+export const ResponsiblePersonSchema = z.object({
+  fullName: z.string().optional(),
+  position: z.string().optional(),
+  phone: z.string().optional(),
+});
+export type ResponsiblePersonFormValues = z.infer<
+  typeof ResponsiblePersonSchema
+>;

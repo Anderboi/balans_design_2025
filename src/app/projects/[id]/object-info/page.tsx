@@ -60,6 +60,14 @@ export default async function ObjectInfoPage({
     attachments: technicalConditionsData.attachments || [],
   };
 
+  // Prepare initial data for ResponsiblePersonSection
+  const responsiblePersonData = objectInfo.responsiblePerson || {};
+  const responsiblePersonInitialData = {
+    fullName: responsiblePersonData.fullName,
+    position: responsiblePersonData.position,
+    phone: responsiblePersonData.phone,
+  };
+
   return (
     <PageContainer>
       {/* Header & Breadcrumbs */}
@@ -97,7 +105,10 @@ export default async function ObjectInfoPage({
           projectId={id}
           initialData={technicalConditionsInitialData}
         />
-        <ResponsiblePersonSection data={objectInfo.responsiblePerson} />
+        <ResponsiblePersonSection
+          projectId={id}
+          initialData={responsiblePersonInitialData}
+        />
         <DocumentationPlansSection data={objectInfo.documents} />
         {/* <PhotoFixationSection data={objectInfo.photos} /> */}
       </div>

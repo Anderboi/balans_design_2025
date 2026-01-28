@@ -40,3 +40,43 @@ export function formatDate(dateString: string): string {
   const year = date.getFullYear();
   return `${day}-${month}-${year}`;
 }
+
+export function formatPhoneNumber(value: string): string {
+  if (!value) return "";
+
+  // Оставляем только цифры
+  const digits = value.replace(/\D/g, "");
+
+  // Если первая цифра 7 или 8, убираем её для нормализации
+  let number = digits;
+  if (number.startsWith("7") || number.startsWith("8")) {
+    number = number.substring(1);
+  }
+
+  // Ограничиваем 10 цифрами
+  number = number.substring(0, 10);
+
+  // Форматируем по маске: +7 (999) 999 99 99
+  let result = "+7";
+
+  if (number.length > 0) {
+    result += " (" + number.substring(0, 3);
+  }
+
+  // Добавляем закрывающую скобку и пробел только если есть 4-я цифра
+  if (number.length > 3) {
+    result += ") " + number.substring(3, 6);
+  }
+
+  // Добавляем пробел только если есть 7-я цифра
+  if (number.length > 6) {
+    result += " " + number.substring(6, 8);
+  }
+
+  // Добавляем пробел только если есть 9-я цифра
+  if (number.length > 8) {
+    result += " " + number.substring(8, 10);
+  }
+
+  return result;
+}
