@@ -109,7 +109,10 @@ export default async function ObjectInfoPage({
           projectId={id}
           initialData={responsiblePersonInitialData}
         />
-        <DocumentationPlansSection data={objectInfo.documents} />
+        <DocumentationPlansSection
+          projectId={id}
+          initialData={objectInfo.documents}
+        />
         {/* <PhotoFixationSection data={objectInfo.photos} /> */}
       </div>
     </PageContainer>

@@ -73,4 +73,47 @@ export const storageService = {
       type: file.type,
     };
   },
+
+  async uploadProjectDocument(
+    file: File,
+    client?: SupabaseClient,
+  ): Promise<{ url: string; size: number; name: string; type: string }> {
+    const supabaseClient = client || supabase;
+    const MAX_SIZE = 50 * 1024 * 1024; // 50MB for project docs (plans can be large)
+    if (file.size > MAX_SIZE) {
+      throw new Error(`Файл ${file.name} превышает лимит 50MB`);
+    }
+
+    const bucket = "projects"; // Assuming 'projects' bucket exists
+    const ext = file.name.split(".").pop() || "";
+    const fileName = `documents/${Date.now()}-${Math.random()
+      .toString(36)
+      .slice(2)}${ext ? "." + ext : ""}`;
+
+    // Note: If 'projects' bucket doesn't exist, this will fail.
+    // Fallback to 'materials' if we want to be safe, but 'projects' is cleaner.
+    // I will stick to 'projects' as per plan, user can create it if missing.
+    const { error: uploadError } = await supabaseClient.storage
+      .from(bucket)
+      .upload(fileName, file, {
+        contentType: file.type,
+        upsert: false,
+      });
+
+    if (uploadError) {
+      // If bucket not found, try 'materials' as fallback or throw specific error?
+      // For now, let's log and throw.
+      console.error("Ошибка при загрузке документа проекта:", uploadError);
+      throw uploadError;
+    }
+
+    const { data } = supabaseClient.storage.from(bucket).getPublicUrl(fileName);
+
+    return {
+      url: data.publicUrl,
+      size: file.size,
+      name: file.name,
+      type: file.type,
+    };
+  },
 };
