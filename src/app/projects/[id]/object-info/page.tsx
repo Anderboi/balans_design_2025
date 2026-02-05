@@ -111,7 +111,7 @@ export default async function ObjectInfoPage({
         />
         <DocumentationPlansSection
           projectId={id}
-          initialData={objectInfo.documents}
+          initialData={objectInfo.documents || []}
         />
         {/* <PhotoFixationSection data={objectInfo.photos} /> */}
       </div>

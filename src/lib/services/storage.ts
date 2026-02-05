@@ -84,15 +84,11 @@ export const storageService = {
       throw new Error(`Файл ${file.name} превышает лимит 50MB`);
     }
 
-    const bucket = "projects"; // Assuming 'projects' bucket exists
+    const bucket = "project_files"; // Using project_files bucket for project documents
     const ext = file.name.split(".").pop() || "";
     const fileName = `documents/${Date.now()}-${Math.random()
       .toString(36)
       .slice(2)}${ext ? "." + ext : ""}`;
-
-    // Note: If 'projects' bucket doesn't exist, this will fail.
-    // Fallback to 'materials' if we want to be safe, but 'projects' is cleaner.
-    // I will stick to 'projects' as per plan, user can create it if missing.
     const { error: uploadError } = await supabaseClient.storage
       .from(bucket)
       .upload(fileName, file, {
