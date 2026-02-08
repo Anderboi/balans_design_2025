@@ -1,3 +1,5 @@
+"use client";
+
 import {
   BriefcaseBusiness,
   Home,
@@ -18,6 +20,7 @@ import {
   SidebarMenuItem,
 } from "./ui/sidebar";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Button } from "./ui/button";
 import { CreateProjectDialog } from "./create-project-dialog";
 
@@ -45,7 +48,9 @@ const items = [
   },
 ];
 
-const AppSidebar = async () => {
+const AppSidebar = () => {
+  const pathname = usePathname();
+
   return (
     <Sidebar collapsible="icon" className="bg-white border-r border-gray-100">
       <SidebarHeader className="py-6 px-4 group-data-[collapsible=icon]:px-2">
@@ -61,23 +66,31 @@ const AppSidebar = async () => {
       <SidebarContent className="px-2 group-data-[collapsible=icon]:px-1">
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu className="gap-2">
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    size="lg"
-                    className="rounded-xl px-3 text-gray-500 hover:text-black hover:bg-gray-50 data-[active=true]:bg-black data-[active=true]:text-white transition-all duration-200 group-data-[collapsible=icon]:px-2"
-                  >
-                    <Link href={item.href}>
-                      <item.icon className="!size-5 shrink-0" />
-                      <span className="font-medium text-[15px] overflow-hidden whitespace-nowrap transition-all duration-200 group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0">
-                        {item.title}
-                      </span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+            <SidebarMenu className="gap-1">
+              {items.map((item) => {
+                const isActive =
+                  item.href === "/"
+                    ? pathname === "/"
+                    : pathname.startsWith(item.href);
+
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      size="lg"
+                      isActive={isActive}
+                      className="rounded-lg px-3 text-zinc-500 hover:text-black hover:bg-zinc-100 data-[active=true]:bg-zinc-200 data-[active=true]:text-black transition-all duration-200 group-data-[collapsible=icon]:px-2"
+                    >
+                      <Link href={item.href}>
+                        <item.icon className="size-5! shrink-0" />
+                        <span className="font-medium text-base overflow-hidden whitespace-nowrap transition-all duration-200 group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0">
+                          {item.title}
+                        </span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -88,11 +101,12 @@ const AppSidebar = async () => {
             <SidebarMenuButton
               asChild
               size="lg"
-              className="rounded-xl px-3 text-gray-500 hover:text-black hover:bg-gray-50 transition-all duration-200 group-data-[collapsible=icon]:px-2"
+              isActive={pathname.startsWith("/settings")}
+              className="rounded-lg px-3 text-zinc-500 hover:text-black hover:bg-zinc-100 data-[active=true]:bg-zinc-200 data-[active=true]:text-black transition-all duration-200 group-data-[collapsible=icon]:px-2"
             >
               <Link href="/settings">
-                <Settings className="!size-5 shrink-0" />
-                <span className="font-medium text-[15px] overflow-hidden whitespace-nowrap transition-all duration-200 group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0">
+                <Settings className="size-5! shrink-0" />
+                <span className="font-medium text-base overflow-hidden whitespace-nowrap transition-all duration-200 group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0">
                   Настройки
                 </span>
               </Link>

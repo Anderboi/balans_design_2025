@@ -48,18 +48,18 @@ export function SettingsNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="space-y-2 flex flex-col items-start w-full //flex-1">
+    <nav className="gap-1 flex flex-col items-start w-full">
       {menuItems.map((menuItem, index) => {
         const Icon = menuItem.icon;
         const isActive = pathname === menuItem.href;
         return (
           <Link key={index} href={menuItem.href} className="w-full" passHref>
             <Button
-              size={"lg"}
+              size="lg"
               variant={isActive ? "outline" : "ghost"}
-              className="cursor-pointer w-full items-center justify-start hover:bg-zinc-200"
+              className="cursor-pointer text-base  hover:text-black w-full items-center justify-start hover:bg-zinc-200"
             >
-              <Icon className="size-[18px]" />
+              <Icon className="size-5!" />
               {menuItem.label}
             </Button>
           </Link>
