@@ -17,12 +17,14 @@ export function StageItem({
 }: Omit<StageItemProps, "onToggle">) {
   const isBrief = item.id === "brief";
   const isObjectInfo = item.id === "object_info";
-  const isClickable = isBrief || isObjectInfo;
+  const isPlanning = item.id === "planning";
+  const isClickable = isBrief || isObjectInfo || isPlanning;
   const Icon = item.icon || FileText;
 
   const getHref = () => {
     if (isBrief) return `/projects/${projectId}/brief`;
     if (isObjectInfo) return `/projects/${projectId}/object-info`;
+    if (isPlanning) return `/projects/${projectId}/planning`;
     return "#";
   };
 
