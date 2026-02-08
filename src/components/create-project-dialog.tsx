@@ -58,7 +58,7 @@ export function CreateProjectDialog({
         address: formData.address || "", // Fix undefined vs null mismatch
         area: areaNumber,
         client_id: null,
-        stage: "PREPROJECT",
+        stage: "Предпроектная",
         residents: "",
         demolition_info: "",
         construction_info: "",

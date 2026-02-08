@@ -9,7 +9,7 @@ export const projectsService = {
     const supabaseClient = client || supabase;
     const { data, error } = await supabaseClient
       .from("projects")
-      .select("*")
+      .select("*, contacts(*), project_stage_items(*)")
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -34,7 +34,7 @@ export const projectsService = {
     const supabaseClient = client || supabase;
     const { data, error } = await supabaseClient
       .from("projects")
-      .select("*, contacts(*)")
+      .select("*, contacts(*), project_stage_items(*)")
       .eq("id", id)
       .single();
 
@@ -267,7 +267,6 @@ export const projectsService = {
 
   // Получение брифа проекта
   async getProjectBrief(projectId: string, client?: SupabaseClient) {
-    
     if (!projectId) return null;
 
     const supabaseClient = client || supabase;
@@ -289,7 +288,7 @@ export const projectsService = {
   // Обновление/создание брифа
   async updateProjectBrief(
     projectId: string,
-    data: Record<string, any>, // Allow flexible partial updates
+    data: Record<string, unknown>, // Allow flexible partial updates
     client?: SupabaseClient,
   ) {
     if (!projectId) throw new Error("ID проекта обязателен");

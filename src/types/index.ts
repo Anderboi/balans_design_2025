@@ -17,6 +17,7 @@ export interface Project {
   location?: string | null;
   tags?: string[] | null;
   owner_id?: string | null;
+  project_stage_items?: ProjectStageItem[];
 }
 
 export interface ProjectStageItem {

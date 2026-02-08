@@ -2,15 +2,24 @@ import { Project } from "@/types";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { getStageBadgeClass } from "@/lib/utils/utils";
+import { STAGES_CONFIG } from "@/config/project-stages";
 
 interface ProjectCardProps {
   project: Project;
 }
 
 export default function ProjectCard({ project }: ProjectCardProps) {
-  // Mock data for visual matching with design since these fields don't exist yet
-  const clientName = "Елена и Сергей"; // Placeholder
-  const progress = 25; // Placeholder
+  // Calculate real progress based on STAGES_CONFIG
+  const totalItems = STAGES_CONFIG.reduce(
+    (acc, stage) => acc + stage.items.length,
+    0,
+  );
+  const completedItemsCount =
+    project.project_stage_items?.filter((item) => item.completed).length || 0;
+  const progress =
+    totalItems > 0 ? Math.round((completedItemsCount / totalItems) * 100) : 0;
+
+  const clientName = project.contacts?.name || "Не указан";
 
   // Random image placeholder from Unsplash based on project ID to keep it consistent
   // Using architecture/interior keywords
@@ -30,7 +39,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
             <Badge
               variant={"secondary"}
               className={`${getStageBadgeClass(
-                project.stage
+                project.stage,
               )} text-xs font-medium px-3 py-1 rounded-full backdrop-blur-md bg-white/90 border-transparent shadow-sm`}
             >
               {project.stage}
@@ -43,9 +52,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
             <h3 className="text-xl font-bold text-gray-900 mb-1 group-hover:text-black transition-colors">
               {project.name}
             </h3>
-            <p className="text-sm text-gray-500 font-medium">
-              {project.client_id ? "Клиент загружается..." : clientName}
-            </p>
+            <p className="text-sm text-gray-500 font-medium">{clientName}</p>
           </div>
 
           <div className="space-y-2">
