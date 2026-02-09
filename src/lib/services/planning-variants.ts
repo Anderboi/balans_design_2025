@@ -81,6 +81,25 @@ export const planningVariantsService = {
     }
   },
 
+  // Отмена согласования для проекта
+  async cancelApproval(
+    projectId: string,
+    client: SupabaseClient,
+  ): Promise<void> {
+    const { error } = await client
+      .from("planning_variants")
+      .update({
+        approved: false,
+        approved_at: null,
+      })
+      .eq("project_id", projectId);
+
+    if (error) {
+      console.error("Error canceling approval:", error);
+      throw error;
+    }
+  },
+
   // Удаление варианта планировки
   async deletePlanningVariant(
     variantId: string,

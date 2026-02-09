@@ -2,12 +2,14 @@
 
 import { PlanningVariant } from "@/types/planning";
 import { Button } from "@/components/ui/button";
-import { FileText, Calendar } from "lucide-react";
+import { FileText, CheckCircle2, Lock } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface PlanningVariantCardProps {
   variant: PlanningVariant;
   onView: (variant: PlanningVariant) => void;
   onApprove: (variant: PlanningVariant) => void;
+  onCancelApproval?: (variant: PlanningVariant) => void;
   isApproving?: boolean;
 }
 
@@ -15,6 +17,7 @@ export function PlanningVariantCard({
   variant,
   onView,
   onApprove,
+  onCancelApproval,
   isApproving = false,
 }: PlanningVariantCardProps) {
   const formattedDate = new Date(variant.created_at).toLocaleDateString(
@@ -29,10 +32,17 @@ export function PlanningVariantCard({
   const fileSizeMB = (variant.file_size / (1024 * 1024)).toFixed(1);
 
   return (
-    <div className="bg-white rounded-[20px] overflow-hidden border border-gray-100 shadow-sm flex flex-col h-full hover:shadow-md transition-shadow">
+    <div
+      className={cn(
+        "bg-white rounded-[20px] overflow-hidden border transition-all duration-300 flex flex-col h-full",
+        variant.approved
+          ? "border-green-500 shadow-[0_0_0_1px_rgba(34,197,94,1)]"
+          : "border-gray-100 shadow-sm hover:shadow-md",
+      )}
+    >
       {/* Image Preview */}
       <div
-        className="relative aspect-[4/3] bg-gray-100 cursor-pointer overflow-hidden group"
+        className="relative aspect-4/3 bg-gray-100 cursor-pointer overflow-hidden group"
         onClick={() => onView(variant)}
       >
         <img
@@ -41,20 +51,21 @@ export function PlanningVariantCard({
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
         {variant.approved && (
-          <div className="absolute top-4 right-4 bg-black text-white text-xs font-medium px-3 py-1.5 rounded-full">
-            Утвержден
+          <div className="absolute top-4 right-4 bg-green-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm">
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            Утверждено
           </div>
         )}
       </div>
 
       {/* Content */}
-      <div className="p-6 flex flex-col flex-grow">
+      <div className="p-6 flex flex-col grow">
         <h3 className="text-lg font-bold text-gray-900 mb-2">
           {variant.title}
         </h3>
 
         {variant.description && (
-          <p className="text-sm text-gray-500 mb-6 line-clamp-3 flex-grow">
+          <p className="text-sm text-gray-500 mb-6 line-clamp-3 grow">
             {variant.description}
           </p>
         )}
@@ -81,8 +92,13 @@ export function PlanningVariantCard({
           )}
 
           {variant.approved && (
-            <Button className="w-full rounded-full bg-gray-100 text-green-600 font-medium py-6 cursor-default hover:bg-gray-100">
-              Вариант утвержден
+            <Button
+              variant="ghost"
+              className="w-full rounded-full bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-600 border-red-100 font-medium py-6 transition-colors border hover:border-red-200 cursor-pointer"
+              onClick={() => onCancelApproval?.(variant)}
+            >
+              <Lock className="size-4 mr-2" />
+              Отменить согласование
             </Button>
           )}
         </div>
