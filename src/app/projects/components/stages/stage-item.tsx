@@ -18,13 +18,18 @@ export function StageItem({
   const isBrief = item.id === "brief";
   const isObjectInfo = item.id === "object_info";
   const isPlanning = item.id === "planning";
-  const isClickable = isBrief || isObjectInfo || isPlanning;
+  const isCollages = item.id === "collages";
+  const isViz = item.id === "viz";
+  const isClickable =
+    isBrief || isObjectInfo || isPlanning || isCollages || isViz;
   const Icon = item.icon || FileText;
 
   const getHref = () => {
     if (isBrief) return `/projects/${projectId}/brief`;
     if (isObjectInfo) return `/projects/${projectId}/object-info`;
     if (isPlanning) return `/projects/${projectId}/planning`;
+    if (isCollages) return `/projects/${projectId}/collages`;
+    if (isViz) return `/projects/${projectId}/visualizations`;
     return "#";
   };
 

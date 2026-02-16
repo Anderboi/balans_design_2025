@@ -1,6 +1,6 @@
 "use client";
 
-import { PlanningVariant } from "@/types/planning";
+import { CollageVariant } from "@/types/collages";
 import {
   Dialog,
   DialogContent,
@@ -8,30 +8,30 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Download, X } from "lucide-react";
+import { Download } from "lucide-react";
 
-interface PlanningVariantDetailDialogProps {
-  variant: PlanningVariant | null;
+interface VariantDetailDialogProps {
+  variant: CollageVariant | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onApprove: (variant: PlanningVariant) => void;
+  onApprove: (variant: CollageVariant) => void;
   isApproving?: boolean;
 }
 
-export function PlanningVariantDetailDialog({
+export function VariantDetailDialog({
   variant,
   open,
   onOpenChange,
   onApprove,
   isApproving = false,
-}: PlanningVariantDetailDialogProps) {
+}: VariantDetailDialogProps) {
   if (!variant) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl p-0 gap-0 overflow-hidden bg-white sm:rounded-[20px] border-none shadow-2xl h-[90vh] flex flex-col">
         <div className="flex flex-col md:flex-row h-full">
-          {/* Image Side - Scrollable */}
+          {/* Image Side */}
           <div className="w-full md:w-2/3 bg-gray-100 overflow-y-auto relative min-h-[300px] md:min-h-full">
             <div className="absolute inset-0">
               <img
@@ -42,7 +42,7 @@ export function PlanningVariantDetailDialog({
             </div>
           </div>
 
-          {/* Info Side - Fixed */}
+          {/* Info Side */}
           <div className="w-full md:w-1/3 flex flex-col bg-white h-full max-h-[50vh] md:max-h-full overflow-hidden">
             <div className="p-6 md:p-8 grow overflow-y-auto">
               <DialogHeader className="mb-6 space-y-4">
@@ -75,7 +75,7 @@ export function PlanningVariantDetailDialog({
                 </h4>
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 border border-gray-100">
                   <div className="w-10 h-10 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-400">
-                    <span className="text-xs font-bold">PDF</span>
+                    <span className="text-xs font-bold">FILE</span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 truncate">
