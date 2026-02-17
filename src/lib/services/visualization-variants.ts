@@ -1,5 +1,8 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { VisualizationVariant } from "@/types/visualizations";
+import {
+  VisualizationVariant,
+  VisualizationImage,
+} from "@/types/visualizations";
 
 const BUCKET_NAME = "visualization_files";
 
@@ -64,6 +67,27 @@ export const visualizationVariantsService = {
     return data;
   },
 
+  // Обновление варианта (заголовок, описание, изображения)
+  async updateVisualizationVariant(
+    variantId: string,
+    updates: Partial<VisualizationVariant>,
+    client: SupabaseClient,
+  ): Promise<VisualizationVariant> {
+    const { data, error } = await client
+      .from("visualization_variants")
+      .update(updates)
+      .eq("id", variantId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error updating visualization variant:", error);
+      throw error;
+    }
+
+    return data;
+  },
+
   // Утверждение варианта визуализации (per-room)
   async approveVisualizationVariant(
     variantId: string,
@@ -115,12 +139,13 @@ export const visualizationVariantsService = {
     }
   },
 
-  // Удаление варианта визуализации
+  // Удаление варианта визуализации (включая все файлы в нем)
   async deleteVisualizationVariant(
     variantId: string,
-    fileUrl: string,
+    images: VisualizationImage[],
     client: SupabaseClient,
   ): Promise<void> {
+    // Удаляем из БД
     const { error: dbError } = await client
       .from("visualization_variants")
       .delete()
@@ -131,21 +156,49 @@ export const visualizationVariantsService = {
       throw dbError;
     }
 
-    try {
-      const urlParts = fileUrl.split(`${BUCKET_NAME}/`);
-      if (urlParts.length > 1) {
-        const filePath = urlParts[1];
-        const { error: storageError } = await client.storage
-          .from(BUCKET_NAME)
-          .remove([filePath]);
-
-        if (storageError) {
-          console.warn("Error deleting file from storage:", storageError);
+    // Удаляем все файлы из хранилища
+    for (const image of images) {
+      try {
+        const urlParts = image.url.split(`${BUCKET_NAME}/`);
+        if (urlParts.length > 1) {
+          const filePath = urlParts[1];
+          await client.storage.from(BUCKET_NAME).remove([filePath]);
         }
+      } catch (e) {
+        console.warn("Error deleting file during variant deletion:", e);
       }
-    } catch (e) {
-      console.warn("Error parsing file URL for deletion:", e);
     }
+  },
+
+  // Удаление конкретного изображения из варианта
+  async deleteImage(
+    variantId: string,
+    images: VisualizationImage[],
+    imageToDeleteId: string,
+    client: SupabaseClient,
+  ): Promise<VisualizationVariant> {
+    const imageToDelete = images.find((img) => img.id === imageToDeleteId);
+    const updatedImages = images.filter((img) => img.id !== imageToDeleteId);
+
+    // Удаляем из хранилища
+    if (imageToDelete) {
+      try {
+        const urlParts = imageToDelete.url.split(`${BUCKET_NAME}/`);
+        if (urlParts.length > 1) {
+          const filePath = urlParts[1];
+          await client.storage.from(BUCKET_NAME).remove([filePath]);
+        }
+      } catch (e) {
+        console.warn("Error deleting file from storage:", e);
+      }
+    }
+
+    // Обновляем БД
+    return this.updateVisualizationVariant(
+      variantId,
+      { images: updatedImages },
+      client,
+    );
   },
 
   // Загрузка файла в хранилище

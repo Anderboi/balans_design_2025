@@ -93,11 +93,19 @@ export function UploadVariantDialog({
           project_id: projectId,
           room_id: roomId,
           title: values.title,
-          description: values.description || "",
-          file_url: fileUrl,
+          description: values.description || null,
           image_url: imageUrl,
-          file_size: file.size,
+          file_url: fileUrl,
           file_name: file.name,
+          file_size: file.size,
+          images: [
+            {
+              id: crypto.randomUUID(),
+              url: imageUrl,
+              name: image.name,
+              size: image.size,
+            },
+          ],
         },
         supabase,
       );

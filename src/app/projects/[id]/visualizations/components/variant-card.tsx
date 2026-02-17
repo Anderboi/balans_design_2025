@@ -2,7 +2,7 @@
 
 import { VisualizationVariant } from "@/types/visualizations";
 import { Button } from "@/components/ui/button";
-import { FileText, CheckCircle2, Lock } from "lucide-react";
+import { CheckCircle2, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface VariantCardProps {
@@ -29,7 +29,8 @@ export function VariantCard({
     },
   );
 
-  const fileSizeMB = (variant.file_size / (1024 * 1024)).toFixed(1);
+  const firstImage = variant.images?.[0]?.url;
+  const imageCount = variant.images?.length || 0;
 
   return (
     <div
@@ -45,11 +46,22 @@ export function VariantCard({
         className="relative aspect-4/3 bg-gray-100 cursor-pointer overflow-hidden group"
         onClick={() => onView(variant)}
       >
-        <img
-          src={variant.image_url}
-          alt={variant.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
+        {firstImage ? (
+          <img
+            src={firstImage}
+            alt={variant.title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-gray-400">
+            Нет изображений
+          </div>
+        )}
+
+        <div className="absolute top-4 left-4 bg-black/50 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-1 rounded-md">
+          {imageCount} {imageCount === 1 ? "ФОТО" : "ФОТОГРАФИЙ"}
+        </div>
+
         {variant.approved && (
           <div className="absolute top-4 right-4 bg-green-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm">
             <CheckCircle2 className="w-3.5 h-3.5" />
@@ -72,11 +84,7 @@ export function VariantCard({
 
         <div className="mt-auto space-y-4">
           <div className="flex items-center justify-between text-xs text-gray-400">
-            <div className="flex items-center gap-1.5">
-              <FileText className="w-3.5 h-3.5" />
-              <span>{fileSizeMB} MB</span>
-            </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-wider">
               <span>{formattedDate}</span>
             </div>
           </div>
