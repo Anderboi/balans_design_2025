@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import {
   VisualizationVariant,
   VisualizationImage,
@@ -25,6 +25,11 @@ import {
   Info,
   CheckCircle2,
   ImageIcon,
+  Maximize2,
+  Minimize2,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
 } from "lucide-react";
 import { visualizationVariantsService } from "@/lib/services/visualization-variants";
 import { createClient } from "@/lib/supabase/client";
@@ -64,22 +69,49 @@ export function VariantDetailDialog({
   const [editedTitle, setEditedTitle] = useState("");
   const [editedDesc, setEditedDesc] = useState("");
   const [showInfoPanel, setShowInfoPanel] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [zoom, setZoom] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDraggingImage, setIsDraggingImage] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+  const resetZoom = useCallback(() => {
+    setZoom(1);
+    setPosition({ x: 0, y: 0 });
+  }, []);
+
+  useEffect(() => {
+    resetZoom();
+  }, [currentImageIndex, isFullScreen, resetZoom]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
 
-  if (!variant) return null;
-
-  const images = variant.images || [];
+  const images = variant?.images || [];
   const currentImage = images[currentImageIndex];
 
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     setCurrentImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
-  };
+  }, [images.length]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     setCurrentImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
-  };
+  }, [images.length]);
+
+  useEffect(() => {
+    if (!isFullScreen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsFullScreen(false);
+      if (e.key === "ArrowLeft") handlePrev();
+      if (e.key === "ArrowRight") handleNext();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isFullScreen, handlePrev, handleNext, resetZoom]);
+
+  if (!variant) return null;
 
   const handleAddImages = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -189,7 +221,7 @@ export function VariantDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] w-[1200px] p-0 gap-0 overflow-hidden bg-[#111] sm:rounded-3xl border-none shadow-2xl h-[92vh] flex flex-col">
+      <DialogContent className="max-w-[95vw] lg:max-w-[80vw] w-[1400px] p-0 gap-0 overflow-hidden bg-[#111] sm:rounded-3xl border-none shadow-2xl h-[92vh] flex flex-col transition-all duration-300">
         {/* Hidden accessible header */}
         <DialogHeader className="sr-only">
           <DialogTitle>{variant.title}</DialogTitle>
@@ -258,6 +290,14 @@ export function VariantDetailDialog({
               title="Информация"
             >
               <Info className="size-4" />
+            </button>
+
+            <button
+              onClick={() => setIsFullScreen(true)}
+              className="size-8 rounded-lg flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all"
+              title="Во весь экран"
+            >
+              <Maximize2 className="size-4" />
             </button>
 
             <DropdownMenu>
@@ -571,6 +611,136 @@ export function VariantDetailDialog({
           accept="image/*"
           onChange={handleAddImages}
         />
+
+        {/* Fullscreen Overlay */}
+        {isFullScreen && currentImage && (
+          <div className="fixed inset-0 z-[100] bg-black/95 flex flex-col animate-in fade-in duration-200">
+            {/* Fullscreen Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-black/50 backdrop-blur-md">
+              <div className="flex items-center gap-3">
+                <h2 className="text-sm font-medium text-white/90">
+                  {variant.title} — {currentImageIndex + 1} / {images.length}
+                </h2>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 bg-white/5 rounded-xl p-1 mr-2">
+                  <button
+                    onClick={() =>
+                      setZoom((prev) => Math.max(0.5, prev - 0.25))
+                    }
+                    className="size-8 rounded-lg flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all"
+                    title="Уменьшить"
+                  >
+                    <ZoomOut className="size-4" />
+                  </button>
+                  <span className="text-[10px] font-medium text-white/40 w-12 text-center">
+                    {Math.round(zoom * 100)}%
+                  </span>
+                  <button
+                    onClick={() => setZoom((prev) => Math.min(5, prev + 0.25))}
+                    className="size-8 rounded-lg flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all"
+                    title="Увеличить"
+                  >
+                    <ZoomIn className="size-4" />
+                  </button>
+                  <div className="w-px h-4 bg-white/10 mx-1" />
+                  <button
+                    onClick={resetZoom}
+                    className="size-8 rounded-lg flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all"
+                    title="Сбросить"
+                  >
+                    <RotateCcw className="size-4" />
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => setIsFullScreen(false)}
+                  className="size-10 rounded-xl flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all"
+                  title="Выйти из полноэкранного режима"
+                >
+                  <Minimize2 className="size-5" />
+                </button>
+                <button
+                  onClick={() => setIsFullScreen(false)}
+                  className="size-10 rounded-xl flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all"
+                >
+                  <X className="size-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Fullscreen Image Container */}
+            <div
+              className={cn(
+                "flex-1 relative flex items-center justify-center overflow-hidden p-4 md:p-8",
+                zoom > 1 ? "cursor-grab" : "cursor-default",
+                isDraggingImage && "cursor-grabbing",
+              )}
+              onWheel={(e) => {
+                const delta = e.deltaY > 0 ? -0.1 : 0.1;
+                setZoom((prev) => Math.min(5, Math.max(0.5, prev + delta)));
+              }}
+              onMouseDown={(e) => {
+                if (zoom <= 1) return;
+                setIsDraggingImage(true);
+                setDragStart({
+                  x: e.clientX - position.x,
+                  y: e.clientY - position.y,
+                });
+              }}
+              onMouseMove={(e) => {
+                if (!isDraggingImage) return;
+                setPosition({
+                  x: e.clientX - dragStart.x,
+                  y: e.clientY - dragStart.y,
+                });
+              }}
+              onMouseUp={() => setIsDraggingImage(false)}
+              onMouseLeave={() => setIsDraggingImage(false)}
+            >
+              <div
+                style={{
+                  transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
+                  transition: isDraggingImage
+                    ? "none"
+                    : "transform 0.2s cubic-bezier(0.2, 0, 0, 1)",
+                }}
+                className="flex items-center justify-center select-none"
+              >
+                <img
+                  src={currentImage.url}
+                  alt={variant.title}
+                  className="max-w-full max-h-full object-contain shadow-2xl pointer-events-none"
+                  draggable={false}
+                />
+              </div>
+
+              {/* Navigation in Fullscreen */}
+              {images.length > 1 && (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePrev();
+                    }}
+                    className="absolute left-6 top-1/2 -translate-y-1/2 size-12 rounded-full bg-white/5 hover:bg-white/10 backdrop-blur-md flex items-center justify-center transition-all group border border-white/10"
+                  >
+                    <ChevronLeft className="size-6 text-white/70 group-hover:text-white transition-colors" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleNext();
+                    }}
+                    className="absolute right-6 top-1/2 -translate-y-1/2 size-12 rounded-full bg-white/5 hover:bg-white/10 backdrop-blur-md flex items-center justify-center transition-all group border border-white/10"
+                  >
+                    <ChevronRight className="size-6 text-white/70 group-hover:text-white transition-colors" />
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
