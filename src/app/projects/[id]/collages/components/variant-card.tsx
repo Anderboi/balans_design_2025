@@ -29,7 +29,7 @@ export function VariantCard({
     },
   );
 
-  const fileSizeMB = (variant.file_size / (1024 * 1024)).toFixed(1);
+  const fileSizeMB = ((variant.file_size || 0) / (1024 * 1024)).toFixed(1);
 
   return (
     <div
@@ -46,7 +46,7 @@ export function VariantCard({
         onClick={() => onView(variant)}
       >
         <img
-          src={variant.image_url}
+          src={variant.images?.[0]?.url || variant.image_url}
           alt={variant.title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />

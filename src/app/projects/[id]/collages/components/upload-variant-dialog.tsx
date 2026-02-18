@@ -96,6 +96,14 @@ export function UploadVariantDialog({
           image_url: imageUrl,
           file_size: file.size,
           file_name: file.name,
+          images: [
+            {
+              id: crypto.randomUUID(),
+              url: imageUrl,
+              name: image.name,
+              size: image.size,
+            },
+          ],
         },
         supabase,
       );

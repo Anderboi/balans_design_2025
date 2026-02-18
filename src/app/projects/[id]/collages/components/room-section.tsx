@@ -109,6 +109,19 @@ export function RoomSection({
     }
   };
 
+  const handleUpdateVariant = (updated: CollageVariant) => {
+    setVariants(variants.map((v) => (v.id === updated.id ? updated : v)));
+    if (selectedVariant?.id === updated.id) {
+      setSelectedVariant(updated);
+    }
+  };
+
+  const handleDeleteVariant = (id: string) => {
+    setVariants(variants.filter((v) => v.id !== id));
+    setIsDetailOpen(false);
+    setSelectedVariant(null);
+  };
+
   return (
     <div className="bg-white rounded-[24px] border border-gray-100 shadow-sm overflow-hidden">
       {/* Room Header — Collapsible */}
@@ -197,6 +210,8 @@ export function RoomSection({
         onOpenChange={setIsDetailOpen}
         onApprove={handleApprove}
         isApproving={isApproving}
+        onUpdateVariant={handleUpdateVariant}
+        onDeleteVariant={handleDeleteVariant}
       />
 
       <UploadVariantDialog
