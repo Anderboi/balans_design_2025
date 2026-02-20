@@ -22,6 +22,7 @@ import {
   ProjectStagesLoader,
   ProjectStagesSkeleton,
 } from "../components/project-stages-loader";
+import { ObjectInfoCard } from "../components/object-info-card";
 
 // Загрузчики и блоки
 import SchedulesBlock from "./components/schedules-block";
@@ -118,8 +119,15 @@ export default async function ProjectDetailPage({
 
         <TabsContent
           value="overview"
-          className="space-y-12 animate-in fade-in slide-in-from-bottom-2 duration-300"
+          className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300"
         >
+          {/* Карточка "Информация об объекте" над стадиями */}
+          <ObjectInfoCard
+            projectId={id}
+            address={project.address}
+            area={project.area}
+          />
+
           <Suspense fallback={<ProjectStagesSkeleton />}>
             <ProjectStagesLoader projectId={id} />
           </Suspense>

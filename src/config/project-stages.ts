@@ -40,12 +40,6 @@ export const STAGES_CONFIG: StageConfig[] = [
         completed: false,
         icon: FileText,
       },
-      {
-        id: "object_info",
-        title: "Информация по объекту",
-        completed: false,
-        icon: FileText,
-      },
     ],
   },
   {

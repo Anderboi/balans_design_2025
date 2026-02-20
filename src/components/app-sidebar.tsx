@@ -7,6 +7,11 @@ import {
   PlusCircle,
   Settings,
   Users,
+  LayoutDashboard,
+  FileText,
+  PenTool,
+  Image as ImageIcon,
+  Box,
 } from "lucide-react";
 import {
   Sidebar,
@@ -14,6 +19,7 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -51,6 +57,44 @@ const items = [
 const AppSidebar = () => {
   const pathname = usePathname();
 
+  const projectMatch = pathname.match(/^\/projects\/([a-f0-9-]+)/);
+  const projectId = projectMatch ? projectMatch[1] : null;
+
+  const projectItems = projectId
+    ? [
+        {
+          title: "Обзор проекта",
+          href: `/projects/${projectId}`,
+          exact: true,
+          icon: LayoutDashboard,
+        },
+        {
+          title: "ТЗ",
+          href: `/projects/${projectId}/brief`,
+          exact: false,
+          icon: FileText,
+        },
+        {
+          title: "Планировки",
+          href: `/projects/${projectId}/planning`,
+          exact: false,
+          icon: PenTool,
+        },
+        {
+          title: "Коллажи",
+          href: `/projects/${projectId}/collages`,
+          exact: false,
+          icon: ImageIcon,
+        },
+        {
+          title: "3D Визуализации",
+          href: `/projects/${projectId}/visualizations`,
+          exact: false,
+          icon: Box,
+        },
+      ]
+    : [];
+
   return (
     <Sidebar collapsible="icon" className="bg-white border-r border-gray-100">
       <SidebarHeader className="py-6 px-4 group-data-[collapsible=icon]:px-2">
@@ -71,7 +115,10 @@ const AppSidebar = () => {
                 const isActive =
                   item.href === "/"
                     ? pathname === "/"
-                    : pathname.startsWith(item.href);
+                    : // If we are in a project, don't highlight the global "Projects" tab to avoid confusion with the project sub-menu
+                      item.href === "/projects" && projectId
+                      ? false
+                      : pathname.startsWith(item.href);
 
                 return (
                   <SidebarMenuItem key={item.title}>
@@ -94,6 +141,41 @@ const AppSidebar = () => {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {projectId && (
+          <SidebarGroup className="mt-4 border-t border-gray-100 pt-4">
+            <SidebarGroupLabel className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 transition-all duration-200 group-data-[collapsible=icon]:opacity-0">
+              Разделы проекта
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu className="gap-1">
+                {projectItems.map((item) => {
+                  const isActive = item.exact
+                    ? pathname === item.href
+                    : pathname.startsWith(item.href);
+
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        size="default"
+                        isActive={isActive}
+                        className="rounded-lg px-3 text-zinc-600 hover:text-black hover:bg-zinc-50 data-[active=true]:bg-black data-[active=true]:text-white transition-all duration-200 group-data-[collapsible=icon]:px-2"
+                      >
+                        <Link href={item.href}>
+                          <item.icon className="size-4! shrink-0" />
+                          <span className="font-medium text-sm overflow-hidden whitespace-nowrap transition-all duration-200 group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0">
+                            {item.title}
+                          </span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
       <SidebarFooter className="p-4 gap-4 group-data-[collapsible=icon]:p-2">
         <SidebarMenu>
