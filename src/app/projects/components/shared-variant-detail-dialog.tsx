@@ -26,6 +26,7 @@ import {
   ZoomIn,
   ZoomOut,
   RotateCcw,
+  FileText,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -42,12 +43,14 @@ export interface SharedVariantImage {
   url: string;
   name: string;
   size: number;
+  downloadUrl?: string;
+  type?: string;
 }
 
 export interface SharedVariant {
   id: string;
   project_id: string;
-  room_id: string;
+  room_id?: string;
   title: string;
   description?: string | null;
   approved?: boolean;
@@ -64,25 +67,26 @@ export interface SharedVariantDetailDialogProps<
   onApprove: (variant: T) => void;
   isApproving?: boolean;
   titleLabel?: string;
+  hideImageActions?: boolean;
 
   // Actions
-  onUploadFiles: (
+  onUploadFiles?: (
     files: File[],
   ) => Promise<{ url: string; name: string; size: number }[]>;
-  onUpdateVariantInfo: (id: string, updates: any) => Promise<T>;
-  onDeleteImage: (
+  onUpdateVariantInfo?: (id: string, updates: any) => Promise<T>;
+  onDeleteImage?: (
     variantId: string,
     imageId: string,
     currentImages: SharedVariantImage[],
   ) => Promise<T>;
-  onDeleteVariantRecord: (
+  onDeleteVariantRecord?: (
     variantId: string,
     images: SharedVariantImage[],
   ) => Promise<void>;
 
   // Dispatch
-  onVariantUpdated: (updated: T) => void;
-  onVariantDeleted: (id: string) => void;
+  onVariantUpdated?: (updated: T) => void;
+  onVariantDeleted?: (id: string) => void;
 }
 
 export function SharedVariantDetailDialog<T extends SharedVariant>({
@@ -92,6 +96,7 @@ export function SharedVariantDetailDialog<T extends SharedVariant>({
   onApprove,
   isApproving = false,
   titleLabel = "Детали варианта",
+  hideImageActions = false,
   onUploadFiles,
   onUpdateVariantInfo,
   onDeleteImage,
@@ -127,6 +132,14 @@ export function SharedVariantDetailDialog<T extends SharedVariant>({
   const images = variant?.images || [];
   const currentImage = images[currentImageIndex];
 
+  const isPdf = (image: SharedVariantImage) => {
+    return (
+      image.type === "application/pdf" ||
+      image.name?.toLowerCase().endsWith(".pdf") ||
+      image.url?.toLowerCase().endsWith(".pdf")
+    );
+  };
+
   const handlePrev = useCallback(() => {
     setCurrentImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
   }, [images.length]);
@@ -151,7 +164,13 @@ export function SharedVariantDetailDialog<T extends SharedVariant>({
   if (!variant) return null;
 
   const handleAddImages = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
+    if (
+      !e.target.files ||
+      !onUploadFiles ||
+      !onUpdateVariantInfo ||
+      !onVariantUpdated
+    )
+      return;
     try {
       setIsUploading(true);
       const files = Array.from(e.target.files);
@@ -187,6 +206,8 @@ export function SharedVariantDetailDialog<T extends SharedVariant>({
       return;
     }
 
+    if (!onDeleteImage || !onVariantUpdated) return;
+
     try {
       setIsDeleting(true);
       const updatedVariant = await onDeleteImage(variant.id, imageId, images);
@@ -206,6 +227,7 @@ export function SharedVariantDetailDialog<T extends SharedVariant>({
 
   const handleDeleteVariant = async () => {
     if (!confirm("Вы уверены, что хотите удалить весь вариант?")) return;
+    if (!onDeleteVariantRecord || !onVariantDeleted) return;
     try {
       setIsDeleting(true);
       await onDeleteVariantRecord(variant.id, images);
@@ -221,6 +243,7 @@ export function SharedVariantDetailDialog<T extends SharedVariant>({
     index: number,
     direction: "left" | "right",
   ) => {
+    if (!onUpdateVariantInfo || !onVariantUpdated) return;
     const newIndex = direction === "left" ? index - 1 : index + 1;
     if (newIndex < 0 || newIndex >= images.length) return;
 
@@ -244,6 +267,7 @@ export function SharedVariantDetailDialog<T extends SharedVariant>({
   };
 
   const handleSaveMetadata = async () => {
+    if (!onUpdateVariantInfo || !onVariantUpdated) return;
     try {
       const updatedVariant = await onUpdateVariantInfo(variant.id, {
         title: editedTitle,
@@ -300,22 +324,24 @@ export function SharedVariantDetailDialog<T extends SharedVariant>({
 
           {/* Right: Actions */}
           <div className="flex items-center gap-1 shrink-0">
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isUploading}
-              className="size-8 rounded-lg flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all"
-              title="Добавить изображения"
-            >
-              {isUploading ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <Plus className="size-4" />
-              )}
-            </button>
+            {!hideImageActions && (
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+                className="size-8 rounded-lg flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all"
+                title="Добавить изображения"
+              >
+                {isUploading ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Plus className="size-4" />
+                )}
+              </button>
+            )}
 
             {currentImage && (
               <a
-                href={currentImage.url}
+                href={currentImage.downloadUrl || currentImage.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="size-8 rounded-lg flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all"
@@ -338,13 +364,15 @@ export function SharedVariantDetailDialog<T extends SharedVariant>({
               <Info className="size-4" />
             </button>
 
-            <button
-              onClick={() => setIsFullScreen(true)}
-              className="size-8 rounded-lg flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all"
-              title="Во весь экран"
-            >
-              <Maximize2 className="size-4" />
-            </button>
+            {currentImage && !isPdf(currentImage) && (
+              <button
+                onClick={() => setIsFullScreen(true)}
+                className="size-8 rounded-lg flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all"
+                title="Во весь экран"
+              >
+                <Maximize2 className="size-4" />
+              </button>
+            )}
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -356,16 +384,18 @@ export function SharedVariantDetailDialog<T extends SharedVariant>({
                 align="end"
                 className="rounded-xl p-1.5 border-gray-800 bg-[#1a1a1a] shadow-2xl min-w-[180px]"
               >
-                <DropdownMenuItem
-                  onClick={toggleEdit}
-                  className="rounded-lg flex items-center gap-2.5 py-2.5 px-3 text-white/80 hover:text-white focus:text-white focus:bg-white/10 text-sm cursor-pointer"
-                >
-                  <Pencil className="size-3.5" />
-                  {isEditingMetadata
-                    ? "Отменить редактирование"
-                    : "Редактировать"}
-                </DropdownMenuItem>
-                {currentImage && (
+                {!hideImageActions && (
+                  <DropdownMenuItem
+                    onClick={toggleEdit}
+                    className="rounded-lg flex items-center gap-2.5 py-2.5 px-3 text-white/80 hover:text-white focus:text-white focus:bg-white/10 text-sm cursor-pointer"
+                  >
+                    <Pencil className="size-3.5" />
+                    {isEditingMetadata
+                      ? "Отменить редактирование"
+                      : "Редактировать"}
+                  </DropdownMenuItem>
+                )}
+                {!hideImageActions && currentImage && (
                   <DropdownMenuItem
                     onClick={() => handleDeleteImage(currentImage.id)}
                     disabled={isDeleting}
@@ -375,13 +405,15 @@ export function SharedVariantDetailDialog<T extends SharedVariant>({
                     Удалить фото
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem
-                  onClick={handleDeleteVariant}
-                  className="rounded-lg flex items-center gap-2.5 py-2.5 px-3 text-red-400 hover:text-red-300 focus:text-red-300 focus:bg-red-500/10 text-sm cursor-pointer"
-                >
-                  <Trash2 className="size-3.5" />
-                  Удалить весь вариант
-                </DropdownMenuItem>
+                {!hideImageActions && (
+                  <DropdownMenuItem
+                    onClick={handleDeleteVariant}
+                    className="rounded-lg flex items-center gap-2.5 py-2.5 px-3 text-red-400 hover:text-red-300 focus:text-red-300 focus:bg-red-500/10 text-sm cursor-pointer"
+                  >
+                    <Trash2 className="size-3.5" />
+                    Удалить весь вариант
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -401,12 +433,37 @@ export function SharedVariantDetailDialog<T extends SharedVariant>({
           {/* Image Viewer */}
           <div className="flex-1 relative flex items-center justify-center bg-[#0a0a0a] min-w-0">
             {currentImage ? (
-              <img
-                src={currentImage.url}
-                alt={variant.title}
-                className="max-w-full max-h-full object-contain p-4 select-none"
-                draggable={false}
-              />
+              isPdf(currentImage) ? (
+                <div className="flex flex-col items-center gap-6 text-white/40">
+                  <div className="size-32 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center shadow-2xl">
+                    <FileText className="size-16 text-red-400/60" />
+                  </div>
+                  <div className="text-center space-y-2">
+                    <p className="text-lg font-medium text-white/90">
+                      Документ PDF
+                    </p>
+                    <p className="text-sm text-white/40 max-w-[240px] truncate">
+                      {currentImage.name}
+                    </p>
+                    <a
+                      href={currentImage.downloadUrl || currentImage.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 mt-4 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10 transition-all font-medium text-sm"
+                    >
+                      <Download className="size-4" />
+                      Открыть или скачать оригинальный файл
+                    </a>
+                  </div>
+                </div>
+              ) : (
+                <img
+                  src={currentImage.url}
+                  alt={variant.title}
+                  className="max-w-full max-h-full object-contain p-4 select-none"
+                  draggable={false}
+                />
+              )
             ) : (
               <div className="flex flex-col items-center gap-3 text-white/20">
                 <ImageIcon className="size-12" />
@@ -577,7 +634,7 @@ export function SharedVariantDetailDialog<T extends SharedVariant>({
         </div>
 
         {/* Bottom Thumbnails Strip */}
-        {images.length > 0 && (
+        {images.length > 0 && !hideImageActions && (
           <div className="h-[84px] bg-[#111] border-t border-white/5 flex items-center px-4 gap-3 overflow-x-auto shrink-0 no-scrollbar">
             {images.map((img, idx) => (
               <div key={img.id} className="relative group/thumb shrink-0">
@@ -590,11 +647,20 @@ export function SharedVariantDetailDialog<T extends SharedVariant>({
                       : "border-transparent opacity-40 hover:opacity-100 hover:border-white/20",
                   )}
                 >
-                  <img
-                    src={img.url}
-                    className="w-full h-full object-cover"
-                    alt={`Фото ${idx + 1}`}
-                  />
+                  {isPdf(img) ? (
+                    <div className="w-full h-full bg-[#1a1a1a] flex flex-col items-center justify-center gap-1 group-hover:bg-[#222] transition-colors">
+                      <FileText className="size-6 text-red-500/50" />
+                      <span className="text-[8px] text-white/30 font-bold uppercase tracking-tighter truncate max-w-[50px] px-1">
+                        PDF
+                      </span>
+                    </div>
+                  ) : (
+                    <img
+                      src={img.url}
+                      className="w-full h-full object-cover"
+                      alt={`Фото ${idx + 1}`}
+                    />
+                  )}
                   {/* Index indicator */}
                   <div className="absolute top-1 left-1 size-4 rounded-md bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-bold text-white/70 border border-white/10">
                     {idx + 1}
@@ -700,7 +766,7 @@ export function SharedVariantDetailDialog<T extends SharedVariant>({
           ref={fileInputRef}
           className="hidden"
           multiple
-          accept="image/*"
+          accept="image/*,.pdf"
           onChange={handleAddImages}
         />
 
@@ -799,12 +865,28 @@ export function SharedVariantDetailDialog<T extends SharedVariant>({
                 }}
                 className="flex items-center justify-center select-none"
               >
-                <img
-                  src={currentImage.url}
-                  alt={variant.title}
-                  className="max-w-full max-h-full object-contain shadow-2xl pointer-events-none"
-                  draggable={false}
-                />
+                {isPdf(currentImage) ? (
+                  <div className="flex flex-col items-center gap-6 text-white/40">
+                    <div className="size-32 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center shadow-2xl">
+                      <FileText className="size-16 text-red-500/60" />
+                    </div>
+                    <div className="text-center space-y-2">
+                      <p className="text-lg font-medium text-white/90">
+                        Документ PDF
+                      </p>
+                      <p className="text-sm text-white/40 max-w-[240px] truncate">
+                        {currentImage.name}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <img
+                    src={currentImage.url}
+                    alt={variant.title}
+                    className="max-w-full max-h-full object-contain shadow-2xl pointer-events-none"
+                    draggable={false}
+                  />
+                )}
               </div>
 
               {/* Navigation in Fullscreen */}

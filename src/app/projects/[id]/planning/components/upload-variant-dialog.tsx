@@ -32,9 +32,7 @@ const formSchema = z.object({
   file: z
     .instanceof(FileList)
     .refine((files) => files.length > 0, "Выберите файл"),
-  image: z
-    .instanceof(FileList)
-    .refine((files) => files.length > 0, "Выберите изображение"),
+  image: z.instanceof(FileList).optional(),
 });
 
 interface UploadVariantDialogProps {
@@ -65,7 +63,8 @@ export function UploadVariantDialog({
       setIsLoading(true);
 
       const file = values.file[0];
-      const image = values.image[0];
+      const image =
+        values.image && values.image.length > 0 ? values.image[0] : null;
 
       // Upload file
       const { fullUrl: fileUrl } = await planningVariantsService.uploadFile(
@@ -74,12 +73,16 @@ export function UploadVariantDialog({
         supabase,
       );
 
-      // Upload image
-      const { fullUrl: imageUrl } = await planningVariantsService.uploadFile(
-        image,
-        `${projectId}/images`,
-        supabase,
-      );
+      // Upload image if provided
+      let imageUrl = "";
+      if (image) {
+        const uploadResult = await planningVariantsService.uploadFile(
+          image,
+          `${projectId}/images`,
+          supabase,
+        );
+        imageUrl = uploadResult.fullUrl;
+      }
 
       // Create variant record
       await planningVariantsService.createPlanningVariant(
@@ -91,6 +94,7 @@ export function UploadVariantDialog({
           image_url: imageUrl,
           file_size: file.size,
           file_name: file.name,
+          images: [],
         },
         supabase,
       );

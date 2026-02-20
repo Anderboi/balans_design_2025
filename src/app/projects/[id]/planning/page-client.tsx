@@ -201,13 +201,25 @@ export default function PlanningPageClient({
         </div>
       </div>
 
-      {/* Dialogs */}
       <PlanningVariantDetailDialog
         variant={selectedVariant}
         open={isDetailOpen}
         onOpenChange={setIsDetailOpen}
         onApprove={handleApprove}
         isApproving={isApproving}
+        onUpdateVariant={(updated) => {
+          setVariants(variants.map((v) => (v.id === updated.id ? updated : v)));
+          if (selectedVariant?.id === updated.id) {
+            setSelectedVariant(updated);
+          }
+        }}
+        onDeleteVariant={(id) => {
+          setVariants(variants.filter((v) => v.id !== id));
+          if (selectedVariant?.id === id) {
+            setSelectedVariant(null);
+            setIsDetailOpen(false);
+          }
+        }}
       />
 
       <UploadVariantDialog

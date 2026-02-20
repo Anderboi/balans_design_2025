@@ -40,18 +40,25 @@ export function PlanningVariantCard({
           : "border-gray-100 shadow-sm hover:shadow-md",
       )}
     >
-      {/* Image Preview */}
       <div
-        className="relative aspect-4/3 bg-gray-100 cursor-pointer overflow-hidden group"
+        className="relative aspect-4/3 bg-gray-100 cursor-pointer overflow-hidden group flex items-center justify-center"
         onClick={() => onView(variant)}
       >
-        <img
-          src={variant.image_url}
-          alt={variant.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
+        {variant.image_url &&
+        !variant.image_url.toLowerCase().endsWith(".pdf") ? (
+          <img
+            src={variant.image_url}
+            alt={variant.title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="flex flex-col items-center gap-2 text-gray-300">
+            <FileText className="size-12" />
+            <span className="text-xs font-medium">PDF Планировка</span>
+          </div>
+        )}
         {variant.approved && (
-          <div className="absolute top-4 right-4 bg-green-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm">
+          <div className="absolute top-4 right-4 bg-green-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm z-10">
             <CheckCircle2 className="w-3.5 h-3.5" />
             Утверждено
           </div>

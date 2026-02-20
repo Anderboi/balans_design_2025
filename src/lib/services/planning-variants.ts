@@ -137,6 +137,30 @@ export const planningVariantsService = {
     }
   },
 
+  // Обновление метаданных варианта планировки
+  async updatePlanningVariant(
+    variantId: string,
+    updates: Partial<PlanningVariant>,
+    client: SupabaseClient,
+  ): Promise<PlanningVariant> {
+    const { data, error } = await client
+      .from("planning_variants")
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", variantId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error updating planning variant:", error);
+      throw error;
+    }
+
+    return data;
+  },
+
   // Загрузка файла в хранилище
   async uploadFile(
     file: File,
