@@ -71,6 +71,7 @@ export function VariantDetailDialog({
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDraggingImage, setIsDraggingImage] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [isSavingOrder, setIsSavingOrder] = useState(false);
 
   const resetZoom = useCallback(() => {
     setZoom(1);
@@ -192,6 +193,34 @@ export function VariantDetailDialog({
     }
   };
 
+  const handleMoveImage = async (
+    index: number,
+    direction: "left" | "right",
+  ) => {
+    const newIndex = direction === "left" ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= images.length) return;
+
+    const newImages = [...images];
+    const temp = newImages[index];
+    newImages[index] = newImages[newIndex];
+    newImages[newIndex] = temp;
+
+    try {
+      setIsSavingOrder(true);
+      const updatedVariant = await collageVariantsService.updateCollageVariant(
+        variant.id,
+        { images: newImages },
+        supabase,
+      );
+      onUpdateVariant(updatedVariant);
+      setCurrentImageIndex(newIndex);
+    } catch (error) {
+      console.error("Error moving image:", error);
+    } finally {
+      setIsSavingOrder(false);
+    }
+  };
+
   const handleSaveMetadata = async () => {
     try {
       const updatedVariant = await collageVariantsService.updateCollageVariant(
@@ -210,6 +239,7 @@ export function VariantDetailDialog({
     if (!isEditingMetadata) {
       setEditedTitle(variant.title);
       setEditedDesc(variant.description || "");
+      setShowInfoPanel(true);
     }
     setIsEditingMetadata(!isEditingMetadata);
   };
@@ -527,34 +557,80 @@ export function VariantDetailDialog({
 
         {/* Bottom Thumbnails Strip */}
         {images.length > 0 && (
-          <div className="h-[72px] bg-[#111] border-t border-white/5 flex items-center px-4 gap-2 overflow-x-auto shrink-0">
+          <div className="h-[84px] bg-[#111] border-t border-white/5 flex items-center px-4 gap-3 overflow-x-auto shrink-0 no-scrollbar">
             {images.map((img, idx) => (
-              <button
-                key={img.id}
-                onClick={() => setCurrentImageIndex(idx)}
-                className={cn(
-                  "relative w-[52px] h-[52px] rounded-lg overflow-hidden border-2 transition-all duration-200 shrink-0",
-                  currentImageIndex === idx
-                    ? "border-white/80 shadow-[0_0_12px_rgba(255,255,255,0.15)]"
-                    : "border-transparent opacity-40 hover:opacity-70",
+              <div key={img.id} className="relative group/thumb shrink-0">
+                <button
+                  onClick={() => setCurrentImageIndex(idx)}
+                  className={cn(
+                    "relative w-[60px] h-[60px] rounded-xl overflow-hidden border-2 transition-all duration-200",
+                    currentImageIndex === idx
+                      ? "border-white/80 shadow-[0_0_15px_rgba(255,255,255,0.2)]"
+                      : "border-transparent opacity-40 hover:opacity-100 hover:border-white/20",
+                  )}
+                >
+                  <img
+                    src={img.url}
+                    className="w-full h-full object-cover"
+                    alt={`Фото ${idx + 1}`}
+                  />
+                  {/* Index indicator */}
+                  <div className="absolute top-1 left-1 size-4 rounded-md bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-bold text-white/70 border border-white/10">
+                    {idx + 1}
+                  </div>
+                </button>
+
+                {isEditingMetadata && (
+                  <div className="absolute -top-2 -left-2 -right-2 flex justify-between items-center opacity-0 group-hover/thumb:opacity-100 transition-opacity z-10 pointer-events-none">
+                    <button
+                      disabled={idx === 0 || isSavingOrder}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMoveImage(idx, "left");
+                      }}
+                      className="size-6 rounded-full bg-white text-black shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-all disabled:opacity-0 pointer-events-auto"
+                      title="Переместить влево"
+                    >
+                      <ChevronLeft className="size-3.5" />
+                    </button>
+                    <button
+                      disabled={idx === images.length - 1 || isSavingOrder}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMoveImage(idx, "right");
+                      }}
+                      className="size-6 rounded-full bg-white text-black shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-all disabled:opacity-0 pointer-events-auto"
+                      title="Переместить вправо"
+                    >
+                      <ChevronRight className="size-3.5" />
+                    </button>
+                  </div>
                 )}
-              >
-                <img
-                  src={img.url}
-                  className="w-full h-full object-cover"
-                  alt={`Фото ${idx + 1}`}
-                />
-              </button>
+
+                {isEditingMetadata && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteImage(img.id);
+                    }}
+                    className="absolute -bottom-1 -right-1 size-5 rounded-full bg-red-500 text-white shadow-lg flex items-center justify-center opacity-0 group-hover/thumb:opacity-100 hover:scale-110 active:scale-95 transition-all z-10"
+                    title="Удалить фото"
+                  >
+                    <X className="size-3" />
+                  </button>
+                )}
+              </div>
             ))}
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploading}
-              className="w-[52px] h-[52px] rounded-lg border-2 border-dashed border-white/10 flex items-center justify-center text-white/20 hover:border-white/25 hover:text-white/40 transition-all shrink-0"
+              className="w-[60px] h-[60px] rounded-xl border-2 border-dashed border-white/10 flex items-center justify-center text-white/20 hover:border-white/25 hover:text-white/40 hover:bg-white/5 transition-all shrink-0"
+              title="Добавить фото"
             >
               {isUploading ? (
                 <Loader2 className="size-4 animate-spin" />
               ) : (
-                <Plus className="size-4" />
+                <Plus className="size-5" />
               )}
             </button>
           </div>
