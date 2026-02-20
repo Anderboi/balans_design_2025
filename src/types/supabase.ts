@@ -335,12 +335,217 @@ export type Database = {
           },
         ];
       };
+      project_stage_items: {
+        Row: {
+          completed: boolean;
+          completed_at: string | null;
+          created_at: string;
+          id: string;
+          item_id: string;
+          project_id: string;
+          stage_id: string;
+          updated_at: string;
+        };
+        Insert: {
+          completed?: boolean;
+          completed_at?: string | null;
+          created_at?: string;
+          id?: string;
+          item_id: string;
+          project_id: string;
+          stage_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          completed?: boolean;
+          completed_at?: string | null;
+          created_at?: string;
+          id?: string;
+          item_id?: string;
+          project_id?: string;
+          stage_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "project_stage_items_project_id_fkey";
+            columns: ["project_id"];
+            isOneToOne: false;
+            referencedRelation: "projects";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      planning_variants: {
+        Row: {
+          approved: boolean;
+          approved_at: string | null;
+          created_at: string;
+          description: string | null;
+          file_url: string;
+          id: string;
+          project_id: string;
+          title: string;
+          updated_at: string;
+        };
+        Insert: {
+          approved?: boolean;
+          approved_at?: string | null;
+          created_at?: string;
+          description?: string | null;
+          file_url: string;
+          id?: string;
+          project_id: string;
+          title: string;
+          updated_at?: string;
+        };
+        Update: {
+          approved?: boolean;
+          approved_at?: string | null;
+          created_at?: string;
+          description?: string | null;
+          file_url?: string;
+          id?: string;
+          project_id?: string;
+          title?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "planning_variants_project_id_fkey";
+            columns: ["project_id"];
+            isOneToOne: false;
+            referencedRelation: "projects";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      collage_variants: {
+        Row: {
+          approved: boolean;
+          approved_at: string | null;
+          created_at: string;
+          description: string | null;
+          id: string;
+          images: Json | null;
+          project_id: string;
+          room_id: string;
+          title: string;
+          updated_at: string;
+        };
+        Insert: {
+          approved?: boolean;
+          approved_at?: string | null;
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          images?: Json | null;
+          project_id: string;
+          room_id: string;
+          title: string;
+          updated_at?: string;
+        };
+        Update: {
+          approved?: boolean;
+          approved_at?: string | null;
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          images?: Json | null;
+          project_id?: string;
+          room_id?: string;
+          title?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "collage_variants_project_id_fkey";
+            columns: ["project_id"];
+            isOneToOne: false;
+            referencedRelation: "projects";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "collage_variants_room_id_fkey";
+            columns: ["room_id"];
+            isOneToOne: false;
+            referencedRelation: "rooms";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      visualization_variants: {
+        Row: {
+          approved: boolean;
+          approved_at: string | null;
+          created_at: string;
+          description: string | null;
+          id: string;
+          images: Json | null;
+          project_id: string;
+          room_id: string;
+          title: string;
+          updated_at: string;
+        };
+        Insert: {
+          approved?: boolean;
+          approved_at?: string | null;
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          images?: Json | null;
+          project_id: string;
+          room_id: string;
+          title: string;
+          updated_at?: string;
+        };
+        Update: {
+          approved?: boolean;
+          approved_at?: string | null;
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          images?: Json | null;
+          project_id?: string;
+          room_id?: string;
+          title?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "visualization_variants_project_id_fkey";
+            columns: ["project_id"];
+            isOneToOne: false;
+            referencedRelation: "projects";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "visualization_variants_room_id_fkey";
+            columns: ["room_id"];
+            isOneToOne: false;
+            referencedRelation: "rooms";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      create_project_with_owner: {
+        Args: {
+          p_name: string;
+          p_address: string;
+          p_area: number;
+          p_client_id: string | null;
+          p_stage: string;
+          p_residents: string;
+          p_demolition_info: string;
+          p_construction_info: string;
+        };
+        Returns: string;
+      };
     };
     Enums: {
       app_role:

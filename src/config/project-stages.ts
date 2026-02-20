@@ -37,13 +37,13 @@ export const STAGES_CONFIG: StageConfig[] = [
       {
         id: "brief",
         title: "Техническое задание",
-        completed: true,
+        completed: false,
         icon: FileText,
       },
       {
         id: "object_info",
         title: "Информация по объекту",
-        completed: true,
+        completed: false,
         icon: FileText,
       },
     ],
@@ -58,13 +58,13 @@ export const STAGES_CONFIG: StageConfig[] = [
       {
         id: "planning",
         title: "Планировочные решения",
-        completed: true,
+        completed: false,
         icon: FileText,
       },
       {
         id: "collages",
         title: "Коллажи / Мудборды",
-        completed: true,
+        completed: false,
         icon: FileText,
       },
       {

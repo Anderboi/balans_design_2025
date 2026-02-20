@@ -17,7 +17,7 @@ export const projectsService = {
       throw error;
     }
 
-    return data || [];
+    return (data as any) || [];
   },
 
   // Получение проекта по ID
@@ -43,7 +43,7 @@ export const projectsService = {
       throw error;
     }
 
-    return data;
+    return data as any;
   },
 
   // Создание нового проекта
@@ -87,7 +87,7 @@ export const projectsService = {
 
     // Проверим, что вернуло data.
     // Если id есть в data, используем его.
-    const newProjectId = data?.id || data;
+    const newProjectId = typeof data === "string" ? data : data?.id;
 
     if (!newProjectId) {
       throw new Error("Не удалось получить ID созданного проекта");
@@ -103,7 +103,7 @@ export const projectsService = {
       throw new Error("Проект создан, но не удалось получить его данные");
     }
 
-    return newProject;
+    return newProject as any;
   },
 
   // Обновление проекта
@@ -131,7 +131,7 @@ export const projectsService = {
       throw error;
     }
 
-    return data;
+    return data as any;
   },
 
   // Удаление проекта
@@ -204,7 +204,7 @@ export const projectsService = {
       throw error;
     }
 
-    return data || [];
+    return (data as any) || [];
   },
 
   // Получение статусов этапов проекта
@@ -313,7 +313,54 @@ export const projectsService = {
       throw error;
     }
 
+    // Автоматическая синхронизация статуса "Информация по объекту", если она была обновлена
+    if (data.object_info) {
+      await this.syncObjectInfoStatus(projectId, supabaseClient);
+    }
+
     return result;
+  },
+
+  // Синхронизация статуса информации по объекту
+  async syncObjectInfoStatus(projectId: string, client?: SupabaseClient) {
+    const supabaseClient = client || supabase;
+
+    // Получаем бриф для проверки заполненности object_info
+    const { data: brief, error: fetchError } = await supabaseClient
+      .from("project_briefs")
+      .select("object_info")
+      .eq("project_id", projectId)
+      .single();
+
+    if (fetchError) {
+      console.error("Error fetching brief for object_info sync:", fetchError);
+      return;
+    }
+
+    const objectInfo = (brief?.object_info as Record<string, any>) || {};
+
+    // Считаем информацию по объекту заполненной, если загружены документы
+    // или заполнены основные разделы (локация, тех. условия, ответственное лицо)
+    const hasDocuments =
+      Array.isArray(objectInfo.documents) && objectInfo.documents.length > 0;
+    const hasLocation =
+      !!objectInfo.location && Object.keys(objectInfo.location).length > 0;
+    const hasTechnical =
+      !!objectInfo.technicalConditions &&
+      Object.keys(objectInfo.technicalConditions).length > 0;
+    const hasResponsible =
+      !!objectInfo.responsiblePerson && !!objectInfo.responsiblePerson.fullName;
+
+    const isCompleted =
+      hasDocuments || (hasLocation && hasTechnical && hasResponsible);
+
+    await this.toggleProjectStageItem(
+      projectId,
+      "preproject",
+      "object_info",
+      isCompleted,
+      supabaseClient,
+    );
   },
 
   // Обновление статуса раздела брифа
@@ -379,6 +426,145 @@ export const projectsService = {
       "preproject",
       "brief",
       allCompleted,
+      supabaseClient,
+    );
+  },
+
+  // Синхронизация статуса планировочных решений
+  async syncPlanningStatus(projectId: string, client?: SupabaseClient) {
+    const supabaseClient = client || supabase;
+
+    // Проверяем наличие хотя бы одного утвержденного варианта планировки
+    const { data, error } = await supabaseClient
+      .from("planning_variants")
+      .select("id")
+      .eq("project_id", projectId)
+      .eq("approved", true)
+      .limit(1);
+
+    if (error) {
+      console.error("Error checking planning approval status:", error);
+      return;
+    }
+
+    const isCompleted = data && data.length > 0;
+
+    await this.toggleProjectStageItem(
+      projectId,
+      "concept",
+      "planning",
+      isCompleted,
+      supabaseClient,
+    );
+  },
+
+  // Синхронизация статуса коллажей
+  async syncCollagesStatus(projectId: string, client?: SupabaseClient) {
+    const supabaseClient = client || supabase;
+
+    // 1. Получаем все помещения проекта
+    const { data: rooms, error: roomsError } = await supabaseClient
+      .from("rooms")
+      .select("id")
+      .eq("project_id", projectId);
+
+    if (roomsError) {
+      console.error("Error fetching rooms for collage sync:", roomsError);
+      return;
+    }
+
+    if (!rooms || rooms.length === 0) {
+      // Если помещений нет, считаем не выполненным (или по логике бизнеса?)
+      // Но обычно помещения есть.
+      await this.toggleProjectStageItem(
+        projectId,
+        "concept",
+        "collages",
+        false,
+        supabaseClient,
+      );
+      return;
+    }
+
+    // 2. Получаем все утвержденные коллажи для этих помещений
+    const roomIds = rooms.map((r) => r.id);
+    const { data: approvedCollages, error: collagesError } =
+      await supabaseClient
+        .from("collage_variants")
+        .select("room_id")
+        .in("room_id", roomIds)
+        .eq("approved", true);
+
+    if (collagesError) {
+      console.error("Error fetching approved collages:", collagesError);
+      return;
+    }
+
+    // 3. Проверяем, что для КАЖДОГО помещения есть хотя бы один утвержденный коллаж
+    const approvedRoomIds = new Set(approvedCollages?.map((c) => c.room_id));
+    const allRoomsHaveApprovedCollages = rooms.every((room) =>
+      approvedRoomIds.has(room.id),
+    );
+
+    await this.toggleProjectStageItem(
+      projectId,
+      "concept",
+      "collages",
+      allRoomsHaveApprovedCollages,
+      supabaseClient,
+    );
+  },
+
+  // Синхронизация статуса визуализаций
+  async syncVisualizationsStatus(projectId: string, client?: SupabaseClient) {
+    const supabaseClient = client || supabase;
+
+    // 1. Получаем все помещения проекта
+    const { data: rooms, error: roomsError } = await supabaseClient
+      .from("rooms")
+      .select("id")
+      .eq("project_id", projectId);
+
+    if (roomsError) {
+      console.error("Error fetching rooms for visualization sync:", roomsError);
+      return;
+    }
+
+    if (!rooms || rooms.length === 0) {
+      await this.toggleProjectStageItem(
+        projectId,
+        "concept",
+        "viz",
+        false,
+        supabaseClient,
+      );
+      return;
+    }
+
+    // 2. Получаем все утвержденные визуализации для этих помещений
+    const roomIds = rooms.map((r) => r.id);
+    const { data: approvedVizes, error: vizesError } = await supabaseClient
+      .from("visualization_variants")
+      .select("room_id")
+      .in("room_id", roomIds)
+      .eq("approved", true);
+
+    if (vizesError) {
+      console.error("Error fetching approved visualizations:", vizesError);
+      return;
+    }
+
+    // 3. Проверяем, что для КАЖДОГО помещения есть хотя бы один утвержденный вариант
+    const approvedRoomIds = new Set(approvedVizes?.map((v) => v.room_id));
+    const allRoomsHaveApprovedVizes = rooms.every((room) =>
+      approvedRoomIds.has(room.id),
+    );
+
+    await this.toggleProjectStageItem(
+      projectId,
+      "concept",
+      "viz",
+      allRoomsHaveApprovedVizes,
       supabaseClient,
     );
   },

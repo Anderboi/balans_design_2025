@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { AlertCircle, CheckCircle2, ChevronDown } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
+import { syncVisualizationsStatusAction } from "@/lib/actions/concept-sync";
 
 interface RoomSectionProps {
   room: Room;
@@ -111,6 +112,9 @@ export function RoomSection({
         });
       }
 
+      // Sync stage status
+      await syncVisualizationsStatusAction(projectId);
+
       router.refresh();
     } catch (error) {
       console.error("Error approving variant:", error);
@@ -139,6 +143,9 @@ export function RoomSection({
           approved_at: null,
         });
       }
+
+      // Sync stage status
+      await syncVisualizationsStatusAction(projectId);
 
       setIsCancelDialogOpen(false);
       router.refresh();
@@ -240,14 +247,16 @@ export function RoomSection({
         onOpenChange={setIsDetailOpen}
         onApprove={handleApprove}
         isApproving={isApproving}
-        onUpdateVariant={(updated) => {
+        onUpdateVariant={async (updated) => {
           setVariants(variants.map((v) => (v.id === updated.id ? updated : v)));
           setSelectedVariant(updated);
+          await syncVisualizationsStatusAction(projectId);
         }}
-        onDeleteVariant={(id) => {
+        onDeleteVariant={async (id) => {
           setVariants(variants.filter((v) => v.id !== id));
           setIsDetailOpen(false);
           setSelectedVariant(null);
+          await syncVisualizationsStatusAction(projectId);
         }}
       />
 

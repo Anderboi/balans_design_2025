@@ -12,6 +12,7 @@ import { CancelApprovalDialog } from "./components/cancel-approval-dialog";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import PageContainer from "@/components/ui/page-container";
+import { syncPlanningStatusAction } from "@/lib/actions/concept-sync";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -81,6 +82,9 @@ export default function PlanningPageClient({
         });
       }
 
+      // Sync stage status
+      await syncPlanningStatusAction(projectId);
+
       router.refresh();
     } catch (error) {
       console.error("Error approving variant:", error);
@@ -110,6 +114,9 @@ export default function PlanningPageClient({
           approved_at: null,
         });
       }
+
+      // Sync stage status
+      await syncPlanningStatusAction(projectId);
 
       setIsCancelDialogOpen(false);
       router.refresh();
@@ -213,12 +220,13 @@ export default function PlanningPageClient({
             setSelectedVariant(updated);
           }
         }}
-        onDeleteVariant={(id) => {
+        onDeleteVariant={async (id) => {
           setVariants(variants.filter((v) => v.id !== id));
           if (selectedVariant?.id === id) {
             setSelectedVariant(null);
             setIsDetailOpen(false);
           }
+          await syncPlanningStatusAction(projectId);
         }}
       />
 

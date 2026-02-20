@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { AlertCircle, CheckCircle2, ChevronDown } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
+import { syncCollagesStatusAction } from "@/lib/actions/concept-sync";
 
 interface RoomSectionProps {
   room: Room;
@@ -71,6 +72,9 @@ export function RoomSection({
         });
       }
 
+      // Sync stage status
+      await syncCollagesStatusAction(projectId);
+
       router.refresh();
     } catch (error) {
       console.error("Error approving variant:", error);
@@ -100,6 +104,9 @@ export function RoomSection({
         });
       }
 
+      // Sync stage status
+      await syncCollagesStatusAction(projectId);
+
       setIsCancelDialogOpen(false);
       router.refresh();
     } catch (error) {
@@ -109,17 +116,19 @@ export function RoomSection({
     }
   };
 
-  const handleUpdateVariant = (updated: CollageVariant) => {
+  const handleUpdateVariant = async (updated: CollageVariant) => {
     setVariants(variants.map((v) => (v.id === updated.id ? updated : v)));
     if (selectedVariant?.id === updated.id) {
       setSelectedVariant(updated);
     }
+    await syncCollagesStatusAction(projectId);
   };
 
-  const handleDeleteVariant = (id: string) => {
+  const handleDeleteVariant = async (id: string) => {
     setVariants(variants.filter((v) => v.id !== id));
     setIsDetailOpen(false);
     setSelectedVariant(null);
+    await syncCollagesStatusAction(projectId);
   };
 
   return (
