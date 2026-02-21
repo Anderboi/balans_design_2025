@@ -1,5 +1,11 @@
-import { FileText } from "lucide-react";
-import { LucideIcon } from "lucide-react";
+import {
+  FileText,
+  ClipboardList,
+  Sparkles,
+  PencilRuler,
+  Hammer,
+  LucideIcon,
+} from "lucide-react";
 
 export type StageStatus = "completed" | "in_progress" | "locked";
 
@@ -13,6 +19,7 @@ export interface StageSubItem {
 export interface StageConfig {
   id: string;
   title: string;
+  icon?: LucideIcon;
   defaultStatus: StageStatus; // Changed from status to defaultStatus as status will come from DB eventually
   dueDate?: string;
   progress?: {
@@ -26,14 +33,9 @@ export const STAGES_CONFIG: StageConfig[] = [
   {
     id: "preproject",
     title: "Предпроектная",
+    icon: ClipboardList,
     defaultStatus: "completed",
     items: [
-      // {
-      //   id: "documents",
-      //   title: "Документы",
-      //   completed: true,
-      //   icon: FileText,
-      // },
       {
         id: "brief",
         title: "Техническое задание",
@@ -45,6 +47,7 @@ export const STAGES_CONFIG: StageConfig[] = [
   {
     id: "concept",
     title: "Концепция",
+    icon: Sparkles,
     defaultStatus: "in_progress",
     dueDate: "15.11.2023",
     progress: { current: 2, total: 3 },
@@ -72,6 +75,7 @@ export const STAGES_CONFIG: StageConfig[] = [
   {
     id: "working",
     title: "Рабочая",
+    icon: PencilRuler,
     defaultStatus: "locked",
     items: [
       { id: "drawings", title: "Чертежи", completed: false, icon: FileText },
@@ -81,6 +85,7 @@ export const STAGES_CONFIG: StageConfig[] = [
   {
     id: "realization",
     title: "Реализация",
+    icon: Hammer,
     defaultStatus: "locked",
     items: [
       {

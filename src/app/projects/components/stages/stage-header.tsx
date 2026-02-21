@@ -1,7 +1,8 @@
-import { Check, ChevronDown, ChevronUp, Loader2, Lock, PencilRuler } from "lucide-react";
+import { ChevronDown, ChevronUp, Lock, PencilRuler } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { StageConfig } from "@/config/project-stages";
+import { Badge } from '@/components/ui/badge';
 
 interface StageHeaderProps {
   stage: StageConfig;
@@ -19,6 +20,7 @@ export function StageHeader({
   const isLocked = status === "locked";
   const isCompleted = status === "completed";
   const isInProgress = status === "in_progress";
+  const Icon = stage.icon || PencilRuler;
 
   const handleToggle = () => {
     // Prevent toggle if locked, but allow button click to handle it too
@@ -41,15 +43,13 @@ export function StageHeader({
           className={cn(
             "flex items-center justify-center w-12 h-12 rounded-full shrink-0",
             isCompleted
-              ? "bg-black text-white"
+              ? "bg-black text-white shadow-md shadow-zinc-200"
               : isInProgress
-                ? "bg-gray-100"
-                : "bg-gray-50",
+                ? "bg-zinc-100 text-zinc-900 border border-zinc-200/50"
+                : "bg-gray-50 text-gray-400",
           )}
         >
-          {isCompleted && <Check className="size-6" />}
-          {isInProgress && <PencilRuler className="size-6 text-gray-500" />}
-          {isLocked && <Lock className="size-5 text-gray-400" />}
+          {isLocked ? <Lock className="size-5" /> : <Icon className="size-6" />}
         </div>
 
         <div>
@@ -63,14 +63,14 @@ export function StageHeader({
               {stage.title}
             </h3>
             {isCompleted && (
-              <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+              <Badge variant="secondary" className="text-green-600 bg-green-50">
                 Этап завершен
-              </span>
+              </Badge>
             )}
             {isInProgress && (
-              <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider">
+              <Badge variant="secondary" className="text-blue-600 bg-blue-50">
                 В работе
-              </span>
+              </Badge>
             )}
           </div>
           {isInProgress && stage.dueDate && (
@@ -104,7 +104,7 @@ export function StageHeader({
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-gray-400"
+            className="size-8 text-gray-400"
             onClick={(e) => {
               e.stopPropagation();
               onToggle();
