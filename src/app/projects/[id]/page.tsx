@@ -23,6 +23,7 @@ import {
   ProjectStagesSkeleton,
 } from "../components/project-stages-loader";
 import { ObjectInfoCard } from "../components/object-info-card";
+import { ProjectClientSelector } from "../components/project-client-selector";
 
 // Загрузчики и блоки
 import SchedulesBlock from "./components/schedules-block";
@@ -61,9 +62,6 @@ export default async function ProjectDetailPage({
     notFound();
   }
 
-  // Get client name directly from the joined contact
-  // Since we use a foreign key relation, 'contacts' is a single object here.
-  const clientName = project.contacts?.name || "Клиент не указан";
   const address = project.address || "Адрес не указан";
 
   return (
@@ -90,7 +88,10 @@ export default async function ProjectDetailPage({
             </h1>
             <p className="text-base text-zinc-500">
               {address} <span className="mx-2 text-zinc-500">•</span>{" "}
-              {clientName}
+              <ProjectClientSelector
+                projectId={id}
+                clientName={project.contacts?.name}
+              />
             </p>
           </div>
 

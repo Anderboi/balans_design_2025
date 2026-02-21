@@ -24,7 +24,7 @@ export async function getClients() {
 }
 
 export async function createCompany(
-  company: Omit<Company, "id" | "created_at" | "updated_at">
+  company: Omit<Company, "id" | "created_at" | "updated_at">,
 ) {
   try {
     const result = await companiesService.createCompany(company);
@@ -44,5 +44,18 @@ export async function updateContact(id: string, updates: Partial<Contact>) {
   } catch (error) {
     console.error("Ошибка при обновлении контакта:", error);
     return { success: false, error: "Не удалось обновить контакт" };
+  }
+}
+
+export async function createContact(
+  contact: Omit<Contact, "id" | "created_at" | "updated_at">,
+) {
+  try {
+    const data = await contactsService.createContact(contact);
+    revalidatePath("/contacts");
+    return { success: true, data };
+  } catch (error) {
+    console.error("Ошибка при создании контакта:", error);
+    return { success: false, error: "Не удалось создать контакт" };
   }
 }
