@@ -18,6 +18,7 @@ export interface Project {
   tags?: string[] | null;
   owner_id?: string | null;
   project_stage_items?: ProjectStageItem[];
+  is_strict_mode?: boolean | null;
 }
 
 export interface ProjectStageItem {

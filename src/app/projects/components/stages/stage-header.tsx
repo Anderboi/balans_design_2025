@@ -1,4 +1,4 @@
-import { Check, ChevronDown, ChevronUp, Loader2, Lock } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, Loader2, Lock, PencilRuler } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { StageConfig } from "@/config/project-stages";
@@ -31,7 +31,7 @@ export function StageHeader({
     <div
       className={cn(
         "p-6 flex items-center justify-between cursor-pointer",
-        !isLocked && "hover:bg-gray-50/50 rounded-3xl"
+        !isLocked && "hover:bg-gray-50/50 rounded-3xl",
       )}
       onClick={handleToggle}
     >
@@ -43,15 +43,13 @@ export function StageHeader({
             isCompleted
               ? "bg-black text-white"
               : isInProgress
-              ? "bg-gray-100"
-              : "bg-gray-50"
+                ? "bg-gray-100"
+                : "bg-gray-50",
           )}
         >
-          {isCompleted && <Check className="w-6 h-6" />}
-          {isInProgress && (
-            <Loader2 className="w-6 h-6 animate-spin text-gray-500" />
-          )}
-          {isLocked && <Lock className="w-5 h-5 text-gray-400" />}
+          {isCompleted && <Check className="size-6" />}
+          {isInProgress && <PencilRuler className="size-6 text-gray-500" />}
+          {isLocked && <Lock className="size-5 text-gray-400" />}
         </div>
 
         <div>
@@ -59,7 +57,7 @@ export function StageHeader({
             <h3
               className={cn(
                 "text-lg font-semibold",
-                isLocked ? "text-gray-400" : "text-gray-900"
+                isLocked ? "text-gray-400" : "text-gray-900",
               )}
             >
               {stage.title}

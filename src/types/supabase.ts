@@ -149,6 +149,7 @@ export type Database = {
           client_id: string | null;
           created_at: string | null;
           id: string;
+          is_strict_mode: boolean | null;
           location: string | null;
           name: string;
           owner_id: string | null;
@@ -161,6 +162,7 @@ export type Database = {
           client_id?: string | null;
           created_at?: string | null;
           id?: string;
+          is_strict_mode?: boolean | null;
           location?: string | null;
           name: string;
           owner_id?: string | null;
@@ -173,6 +175,7 @@ export type Database = {
           client_id?: string | null;
           created_at?: string | null;
           id?: string;
+          is_strict_mode?: boolean | null;
           location?: string | null;
           name?: string;
           owner_id?: string | null;

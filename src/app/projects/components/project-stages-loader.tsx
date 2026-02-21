@@ -4,14 +4,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 interface ProjectStagesLoaderProps {
   projectId: string;
+  isStrictMode?: boolean;
 }
 
 export async function ProjectStagesLoader({
   projectId,
+  isStrictMode = true,
 }: ProjectStagesLoaderProps) {
   const stageItems = await projectsService.getProjectStageItems(projectId);
 
-  return <ProjectStages initialStageItems={stageItems} />;
+  return (
+    <ProjectStages initialStageItems={stageItems} isStrictMode={isStrictMode} />
+  );
 }
 
 export function ProjectStagesSkeleton() {

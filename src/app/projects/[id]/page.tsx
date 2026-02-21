@@ -129,7 +129,10 @@ export default async function ProjectDetailPage({
           />
 
           <Suspense fallback={<ProjectStagesSkeleton />}>
-            <ProjectStagesLoader projectId={id} />
+            <ProjectStagesLoader
+              projectId={id}
+              isStrictMode={project.is_strict_mode ?? true}
+            />
           </Suspense>
 
           {/* Brief Carousel or other blocks can participate here if needed, 
