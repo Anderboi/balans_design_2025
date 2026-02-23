@@ -229,6 +229,7 @@ export function RoomSection({
         projectId={projectId}
         roomId={room.id}
         roomName={room.name}
+        nextIndex={variants.length + 1}
       />
 
       <CancelApprovalDialog

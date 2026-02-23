@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -43,6 +43,7 @@ interface UploadVariantDialogProps {
   projectId: string;
   roomId: string;
   roomName: string;
+  nextIndex: number;
 }
 
 export function UploadVariantDialog({
@@ -51,6 +52,7 @@ export function UploadVariantDialog({
   projectId,
   roomId,
   roomName,
+  nextIndex,
 }: UploadVariantDialogProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -63,6 +65,17 @@ export function UploadVariantDialog({
       description: "",
     },
   });
+
+  // Set automatic title when dialog opens or nextIndex/roomName changes
+  useEffect(() => {
+    if (open) {
+      const currentTitle = form.getValues("title");
+      // Only set if title is empty or was previously auto-generated
+      if (!currentTitle || currentTitle.startsWith("Вариант")) {
+        form.setValue("title", `Вариант ${nextIndex}. ${roomName}`);
+      }
+    }
+  }, [open, nextIndex, roomName, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -158,7 +171,7 @@ export function UploadVariantDialog({
             <FormField
               control={form.control}
               name="image"
-              render={({ field: { onChange, value, ...field } }) => (
+              render={({ field: { onChange, value: _, ...field } }) => (
                 <FormItem>
                   <FormLabel>Изображение (превью)</FormLabel>
                   <FormControl>
@@ -176,7 +189,7 @@ export function UploadVariantDialog({
             <FormField
               control={form.control}
               name="file"
-              render={({ field: { onChange, value, ...field } }) => (
+              render={({ field: { onChange, value: _, ...field } }) => (
                 <FormItem>
                   <FormLabel>Файл (PDF, JPG, PNG)</FormLabel>
                   <FormControl>

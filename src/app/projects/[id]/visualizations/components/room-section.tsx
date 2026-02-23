@@ -5,6 +5,7 @@ import { Room } from "@/types";
 import { VisualizationVariant } from "@/types/visualizations";
 import { VariantCard } from "./variant-card";
 import { UploadVariantCard } from "./upload-variant-card";
+import { UploadVariantDialog } from "./upload-variant-dialog";
 import { VariantDetailDialog } from "./variant-detail-dialog";
 import { CancelApprovalDialog } from "./cancel-approval-dialog";
 import { visualizationVariantsService } from "@/lib/services/visualization-variants";
@@ -35,7 +36,8 @@ export function RoomSection({
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
   const [isCanceling, setIsCanceling] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const router = useRouter();
   const supabase = createClient();
 
@@ -46,45 +48,9 @@ export function RoomSection({
     setIsDetailOpen(true);
   };
 
-  const handleFilesSelected = async (fileList: FileList) => {
-    try {
-      setIsUploading(true);
-      const files = Array.from(fileList);
-      const uploadedImages = [];
-
-      for (const file of files) {
-        const { fullUrl } = await visualizationVariantsService.uploadFile(
-          file,
-          `${projectId}/${room.id}/visualizations`,
-          supabase,
-        );
-        uploadedImages.push({
-          id: crypto.randomUUID(),
-          url: fullUrl,
-          name: file.name,
-          size: file.size,
-        });
-      }
-
-      const newVariant =
-        await visualizationVariantsService.createVisualizationVariant(
-          {
-            project_id: projectId,
-            room_id: room.id,
-            title: `Вариант ${variants.length + 1}`,
-            description: "",
-            images: uploadedImages,
-          },
-          supabase,
-        );
-
-      setVariants([...variants, newVariant]);
-      router.refresh();
-    } catch (error) {
-      console.error("Error uploading files:", error);
-    } finally {
-      setIsUploading(false);
-    }
+  const handleFilesSelected = (fileList: FileList) => {
+    setSelectedFiles(Array.from(fileList));
+    setIsUploadOpen(true);
   };
 
   const handleApprove = async (variant: VisualizationVariant) => {
@@ -224,7 +190,7 @@ export function RoomSection({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <UploadVariantCard
               onFilesSelected={handleFilesSelected}
-              isLoading={isUploading}
+              isLoading={false}
             />
             {variants.map((variant) => (
               <VariantCard
@@ -257,6 +223,20 @@ export function RoomSection({
           setIsDetailOpen(false);
           setSelectedVariant(null);
           await syncVisualizationsStatusAction(projectId);
+        }}
+      />
+
+      <UploadVariantDialog
+        open={isUploadOpen}
+        onOpenChange={setIsUploadOpen}
+        projectId={projectId}
+        roomId={room.id}
+        roomName={room.name}
+        nextIndex={variants.length + 1}
+        files={selectedFiles}
+        onSuccess={() => {
+          setSelectedFiles([]);
+          router.refresh();
         }}
       />
 

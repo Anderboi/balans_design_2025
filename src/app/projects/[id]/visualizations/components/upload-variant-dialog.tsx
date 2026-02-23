@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -23,18 +23,12 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { visualizationVariantsService } from "@/lib/services/visualization-variants";
 import { createClient } from "@/lib/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, ImageIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   title: z.string().min(1, "Введите название варианта"),
   description: z.string().optional(),
-  file: z
-    .instanceof(FileList)
-    .refine((files) => files.length > 0, "Выберите файл"),
-  image: z
-    .instanceof(FileList)
-    .refine((files) => files.length > 0, "Выберите изображение"),
 });
 
 interface UploadVariantDialogProps {
@@ -43,6 +37,9 @@ interface UploadVariantDialogProps {
   projectId: string;
   roomId: string;
   roomName: string;
+  nextIndex: number;
+  files: File[];
+  onSuccess?: () => void;
 }
 
 export function UploadVariantDialog({
@@ -51,6 +48,9 @@ export function UploadVariantDialog({
   projectId,
   roomId,
   roomName,
+  nextIndex,
+  files: initialFiles,
+  onSuccess,
 }: UploadVariantDialogProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -64,28 +64,37 @@ export function UploadVariantDialog({
     },
   });
 
+  // Set automatic title when dialog opens or nextIndex/roomName changes
+  useEffect(() => {
+    if (open) {
+      const currentTitle = form.getValues("title");
+      // Only set if title is empty or was previously auto-generated
+      if (!currentTitle || currentTitle.startsWith("Вариант")) {
+        form.setValue("title", `Вариант ${nextIndex}. ${roomName}`);
+      }
+    }
+  }, [open, nextIndex, roomName, form]);
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (initialFiles.length === 0) return;
+
     try {
       setIsLoading(true);
 
-      const file = values.file[0];
-      const image = values.image[0];
-
-      // Upload file
-      const { fullUrl: fileUrl } =
-        await visualizationVariantsService.uploadFile(
+      const uploadedImages = [];
+      for (const file of initialFiles) {
+        const { fullUrl } = await visualizationVariantsService.uploadFile(
           file,
-          `${projectId}/${roomId}/files`,
+          `${projectId}/${roomId}/visualizations`,
           supabase,
         );
-
-      // Upload image
-      const { fullUrl: imageUrl } =
-        await visualizationVariantsService.uploadFile(
-          image,
-          `${projectId}/${roomId}/images`,
-          supabase,
-        );
+        uploadedImages.push({
+          id: crypto.randomUUID(),
+          url: fullUrl,
+          name: file.name,
+          size: file.size,
+        });
+      }
 
       // Create variant record
       await visualizationVariantsService.createVisualizationVariant(
@@ -94,27 +103,17 @@ export function UploadVariantDialog({
           room_id: roomId,
           title: values.title,
           description: values.description || null,
-          image_url: imageUrl,
-          file_url: fileUrl,
-          file_name: file.name,
-          file_size: file.size,
-          images: [
-            {
-              id: crypto.randomUUID(),
-              url: imageUrl,
-              name: image.name,
-              size: image.size,
-            },
-          ],
+          images: uploadedImages,
         },
         supabase,
       );
 
       form.reset();
       onOpenChange(false);
+      onSuccess?.();
       router.refresh();
     } catch (error) {
-      console.error("Error uploading visualization variant:", error);
+      console.error("Error creating visualization variant:", error);
     } finally {
       setIsLoading(false);
     }
@@ -124,7 +123,7 @@ export function UploadVariantDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Загрузить визуализацию — {roomName}</DialogTitle>
+          <DialogTitle>Новый вариант — {roomName}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -135,10 +134,7 @@ export function UploadVariantDialog({
                 <FormItem>
                   <FormLabel>Название</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Вариант 1: Основной ракурс"
-                      {...field}
-                    />
+                    <Input placeholder="Напр. Вариант 1. Гостиная" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -152,7 +148,7 @@ export function UploadVariantDialog({
                   <FormLabel>Описание</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Краткое описание визуализации"
+                      placeholder="Краткое описание (необязательно)"
                       {...field}
                     />
                   </FormControl>
@@ -160,45 +156,26 @@ export function UploadVariantDialog({
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="image"
-              render={({ field: { onChange, value, ...field } }) => (
-                <FormItem>
-                  <FormLabel>Изображение (превью)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => onChange(e.target.files)}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="file"
-              render={({ field: { onChange, value, ...field } }) => (
-                <FormItem>
-                  <FormLabel>Файл (PDF, JPG, PNG)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={(e) => onChange(e.target.files)}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
+            <div className="space-y-2">
+              <FormLabel>
+                Выбранные изображения ({initialFiles.length})
+              </FormLabel>
+              <div className="grid grid-cols-4 gap-2">
+                {initialFiles.map((file, i) => (
+                  <div
+                    key={i}
+                    className="aspect-square relative rounded-md bg-zinc-100 flex items-center justify-center overflow-hidden border"
+                  >
+                    <ImageIcon className="w-5 h-5 text-zinc-400" />
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Загрузить
+              Создать вариант
             </Button>
           </form>
         </Form>
