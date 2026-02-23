@@ -8,6 +8,7 @@ import { UploadVariantCard } from "./upload-variant-card";
 import { UploadVariantDialog } from "./upload-variant-dialog";
 import { VariantDetailDialog } from "./variant-detail-dialog";
 import { CancelApprovalDialog } from "./cancel-approval-dialog";
+import { ApproveSwitchDialog } from "./approve-switch-dialog";
 import { visualizationVariantsService } from "@/lib/services/visualization-variants";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -34,10 +35,12 @@ export function RoomSection({
     useState<VisualizationVariant | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  const [isSwitchDialogOpen, setIsSwitchDialogOpen] = useState(false);
+  const [variantToApprove, setVariantToApprove] =
+    useState<VisualizationVariant | null>(null);
   const [isApproving, setIsApproving] = useState(false);
   const [isCanceling, setIsCanceling] = useState(false);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const router = useRouter();
   const supabase = createClient();
 
@@ -48,12 +51,14 @@ export function RoomSection({
     setIsDetailOpen(true);
   };
 
-  const handleFilesSelected = (fileList: FileList) => {
-    setSelectedFiles(Array.from(fileList));
-    setIsUploadOpen(true);
-  };
-
   const handleApprove = async (variant: VisualizationVariant) => {
+    // If there's already an approved variant, show confirmation dialog
+    if (approvedVariant && approvedVariant.id !== variant.id) {
+      setVariantToApprove(variant);
+      setIsSwitchDialogOpen(true);
+      return;
+    }
+
     try {
       setIsApproving(true);
       await visualizationVariantsService.approveVisualizationVariant(
@@ -81,6 +86,8 @@ export function RoomSection({
       // Sync stage status
       await syncVisualizationsStatusAction(projectId);
 
+      setIsSwitchDialogOpen(false);
+      setVariantToApprove(null);
       router.refresh();
     } catch (error) {
       console.error("Error approving variant:", error);
@@ -189,7 +196,7 @@ export function RoomSection({
           {/* Variants Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <UploadVariantCard
-              onFilesSelected={handleFilesSelected}
+              onClick={() => setIsUploadOpen(true)}
               isLoading={false}
             />
             {variants.map((variant) => (
@@ -233,10 +240,8 @@ export function RoomSection({
         roomId={room.id}
         roomName={room.name}
         nextIndex={variants.length + 1}
-        files={selectedFiles}
-        onSuccess={() => {
-          setSelectedFiles([]);
-          router.refresh();
+        onSuccess={(newVariant) => {
+          setVariants([...variants, newVariant]);
         }}
       />
 
@@ -246,6 +251,15 @@ export function RoomSection({
         onConfirm={handleCancelApproval}
         isCanceling={isCanceling}
         roomName={room.name}
+      />
+
+      <ApproveSwitchDialog
+        open={isSwitchDialogOpen}
+        onOpenChange={setIsSwitchDialogOpen}
+        onConfirm={() => variantToApprove && handleApprove(variantToApprove)}
+        isLoading={isApproving}
+        roomName={room.name}
+        variantTitle={variantToApprove?.title || ""}
       />
     </div>
   );

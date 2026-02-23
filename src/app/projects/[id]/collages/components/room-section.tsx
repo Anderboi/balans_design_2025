@@ -8,6 +8,7 @@ import { UploadVariantCard } from "./upload-variant-card";
 import { UploadVariantDialog } from "./upload-variant-dialog";
 import { VariantDetailDialog } from "./variant-detail-dialog";
 import { CancelApprovalDialog } from "./cancel-approval-dialog";
+import { ApproveSwitchDialog } from "./approve-switch-dialog";
 import { collageVariantsService } from "@/lib/services/collage-variants";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -35,6 +36,9 @@ export function RoomSection({
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  const [isSwitchDialogOpen, setIsSwitchDialogOpen] = useState(false);
+  const [variantToApprove, setVariantToApprove] =
+    useState<CollageVariant | null>(null);
   const [isApproving, setIsApproving] = useState(false);
   const [isCanceling, setIsCanceling] = useState(false);
   const router = useRouter();
@@ -48,6 +52,13 @@ export function RoomSection({
   };
 
   const handleApprove = async (variant: CollageVariant) => {
+    // If there's already an approved variant, show confirmation dialog
+    if (approvedVariant && approvedVariant.id !== variant.id) {
+      setVariantToApprove(variant);
+      setIsSwitchDialogOpen(true);
+      return;
+    }
+
     try {
       setIsApproving(true);
       await collageVariantsService.approveCollageVariant(
@@ -75,6 +86,8 @@ export function RoomSection({
       // Sync stage status
       await syncCollagesStatusAction(projectId);
 
+      setIsSwitchDialogOpen(false);
+      setVariantToApprove(null);
       router.refresh();
     } catch (error) {
       console.error("Error approving variant:", error);
@@ -197,7 +210,10 @@ export function RoomSection({
 
           {/* Variants Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <UploadVariantCard onClick={() => setIsUploadOpen(true)} />
+            <UploadVariantCard
+              onClick={() => setIsUploadOpen(true)}
+              isLoading={false}
+            />
             {variants.map((variant) => (
               <VariantCard
                 key={variant.id}
@@ -230,6 +246,9 @@ export function RoomSection({
         roomId={room.id}
         roomName={room.name}
         nextIndex={variants.length + 1}
+        onSuccess={(newVariant) => {
+          setVariants([...variants, newVariant]);
+        }}
       />
 
       <CancelApprovalDialog
@@ -238,6 +257,15 @@ export function RoomSection({
         onConfirm={handleCancelApproval}
         isCanceling={isCanceling}
         roomName={room.name}
+      />
+
+      <ApproveSwitchDialog
+        open={isSwitchDialogOpen}
+        onOpenChange={setIsSwitchDialogOpen}
+        onConfirm={() => variantToApprove && handleApprove(variantToApprove)}
+        isLoading={isApproving}
+        roomName={room.name}
+        variantTitle={variantToApprove?.title || ""}
       />
     </div>
   );
