@@ -5,6 +5,7 @@ import {
   PencilRuler,
   Hammer,
   LucideIcon,
+  Ruler,
 } from "lucide-react";
 
 export type StageStatus = "completed" | "in_progress" | "locked";
@@ -78,7 +79,7 @@ export const STAGES_CONFIG: StageConfig[] = [
     icon: PencilRuler,
     defaultStatus: "locked",
     items: [
-      { id: "drawings", title: "Чертежи", completed: false, icon: FileText },
+      { id: "drawings", title: "Чертежи", completed: false, icon: Ruler },
       { id: "specs", title: "Спецификации", completed: false, icon: FileText },
     ],
   },

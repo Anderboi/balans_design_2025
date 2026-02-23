@@ -20,8 +20,9 @@ export function StageItem({
   const isPlanning = item.id === "planning";
   const isCollages = item.id === "collages";
   const isViz = item.id === "viz";
+  const isDrawings = item.id === "drawings";
   const isClickable =
-    isBrief || isObjectInfo || isPlanning || isCollages || isViz;
+    isBrief || isObjectInfo || isPlanning || isCollages || isViz || isDrawings;
   const Icon = item.icon || FileText;
 
   const getHref = () => {
@@ -30,6 +31,7 @@ export function StageItem({
     if (isPlanning) return `/projects/${projectId}/planning`;
     if (isCollages) return `/projects/${projectId}/collages`;
     if (isViz) return `/projects/${projectId}/visualizations`;
+    if (isDrawings) return `/projects/${projectId}/drawings`;
     return "#";
   };
 
@@ -66,7 +68,14 @@ export function StageItem({
         >
           <Icon className="size-4" />
         </div>
-        <span className={cn("font-medium text-sm", item.completed ? "text-green-600/80" : "text-gray-600")}>{item.title}</span>
+        <span
+          className={cn(
+            "font-medium text-sm",
+            item.completed ? "text-green-600/80" : "text-gray-600",
+          )}
+        >
+          {item.title}
+        </span>
       </div>
 
       <div className="flex items-center gap-2">

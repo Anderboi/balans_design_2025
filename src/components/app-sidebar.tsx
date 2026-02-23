@@ -12,6 +12,7 @@ import {
   PenTool,
   Image as ImageIcon,
   Box,
+  Ruler,
 } from "lucide-react";
 import {
   Sidebar,
@@ -91,6 +92,12 @@ const AppSidebar = () => {
           href: `/projects/${projectId}/visualizations`,
           exact: false,
           icon: Box,
+        },
+        {
+          title: "Чертежи",
+          href: `/projects/${projectId}/drawings`,
+          exact: false,
+          icon: Ruler,
         },
       ]
     : [];
