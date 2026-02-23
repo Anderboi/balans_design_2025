@@ -66,7 +66,7 @@ export function StageItem({
         >
           <Icon className="size-4" />
         </div>
-        <span className="font-medium text-sm">{item.title}</span>
+        <span className={cn("font-medium text-sm", item.completed ? "text-green-600/80" : "text-gray-600")}>{item.title}</span>
       </div>
 
       <div className="flex items-center gap-2">

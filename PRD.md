@@ -10,7 +10,7 @@ Data Strategy: Currently runs on complex local mock data with state management h
 
 ## 2. Tech Stack & Dependencies
 
-Framework: React 18.3.1
+Framework: Next JS
 Styling: Tailwind CSS (via CDN with custom config).
 Icons: lucide-react
 AI Integration: @google/genai (Google Gemini) for material suggestions.

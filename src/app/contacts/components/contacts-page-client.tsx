@@ -9,11 +9,17 @@ import { PlusCircle, Search, X } from "lucide-react";
 import { CompanyCard } from "./company-card";
 import { toast } from "sonner";
 import { AddCompanyDialog } from "./add-company-dialog";
+import AddContactDialog from "./add-contact-dialog";
 import { ContactCard } from "./contact-card";
 import { EditContactDrawer } from "./edit-contact-drawer";
-import { createCompany, getClients, getCompanies } from "../actions";
+import {
+  createCompany,
+  createContact,
+  getClients,
+  getCompanies,
+} from "../actions";
 import PageContainer from "@/components/ui/page-container";
-import PageHeader from '@/components/ui/page-header';
+import PageHeader from "@/components/ui/page-header";
 
 interface ContactsPageClientProps {
   initialCompanies: Company[];
@@ -33,7 +39,7 @@ export function ContactsPageClient({
       (company) =>
         company.name.toLowerCase().includes(query) ||
         (company.email && company.email.toLowerCase().includes(query)) ||
-        (company.phone && company.phone.toLowerCase().includes(query))
+        (company.phone && company.phone.toLowerCase().includes(query)),
     );
   }, [companies, searchQuery]);
 
@@ -43,7 +49,7 @@ export function ContactsPageClient({
       (client) =>
         client.name.toLowerCase().includes(query) ||
         (client.email && client.email.toLowerCase().includes(query)) ||
-        (client.phone && client.phone.toLowerCase().includes(query))
+        (client.phone && client.phone.toLowerCase().includes(query)),
     );
   }, [clients, searchQuery]);
 
@@ -53,6 +59,7 @@ export function ContactsPageClient({
 
   const [activeTab, setActiveTab] = useState("all");
   const [isAddCompanyOpen, setIsAddCompanyOpen] = useState(false);
+  const [isAddContactOpen, setIsAddContactOpen] = useState(false);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
@@ -77,7 +84,7 @@ export function ContactsPageClient({
   };
 
   const handleAddCompany = async (
-    company: Omit<Company, "id" | "created_at" | "updated_at">
+    company: Omit<Company, "id" | "created_at" | "updated_at">,
   ) => {
     try {
       const result = await createCompany(company);
@@ -94,6 +101,24 @@ export function ContactsPageClient({
     }
   };
 
+  const handleAddContact = async (
+    contact: Omit<Contact, "id" | "created_at" | "updated_at">,
+  ) => {
+    try {
+      const result = await createContact(contact);
+      if (result.success) {
+        toast.success("Контакт успешно добавлен");
+        await loadContacts();
+        setIsAddContactOpen(false);
+      } else {
+        toast.error(result.error || "Не удалось добавить контакт");
+      }
+    } catch (error) {
+      console.error("Ошибка при добавлении контакта:", error);
+      toast.error("Не удалось добавить контакт");
+    }
+  };
+
   const handleContactClick = (contact: Contact) => {
     setSelectedContact(contact);
     setIsDrawerOpen(true);
@@ -106,11 +131,20 @@ export function ContactsPageClient({
   return (
     <PageContainer>
       <div className="flex justify-between items-start">
-        <PageHeader title='Адресная книга' description='Управление контактами'/>
-        <Button onClick={() => setIsAddCompanyOpen(true)}>
-          <PlusCircle className="mr-2 size-4" />
-          Добавить новый
-        </Button>
+        <PageHeader
+          title="Адресная книга"
+          description="Управление контактами"
+        />
+        <div className="flex gap-2">
+          {/* <Button variant="outline" onClick={() => setIsAddCompanyOpen(true)}>
+            <PlusCircle className="mr-2 size-4" />
+            Добавить компанию
+          </Button> */}
+          <Button onClick={() => setIsAddContactOpen(true)}>
+            <PlusCircle className="mr-2 size-4" />
+            Добавить контакт
+          </Button>
+        </div>
       </div>
 
       <div className="flex items-center space-x-2">
@@ -153,7 +187,7 @@ export function ContactsPageClient({
                 />
               ) : (
                 <CompanyCard key={item.id} company={item} />
-              )
+              ),
             )}
             {filteredAll.length === 0 && (
               <div className="col-span-full text-center py-10">
@@ -196,6 +230,12 @@ export function ContactsPageClient({
         open={isAddCompanyOpen}
         onOpenChange={setIsAddCompanyOpen}
         onAddCompany={handleAddCompany}
+      />
+
+      <AddContactDialog
+        isOpen={isAddContactOpen}
+        onOpenChange={setIsAddContactOpen}
+        onSubmit={handleAddContact}
       />
 
       <EditContactDrawer

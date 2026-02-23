@@ -57,6 +57,7 @@ export function StageHeader({
             <h3
               className={cn(
                 "text-lg font-semibold",
+                isCompleted && "text-gray-600/80",
                 isLocked ? "text-gray-400" : "text-gray-900",
               )}
             >
