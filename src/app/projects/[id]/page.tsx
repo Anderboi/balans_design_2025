@@ -10,6 +10,7 @@ import {
   Sparkles,
   ChevronLeft,
   Users,
+  Images,
 } from "lucide-react";
 
 // Импорты внутренней логики и компонентов
@@ -31,6 +32,7 @@ import SchedulesBlock from "./components/schedules-block";
 // import RoomsBlockLoader from "./components/rooms-block-loader";
 import TasksBlockLoader from "./components/tasks-block-loader";
 import TeamManagementLoader from "./components/team-management-loader";
+import MediaTabLoader from "./components/media-tab-loader";
 // import ProjectInfoBlock from "./components/project-info-block";
 
 export const revalidate = 0;
@@ -39,6 +41,7 @@ const tabs = [
   { value: "overview", name: "Обзор", icon: Info },
   { value: "tasks", name: "Задачи", icon: SquareKanban },
   { value: "specifications", name: "Спецификации", icon: FileSpreadsheet },
+  { value: "media", name: "Медиа", icon: Images },
   { value: "team", name: "Команда", icon: Users },
 ];
 
@@ -156,6 +159,15 @@ export default async function ProjectDetailPage({
         >
           <Suspense fallback={<div>Loading specs...</div>}>
             <SchedulesBlock id={id} />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent
+          value="media"
+          className="animate-in fade-in slide-in-from-bottom-2 duration-300"
+        >
+          <Suspense fallback={<div>Загрузка медиа...</div>}>
+            <MediaTabLoader id={id} />
           </Suspense>
         </TabsContent>
 
