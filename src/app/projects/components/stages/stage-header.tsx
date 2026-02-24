@@ -43,7 +43,7 @@ export function StageHeader({
           className={cn(
             "flex items-center justify-center w-12 h-12 rounded-full shrink-0",
             isCompleted
-              ? "bg-black text-white shadow-md shadow-zinc-200"
+              ? "bg-green-100 text-green-600 border border-green-300 "
               : isInProgress
                 ? "bg-zinc-100 text-zinc-900 border border-zinc-200/50"
                 : "bg-gray-50 text-gray-400",
@@ -56,20 +56,26 @@ export function StageHeader({
           <div className="flex items-center gap-3">
             <h3
               className={cn(
-                "text-lg font-semibold",
-                isCompleted && "text-gray-600/80",
-                isLocked ? "text-gray-400" : "text-gray-900",
+                "text-lg font-bold",
+                isCompleted && "text-zinc-600/80",
+                isLocked ? "text-zinc-400" : "text-zinc-800",
               )}
             >
               {stage.title}
             </h3>
             {isCompleted && (
-              <Badge variant="secondary" className="text-green-600 bg-green-50">
+              <Badge
+                variant="secondary"
+                className="text-green-600 bg-green-50 border border-green-300 text-[10px] uppercase tracking-wide font-bold"
+              >
                 Этап завершен
               </Badge>
             )}
             {isInProgress && (
-              <Badge variant="secondary" className="text-blue-600 bg-blue-50">
+              <Badge
+                variant="secondary"
+                className="text-blue-600 bg-blue-50 border border-blue-200 text-[10px] uppercase tracking-wide font-bold"
+              >
                 В работе
               </Badge>
             )}

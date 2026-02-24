@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 
 // Импорты иконок (lucide-react)
-import { Sparkles, ChevronLeft } from "lucide-react";
+import { Sparkles, ChevronLeft, CircleUser } from "lucide-react";
 
 // Импорты внутренней логики и компонентов
 import { projectsService } from "@/lib/services/projects";
@@ -63,33 +63,39 @@ export default async function ProjectDetailPage({
             <h1 className="text-3xl md:text-5xl text-zinc-900 mb-2 tracking-tight">
               {project.name}
             </h1>
-            <p className="text-base text-zinc-500">
-              {address} <span className="mx-2 text-zinc-500">•</span>{" "}
-              <ProjectClientSelector
-                projectId={id}
-                clientName={project.contacts?.name}
-              />
+            <p className="text-base text-zinc-500 flex items-center gap-1">
+              {/* <span className="flex items-center gap-1 bg-white/50 px-3 py-1 rounded-full border border-slate-200/60">
+                {address}
+              </span>
+              <span className="mx-2 text-zinc-500">•</span> */}
+              <span className="flex items-center text-zinc-400 gap-1 bg-white/50 px-3 py-1 rounded-full border border-slate-200/60">
+                <CircleUser className="size-4  mr-1" />
+                <ProjectClientSelector
+                  projectId={id}
+                  clientName={project.contacts?.name}
+                />
+              </span>
             </p>
           </div>
 
           <Button className="rounded-full h-12 px-6 bg-[#7C3AED] hover:bg-[#6D28D9] text-white shadow-lg shadow-purple-200/50 transition-all font-medium flex items-center gap-2">
             <Sparkles className="w-4 h-4" />
-            Спросить Aura AI
+            Спросить Balans AI
           </Button>
         </div>
       </div>
 
       {/* Main Content Section */}
       <div className="space-y-10">
-        {/* Quick Access Cards */}
-        <ProjectNavCards projectId={id} />
-
         {/* Карточка "Информация об объекте" над стадиями */}
         <ObjectInfoCard
           projectId={id}
           address={project.address}
           area={project.area}
         />
+
+        {/* Quick Access Cards */}
+        <ProjectNavCards projectId={id} />
 
         <Suspense fallback={<ProjectStagesSkeleton />}>
           <ProjectStagesLoader

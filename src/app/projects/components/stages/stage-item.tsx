@@ -60,7 +60,7 @@ export function StageItem({
         </div> */}
         <div
           className={cn(
-            "size-8 rounded-lg flex items-center justify-center shrink-0",
+            "size-8 rounded-lg flex items-center justify-center shrink-0 ",
             item.completed
               ? "bg-green-50 text-green-600"
               : "bg-gray-100 text-gray-400",

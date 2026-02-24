@@ -14,12 +14,12 @@ export function ObjectInfoCard({
 }: ObjectInfoCardProps) {
   return (
     <Link href={`/projects/${projectId}/object-info`} className="block">
-      <div className="bg-linear-to-br from-[#f8f9fc] to-white hover:from-indigo-50/80 hover:to-white border border-gray-200/80 rounded-[24px] p-6 shadow-sm transition-all duration-300 group cursor-pointer relative overflow-hidden flex flex-col justify-between items-start w-full">
+      <div className="glass-card bg-linear-to-br from-[#f8f9fc] to-white hover:from-indigo-50/80 hover:to-white rounded-4xl p-6 transition-all duration-300 group cursor-pointer relative overflow-hidden flex flex-col justify-between items-start w-full">
         {/* Decorative circle */}
         <div className="absolute -right-8 -top-8 w-40 h-40 bg-indigo-100/40 rounded-full blur-3xl group-hover:bg-indigo-200/50 transition-colors" />
 
         <div className="flex items-center gap-5 w-full relative z-10">
-          <div className="size-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md">
+          <div className="size-12 rounded-full bg-white text-indigo-600 border border-indigo-100 flex items-center justify-center shrink-0 shadow-lg shadow-indigo-100/50">
             <Building className="size-6" />
           </div>
 
@@ -35,7 +35,9 @@ export function ObjectInfoCard({
               {area && area > 0 && (
                 <span className="flex items-center gap-1.5 shrink-0">
                   <span className="size-1 bg-gray-300 rounded-full" />
-                  {area} м²
+                  <span className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full text-xs font-bold border border-indigo-100">
+                    {area} м²
+                  </span>
                 </span>
               )}
             </div>

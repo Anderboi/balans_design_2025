@@ -16,7 +16,7 @@ const MainBlockCard = ({
         "rounded-4xl transition-all duration-300  ",
         isLocked
           ? "opacity-60"
-          : "shadow-sm bg-background border border-gray-100",
+          : "shadow-md shadow-zinc-200/50 bg-background //border //border-gray-100",
         className
       )}
     >
