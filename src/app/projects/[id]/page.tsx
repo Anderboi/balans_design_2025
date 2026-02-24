@@ -1,49 +1,23 @@
 // Импорты UI компонентов
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 
 // Импорты иконок (lucide-react)
-import {
-  FileSpreadsheet,
-  Info,
-  SquareKanban,
-  Sparkles,
-  ChevronLeft,
-  Users,
-  Images,
-} from "lucide-react";
+import { Sparkles, ChevronLeft } from "lucide-react";
 
 // Импорты внутренней логики и компонентов
 import { projectsService } from "@/lib/services/projects";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-// import { ProjectStages } from "../components/project-stages";
 import {
   ProjectStagesLoader,
   ProjectStagesSkeleton,
 } from "../components/project-stages-loader";
 import { ObjectInfoCard } from "../components/object-info-card";
 import { ProjectClientSelector } from "../components/project-client-selector";
-
-// Загрузчики и блоки
-import SchedulesBlock from "./components/schedules-block";
-// import ProjectChatBlock from "./components/project-chat-block";
-// import RoomsBlockLoader from "./components/rooms-block-loader";
-import TasksBlockLoader from "./components/tasks-block-loader";
-import TeamManagementLoader from "./components/team-management-loader";
-import MediaTabLoader from "./components/media-tab-loader";
-// import ProjectInfoBlock from "./components/project-info-block";
+import { ProjectNavCards } from "../components/project-nav-cards";
 
 export const revalidate = 0;
-
-const tabs = [
-  { value: "overview", name: "Обзор", icon: Info },
-  { value: "tasks", name: "Задачи", icon: SquareKanban },
-  { value: "specifications", name: "Спецификации", icon: FileSpreadsheet },
-  { value: "media", name: "Медиа", icon: Images },
-  { value: "team", name: "Команда", icon: Users },
-];
 
 import { createClient } from "@/lib/supabase/server";
 
@@ -105,81 +79,25 @@ export default async function ProjectDetailPage({
         </div>
       </div>
 
-      {/* Tabs Section */}
-      <Tabs defaultValue="overview" className="space-y-8">
-        <div className="border-b border-gray-100">
-          <TabsList className="h-auto p-0 bg-transparent gap-8">
-            {tabs.map((tab) => (
-              <TabsTrigger
-                key={tab.value}
-                value={tab.value}
-                className="h-12 px-0 cursor-pointer rounded-none border-b-2 border-transparent data-[state=active]:border-b-black data-[state=active]:bg-transparent data-[state=active]:text-black data-[state=active]:shadow-none text-gray-500 hover:text-gray-800 transition-colors bg-transparent font-medium"
-              >
-                {tab.name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </div>
+      {/* Main Content Section */}
+      <div className="space-y-10">
+        {/* Quick Access Cards */}
+        <ProjectNavCards projectId={id} />
 
-        <TabsContent
-          value="overview"
-          className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300"
-        >
-          {/* Карточка "Информация об объекте" над стадиями */}
-          <ObjectInfoCard
+        {/* Карточка "Информация об объекте" над стадиями */}
+        <ObjectInfoCard
+          projectId={id}
+          address={project.address}
+          area={project.area}
+        />
+
+        <Suspense fallback={<ProjectStagesSkeleton />}>
+          <ProjectStagesLoader
             projectId={id}
-            address={project.address}
-            area={project.area}
+            isStrictMode={project.is_strict_mode ?? true}
           />
-
-          <Suspense fallback={<ProjectStagesSkeleton />}>
-            <ProjectStagesLoader
-              projectId={id}
-              isStrictMode={project.is_strict_mode ?? true}
-            />
-          </Suspense>
-
-          {/* Brief Carousel or other blocks can participate here if needed, 
-               but for now Stages is the main overview */}
-          {/* <BriefCarousel /> */}
-        </TabsContent>
-
-        <TabsContent
-          value="tasks"
-          className="animate-in fade-in slide-in-from-bottom-2 duration-300"
-        >
-          <Suspense fallback={<div>Loading tasks...</div>}>
-            <TasksBlockLoader id={id} />
-          </Suspense>
-        </TabsContent>
-
-        <TabsContent
-          value="specifications"
-          className="animate-in fade-in slide-in-from-bottom-2 duration-300"
-        >
-          <Suspense fallback={<div>Loading specs...</div>}>
-            <SchedulesBlock id={id} />
-          </Suspense>
-        </TabsContent>
-
-        <TabsContent
-          value="media"
-          className="animate-in fade-in slide-in-from-bottom-2 duration-300"
-        >
-          <Suspense fallback={<div>Загрузка медиа...</div>}>
-            <MediaTabLoader id={id} />
-          </Suspense>
-        </TabsContent>
-
-        <TabsContent
-          value="team"
-          className="animate-in fade-in slide-in-from-bottom-2 duration-300"
-        >
-          <Suspense fallback={<div>Loading team...</div>}>
-            <TeamManagementLoader id={id} />
-          </Suspense>
-        </TabsContent>
-      </Tabs>
+        </Suspense>
+      </div>
     </div>
   );
 }

@@ -8,11 +8,9 @@ import {
   Settings,
   Users,
   LayoutDashboard,
-  FileText,
-  PenTool,
-  Image as ImageIcon,
-  Box,
-  Ruler,
+  FileSpreadsheet,
+  SquareKanban,
+  Images,
 } from "lucide-react";
 import {
   Sidebar,
@@ -64,40 +62,34 @@ const AppSidebar = () => {
   const projectItems = projectId
     ? [
         {
-          title: "Обзор проекта",
+          title: "Обзор",
           href: `/projects/${projectId}`,
           exact: true,
           icon: LayoutDashboard,
         },
         {
-          title: "ТЗ",
-          href: `/projects/${projectId}/brief`,
+          title: "Задачи",
+          href: `/projects/${projectId}/tasks`,
           exact: false,
-          icon: FileText,
+          icon: SquareKanban,
         },
         {
-          title: "Планировки",
-          href: `/projects/${projectId}/planning`,
+          title: "Спецификации",
+          href: `/projects/${projectId}/specifications`,
           exact: false,
-          icon: PenTool,
+          icon: FileSpreadsheet,
         },
         {
-          title: "Коллажи",
-          href: `/projects/${projectId}/collages`,
+          title: "Медиа",
+          href: `/projects/${projectId}/media`,
           exact: false,
-          icon: ImageIcon,
+          icon: Images,
         },
         {
-          title: "3D Визуализации",
-          href: `/projects/${projectId}/visualizations`,
+          title: "Команда",
+          href: `/projects/${projectId}/team`,
           exact: false,
-          icon: Box,
-        },
-        {
-          title: "Чертежи",
-          href: `/projects/${projectId}/drawings`,
-          exact: false,
-          icon: Ruler,
+          icon: Users,
         },
       ]
     : [];

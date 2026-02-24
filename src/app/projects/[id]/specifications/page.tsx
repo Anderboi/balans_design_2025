@@ -13,6 +13,8 @@ import { SlashIcon } from "lucide-react";
 import { projectsService } from "@/lib/services/projects";
 import { materialsService } from "@/lib/services/materials";
 import MaterialListControls from "../components/material-list-controls";
+import { createClient } from "@/lib/supabase/server";
+import { notFound } from "next/navigation";
 
 const ScheduleCategoryPage = async ({
   params,
@@ -22,51 +24,51 @@ const ScheduleCategoryPage = async ({
   searchParams: Promise<{ [key: string]: string }>;
 }) => {
   const { id } = await params;
-  const { schedule: scheduleName } = await searchParams;
+  const { schedule } = await searchParams;
+  const scheduleName = schedule || "Спецификации";
+
+  const supabase = await createClient();
 
   const [projectInfo, specifications] = await Promise.all([
-    projectsService.getProjectById(id),
-    materialsService.getSpecifications(id),
+    projectsService.getProjectById(id, supabase),
+    materialsService.getSpecifications(id, supabase),
   ]);
 
-  // const materials = specifications
-  //   .map((spec) => spec.material)
-  //   .filter((material) => material !== null && material !== undefined);
+  if (!projectInfo) {
+    notFound();
+  }
 
   return (
     <PageContainer>
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link href="/">Главная</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <SlashIcon />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link href={`/projects/${id}`}>
-                {projectInfo && projectInfo.name}
-              </Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <SlashIcon />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbPage>{scheduleName}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-      <BlockHeader
-        title={scheduleName}
-        href={``}
-        buttontext="Добавить материал"
-      />
+      <div className="space-y-6">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href={`/projects/${id}`}>{projectInfo.name}</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator>
+              <SlashIcon className="w-3 h-3" />
+            </BreadcrumbSeparator>
+            <BreadcrumbItem>
+              <BreadcrumbPage className="font-bold text-black">
+                {scheduleName}
+              </BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
 
-      <MaterialListControls materials={specifications} />
+        <BlockHeader
+          title={scheduleName}
+          href={``}
+          buttontext="Добавить материал"
+        />
+
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <MaterialListControls materials={specifications} />
+        </div>
+      </div>
     </PageContainer>
   );
 };
