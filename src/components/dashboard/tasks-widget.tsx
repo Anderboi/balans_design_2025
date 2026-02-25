@@ -1,11 +1,11 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-// import { Badge } from "@/components/ui/badge";
-// import { TaskDetailsDialog } from "../task-details-dialog";
-// import { tasksService } from '@/lib/services/tasks';
+import { TaskDetailsDialog } from '../task-details-dialog';
+import { Badge } from '../ui/badge';
+import { tasksService } from '@/lib/services/tasks';
 
 export async function TasksWidget() {
-  // const tasks = await tasksService.getTasks();
+  const tasks = await tasksService.getTasks();
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between mb-4">
@@ -20,8 +20,8 @@ export async function TasksWidget() {
         </Link>
       </div>
 
-      {/* <TaskDetailsDialog task={tasks[0]}>
-        <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 flex-1 hover:shadow-md transition-shadow cursor-pointer group text-left w-full h-full relative">
+      <TaskDetailsDialog task={tasks[0]}>
+        <div className="bg-white shadow-lg shadow-zinc-300/50 rounded-4xl p-6 flex-1 cursor-pointer group text-left w-full h-full relative">
           <div className="flex justify-between items-start mb-4">
             <Badge
               variant="destructive"
@@ -45,7 +45,7 @@ export async function TasksWidget() {
             </div>
           </div>
         </div>
-      </TaskDetailsDialog> */}
+      </TaskDetailsDialog>
     </div>
   );
 }

@@ -239,7 +239,7 @@ export function MaterialsPageClient({
     <PageContainer>
       {/* Заголовок */}
 
-      <div className="flex items-end justify-between mb-6">
+      <div className="flex items-end justify-between">
         <PageHeader
           title="Библиотека"
           description="Каталог материалов, оборудования и мебели."
@@ -289,7 +289,7 @@ export function MaterialsPageClient({
             <div key={groupKey} className="space-y-4">
               {groupBy && (
                 <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-semibold text-zinc-900">
+                  <h2 className="text-lg font-bold text-zinc-900">
                     {groupKey}
                   </h2>
                   <Badge

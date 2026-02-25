@@ -5,7 +5,7 @@ import { Truck } from "lucide-react";
 export function DeliveryWidget() {
   return (
     <div className="flex flex-col h-full">
-      <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 h-full flex flex-col">
+      <div className="bg-white shadow-lg shadow-zinc-300/50 rounded-4xl p-6 cursor-pointer h-full flex flex-col">
         <div className="flex items-start justify-between mb-2">
           <div>
             <h3 className="text-lg font-semibold mb-1">Статус поставок</h3>
@@ -13,12 +13,12 @@ export function DeliveryWidget() {
               Отслеживание критических позиций
             </p>
           </div>
-          <Truck className="h-5 w-5 text-gray-300" />
+          <Truck className="size-5 text-gray-300" />
         </div>
 
         <div className="mt-auto space-y-4">
           <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 transition-colors">
-            <div className="h-12 w-12 bg-gray-200 rounded-lg overflow-hidden relative shrink-0">
+            <div className="size-12 bg-gray-200 rounded-lg overflow-hidden relative shrink-0">
               <div className="absolute inset-0 bg-gray-300" />
               {/* Image placeholder */}
             </div>

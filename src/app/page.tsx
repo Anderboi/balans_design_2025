@@ -26,7 +26,7 @@ export default async function Home() {
         </div>
         <div className="md:col-span-4">
           <div className="h-full pt-[44px]">
-            {" "}
+            
             {/* Align with widgets that have headers */}
             <DeliveryWidget />
           </div>

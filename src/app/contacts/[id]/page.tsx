@@ -1,18 +1,28 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
-import { companiesService } from '@/lib/services/companies';
-import { contactsService } from '@/lib/services/contacts';
-import { Company, Contact } from '@/types';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Building, Phone, Mail, Globe, ArrowLeft, Plus, Pencil } from 'lucide-react';
-import Link from 'next/link';
-import AddContactDialog from '../components/add-contact-dialog';
-import { ContactsDataTable } from '@/components/contacts-data-table';
-import { EditCompanyDialog } from '../components/edit-company-dialog';
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
+import { companiesService } from "@/lib/services/companies";
+import { contactsService } from "@/lib/services/contacts";
+import { Company, Contact } from "@/types";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Building,
+  Phone,
+  Mail,
+  Globe,
+  ArrowLeft,
+  Plus,
+  Pencil,
+  ChevronLeft,
+} from "lucide-react";
+import Link from "next/link";
+import AddContactDialog from "../components/add-contact-dialog";
+import { ContactsDataTable } from "@/components/contacts-data-table";
+import { EditCompanyDialog } from "../components/edit-company-dialog";
+import PageContainer from '@/components/ui/page-container';
 
 export default function CompanyDetailsPage() {
   const { id } = useParams();
@@ -26,7 +36,7 @@ export default function CompanyDetailsPage() {
     const fetchCompanyData = async () => {
       setIsLoading(true);
       try {
-        if (typeof id === 'string') {
+        if (typeof id === "string") {
           const companyData = await companiesService.getCompanyById(id);
           if (companyData) {
             setCompany(companyData);
@@ -35,7 +45,7 @@ export default function CompanyDetailsPage() {
           }
         }
       } catch (error) {
-        console.error('Ошибка при получении данных компании:', error);
+        console.error("Ошибка при получении данных компании:", error);
       } finally {
         setIsLoading(false);
       }
@@ -44,40 +54,45 @@ export default function CompanyDetailsPage() {
     fetchCompanyData();
   }, [id]);
 
-  const handleAddContact = async (newContact: Omit<Contact, 'id' | 'created_at' | 'updated_at'>) => {
+  const handleAddContact = async (
+    newContact: Omit<Contact, "id" | "created_at" | "updated_at">,
+  ) => {
     try {
       if (company) {
         const contactWithCompany = {
           ...newContact,
-          company_id: company.id
+          company_id: company.id,
         };
-        const createdContact = await contactsService.createContact(contactWithCompany);
-        setContacts(prevContacts => [...prevContacts, createdContact]);
+        const createdContact =
+          await contactsService.createContact(contactWithCompany);
+        setContacts((prevContacts) => [...prevContacts, createdContact]);
         setIsAddContactDialogOpen(false);
       }
     } catch (error) {
-      console.error('Ошибка при создании контакта:', error);
+      console.error("Ошибка при создании контакта:", error);
     }
   };
 
   const handleUpdateCompany = async (updatedCompany: Partial<Company>) => {
     try {
       if (company) {
-        const result = await companiesService.updateCompany(company.id, updatedCompany);
+        const result = await companiesService.updateCompany(
+          company.id,
+          updatedCompany,
+        );
         setCompany(result);
         setIsEditCompanyDialogOpen(false);
       }
     } catch (error) {
-      console.error('Ошибка при обновлении компании:', error);
+      console.error("Ошибка при обновлении компании:", error);
     }
   };
 
-
   const getInitials = (name: string) => {
     return name
-      .split(' ')
-      .map(part => part[0])
-      .join('')
+      .split(" ")
+      .map((part) => part[0])
+      .join("")
       .toUpperCase()
       .substring(0, 2);
   };
@@ -101,31 +116,31 @@ export default function CompanyDetailsPage() {
   }
 
   return (
-    <div className="//container mx-auto py-6">
+    <PageContainer>
       <div className="mb-6 justify-between flex">
-        <Link href="/contacts">
-          <Button variant="outline">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Назад к списку
-          </Button>
+        <Link
+          href="/contacts"
+          className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-black transition-colors"
+        >
+          <ChevronLeft className="size-4 mr-1" />
+          Назад к списку
         </Link>
         <Button
           variant="outline"
           size="icon"
-
           onClick={() => setIsEditCompanyDialogOpen(true)}
         >
-          <Pencil className="h-5 w-5 text-muted-foreground" />
+          <Pencil className="size-5 text-muted-foreground" />
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-1">
-          <Card>
-            <CardHeader>
+          <Card className="border-0 shadow-lg shadow-zinc-300/50 rounded-4xl p-8">
+            <CardHeader className="px-0">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <Avatar className="h-16 w-16">
+                  <Avatar className="size-16">
                     <AvatarFallback>{getInitials(company.name)}</AvatarFallback>
                   </Avatar>
                   <div>
@@ -137,11 +152,11 @@ export default function CompanyDetailsPage() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-0">
               <div className="space-y-4">
                 {company.website && (
                   <div className="flex items-center gap-3">
-                    <Globe className="h-5 w-5 text-muted-foreground" />
+                    <Globe className="size-5 text-muted-foreground" />
                     <a
                       href={company.website}
                       target="_blank"
@@ -153,11 +168,11 @@ export default function CompanyDetailsPage() {
                   </div>
                 )}
                 <div className="flex items-center gap-3">
-                  <Phone className="h-5 w-5 text-muted-foreground" />
+                  <Phone className="size-5 text-muted-foreground" />
                   <span className="text-sm">{company.phone}</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Mail className="h-5 w-5 text-muted-foreground" />
+                  <Mail className="size-5 text-muted-foreground" />
                   <a
                     href={`mailto:${company.email}`}
                     className="text-primary text-sm hover:underline"
@@ -237,6 +252,6 @@ export default function CompanyDetailsPage() {
         onUpdateCompany={handleUpdateCompany}
         company={company}
       />
-    </div>
+    </PageContainer>
   );
 }

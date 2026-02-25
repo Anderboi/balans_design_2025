@@ -2,22 +2,23 @@
 
 import { Clock } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from '../ui/button';
 
 export function HistoryWidget() {
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold">История изменений</h3>
-        <Clock className="h-4 w-4 text-gray-300" />
+        <Clock className="size-4 text-gray-300" />
       </div>
 
-      <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 flex-1">
+      <div className="bg-white rounded-4xl p-6 shadow-lg shadow-zinc-300/50 flex-1">
         <div className="space-y-6 relative">
           {/* Timeline line */}
           <div className="absolute left-[19px] top-8 bottom-0 w-px bg-gray-100" />
 
           <div className="relative flex gap-4">
-            <Avatar className="h-10 w-10 border-2 border-white shadow-sm shrink-0 z-10">
+            <Avatar className="size-10 border-2 border-white shadow-sm shrink-0 z-10">
               <AvatarFallback>ЕС</AvatarFallback>
             </Avatar>
             <div>
@@ -81,9 +82,9 @@ export function HistoryWidget() {
         </div>
 
         <div className="mt-8 pt-4 border-t border-gray-50 text-center">
-          <button className="text-xs font-semibold text-gray-400 hover:text-gray-600 uppercase tracking-widest transition-colors">
+          <Button variant="ghost" className="text-xs font-semibold text-gray-400 hover:text-gray-600 uppercase tracking-widest transition-colors cursor-pointer">
             Показать всё
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -71,7 +71,7 @@ export function MaterialCard({
   if (viewMode === "list") {
     return (
       <>
-        <div className="w-full border rounded-xl overflow-clip bg-background p-2">
+        <div className="glass-card w-full rounded-4xl overflow-clip p-2">
           <div className="flex items-center justify-between">
             <div className="flex items-end space-x-4 flex-1 ">
               <div className="rounded-md overflow-clip">
@@ -79,10 +79,10 @@ export function MaterialCard({
                   <img
                     src={material.image_url}
                     alt={material.name}
-                    className="size-24 object-cover "
+                    className="size-24 object-cover rounded-3xl"
                   />
                 ) : (
-                  <div className="size-24 bg-muted flex items-center justify-center">
+                  <div className="size-24 bg-muted flex items-center justify-center rounded-3xl">
                     <Package className="size-8 text-muted-foreground" />
                   </div>
                 )}
@@ -197,16 +197,16 @@ export function MaterialCard({
 
   return (
     <>
-      <Card className="w-full h-full flex flex-col">
+      <Card className="w-full h-full flex flex-col rounded-4xl border-0 shadow-lg shadow-zinc-300/50">
         <CardContent className="flex-1">
           {material.image_url ? (
             <img
               src={material.image_url}
               alt={material.name}
-              className="w-full h-48 object-cover rounded-sm mb-4"
+              className="w-full h-48 object-cover rounded-xl mb-4"
             />
           ) : (
-            <div className="w-full h-48 bg-muted rounded-sm flex items-center justify-center mb-4">
+            <div className="w-full h-48 bg-muted rounded-xl flex items-center justify-center mb-4">
               <Package className="size-16 text-muted-foreground" />
             </div>
           )}
@@ -266,9 +266,9 @@ export function MaterialCard({
           <div className="flex space-x-2 w-full">
             <Button
               variant="outline"
-              size="sm"
+              // size="sm"
               onClick={handleAssignMaterial}
-              className="flex-1"
+              className="flex-1 rounded-full cursor-pointer"
             >
               <Plus className="size-4 mr-1" />
               Присвоить
@@ -276,7 +276,7 @@ export function MaterialCard({
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" className="cursor-pointer rounded-full">
                   <MoreHorizontal className="size-4" />
                 </Button>
               </DropdownMenuTrigger>

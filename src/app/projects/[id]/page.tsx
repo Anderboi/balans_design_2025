@@ -50,7 +50,7 @@ export default async function ProjectDetailPage({
           href="/projects"
           className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-black transition-colors"
         >
-          <ChevronLeft className="w-4 h-4 mr-1" />
+          <ChevronLeft className="size-4 mr-1" />
           Назад к списку
         </Link>
 

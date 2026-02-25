@@ -2,7 +2,7 @@
 
 import { Contact } from "@/types";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 
 interface ContactCardProps {
   contact: Contact;
@@ -10,7 +10,7 @@ interface ContactCardProps {
 }
 
 export function ContactCard({ contact, onClick }: ContactCardProps) {
-  const router = useRouter();
+  // const router = useRouter();
 
   const getInitials = (name: string) => {
     return name
@@ -26,11 +26,11 @@ export function ContactCard({ contact, onClick }: ContactCardProps) {
       onClick={onClick}
       onKeyDown={(e) => e.key === 'Enter' && onClick()}
       tabIndex={0}
-      className="cursor-pointer hover:shadow-lg transition-shadow duration-200 rounded-2xl justify-between border p-6"
+      className="cursor-pointer rounded-4xl glass-card justify-between p-6"
     >
       <div>
         <div className="flex items-start gap-4">
-          <Avatar className="h-16 w-16 rounded-lg bg-teal-600 text-white flex items-center justify-center">
+          <Avatar className="size-16 rounded-2xl bg-teal-600 text-white flex items-center justify-center">
             <AvatarFallback className="bg-transparent text-2xl font-bold">
               {getInitials(contact.name)}
             </AvatarFallback>

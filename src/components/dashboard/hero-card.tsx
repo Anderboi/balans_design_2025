@@ -8,7 +8,7 @@ interface HeroCardProps {
 
 export function HeroCard({ userName }: HeroCardProps) {
   return (
-    <div className="bg-[#111111] text-white rounded-[32px] p-8 md:p-12 relative overflow-hidden">
+    <div className="bg-[#111111] text-white rounded-4xl p-8 md:p-12 relative overflow-hidden">
       {/* Background gradient/blob effect */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-900/20 blur-[100px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/3" />
 
@@ -16,7 +16,7 @@ export function HeroCard({ userName }: HeroCardProps) {
         <div className="flex items-center gap-2 text-purple-400 mb-6">
           <Sparkles className="h-5 w-5" />
           <span className="text-sm font-medium tracking-wide uppercase">
-            Aura OS Assistant
+            Balans OS Assistant
           </span>
         </div>
 
