@@ -148,12 +148,13 @@ export function ContactsPageClient({
       </div>
 
       <div className="flex items-center space-x-2">
-        <div className="relative flex-1">
+        <div className="w-full flex flex-col md:flex-row gap-4 items-center justify-between bg-background p-2 rounded-2xl shadow-lg shadow-zinc-300/50">
+          <div className="relative w-full //md:w-96 group">
           <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
           <Input
             type="search"
             placeholder="Поиск..."
-            className="pl-8"
+            className="pl-8 w-full"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -167,6 +168,7 @@ export function ContactsPageClient({
               <X className="size-4" />
             </Button>
           )}
+          </div>
         </div>
       </div>
 

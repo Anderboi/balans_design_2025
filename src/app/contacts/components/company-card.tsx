@@ -45,12 +45,12 @@ export function CompanyCard({ company }: CompanyCardProps) {
       }
       tabIndex={0}
       onClick={() => router.push(`/contacts/${company.id}`)}
-      className="cursor-pointer hover:shadow-lg transition-shadow duration-200 rounded-2xl justify-between border p-6"
+      className="cursor-pointer glass-card rounded-4xl justify-between p-6"
     >
       <section>
         {/* <div className="flex items-start justify-between"> */}
         <div className="flex items-start gap-4">
-          <Avatar className="h-16 w-16 rounded-lg bg-sky-600 text-white flex items-center justify-center">
+          <Avatar className="size-16 rounded-2xl bg-sky-600 text-white flex items-center justify-center">
             <AvatarFallback className="bg-transparent text-2xl font-bold">
               {getInitials(company.name)}
             </AvatarFallback>
