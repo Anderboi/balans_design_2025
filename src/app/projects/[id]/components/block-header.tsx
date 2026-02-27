@@ -14,7 +14,7 @@ const BlockHeader = ({
 }) => {
   return (
     <div className="flex justify-between items-center">
-      <h2 className="text-xl font-semibold">{title}</h2>
+      <h1 className="text-3xl md:text-5xl text-zinc-900 tracking-tight">{title}</h1>
       {onClick ? (
         <Button onClick={onClick}>{buttontext}</Button>
       ) : (

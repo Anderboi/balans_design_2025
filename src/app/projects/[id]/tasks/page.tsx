@@ -3,16 +3,8 @@ import TasksBlockLoader from "../components/tasks-block-loader";
 import { projectsService } from "@/lib/services/projects";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import Link from "next/link";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { SlashIcon } from "lucide-react";
+import { ProjectPageHeader } from "@/components/project-page-header";
+import PageContainer from "@/components/ui/page-container";
 
 export default async function TasksPage({
   params,
@@ -28,38 +20,20 @@ export default async function TasksPage({
   }
 
   return (
-    <div className="space-y-8 h-full flex flex-col">
-      <div className="space-y-6 shrink-0">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href={`/projects/${id}`}>{project.name}</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator>
-              <SlashIcon className="w-3 h-3" />
-            </BreadcrumbSeparator>
-            <BreadcrumbItem>
-              <BreadcrumbPage className="font-bold text-black">
-                Задачи
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+    <PageContainer>
+      <div className="space-y-8 h-full flex flex-col">
+        <ProjectPageHeader
+          projectId={id}
+          projectName={project.name}
+          title="Задачи"
+        />
 
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl md:text-5xl text-zinc-900 tracking-tight">
-            Задачи
-          </h1>
+        <div className="flex-1 min-h-0 overflow-hidden mt-4">
+          <Suspense fallback={<div>Загрузка задач...</div>}>
+            <TasksBlockLoader id={id} />
+          </Suspense>
         </div>
       </div>
-
-      <div className="flex-1 min-h-0 overflow-hidden">
-        <Suspense fallback={<div>Загрузка задач...</div>}>
-          <TasksBlockLoader id={id} />
-        </Suspense>
-      </div>
-    </div>
+    </PageContainer>
   );
 }

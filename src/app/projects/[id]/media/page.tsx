@@ -3,16 +3,8 @@ import MediaTabLoader from "../components/media-tab-loader";
 import { projectsService } from "@/lib/services/projects";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import Link from "next/link";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { SlashIcon } from "lucide-react";
+import { ProjectPageHeader } from "@/components/project-page-header";
+import PageContainer from "@/components/ui/page-container";
 
 export default async function MediaPage({
   params,
@@ -28,36 +20,18 @@ export default async function MediaPage({
   }
 
   return (
-    <div className="space-y-8">
-      <div className="space-y-6">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href={`/projects/${id}`}>{project.name}</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator>
-              <SlashIcon className="w-3 h-3" />
-            </BreadcrumbSeparator>
-            <BreadcrumbItem>
-              <BreadcrumbPage className="font-bold text-black">
-                Медиа
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+    <PageContainer>
+      <ProjectPageHeader
+        projectId={id}
+        projectName={project.name}
+        title="Медиа"
+      />
 
-        <h1 className="text-3xl md:text-5xl text-zinc-900 tracking-tight">
-          Медиа
-        </h1>
-      </div>
-
-      <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+      <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 mt-8">
         <Suspense fallback={<div>Загрузка медиа...</div>}>
           <MediaTabLoader id={id} />
         </Suspense>
       </div>
-    </div>
+    </PageContainer>
   );
 }

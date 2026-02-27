@@ -60,7 +60,7 @@ export default async function ProjectDetailPage({
             <span className="text-xs font-bold tracking-widest text-gray-400 uppercase">
               Проект
             </span>
-            <h1 className="text-3xl md:text-5xl text-zinc-900 mb-2 tracking-tight">
+            <h1 className="text-3xl md:text-5xl font-semibold text-zinc-900 mb-2 tracking-tight animate-in fade-in slide-in-from-left-2 duration-700">
               {project.name}
             </h1>
             <p className="text-base text-zinc-500 flex items-center gap-1">
