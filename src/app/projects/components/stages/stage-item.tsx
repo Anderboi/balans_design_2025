@@ -60,18 +60,18 @@ export function StageItem({
         </div> */}
         <div
           className={cn(
-            "size-8 rounded-lg flex items-center justify-center shrink-0 ",
+            "size-8 rounded-full flex items-center justify-center shrink-0 ",
             item.completed
-              ? "bg-green-50 text-green-600"
+              ? "bg-zinc-900 text-white border-0"
               : "bg-gray-100 text-gray-400",
           )}
         >
-          <Icon className="size-4" />
+          {item.completed ? <Check className="size-4" /> : <Icon className="size-4" />}
         </div>
         <span
           className={cn(
             "font-medium text-sm",
-            item.completed ? "text-green-600/80" : "text-gray-600",
+            item.completed ? "text-zinc-600" : "text-zinc-900",
           )}
         >
           {item.title}
@@ -79,7 +79,7 @@ export function StageItem({
       </div>
 
       <div className="flex items-center gap-2">
-        {item.completed && <Check className="size-4 text-green-500" />}
+        {/* {item.completed && <Check className="size-4 text-green-500" />} */}
         {isClickable && (
           <ChevronRight className="size-4 text-gray-300 group-hover:text-black transition-colors" />
         )}

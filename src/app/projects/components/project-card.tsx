@@ -78,7 +78,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           <div className="mt-6 flex items-center gap-3 opacity-80 group-hover:opacity-100 transition-opacity duration-500">
             <div className="flex-1 h-1 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm">
               <div
-                className="h-full bg-white rounded-full transition-all duration-700 ease-out shadow-[0_0_10px_rgba(255,255,255,0.5)]"
+                className="h-full bg-primary rounded-full transition-all duration-700 ease-out shadow-[0_0_10px_rgba(255,255,255,0.5)]"
                 style={{ width: `${progress}%` }}
               />
             </div>

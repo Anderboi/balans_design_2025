@@ -71,7 +71,7 @@ export function ProjectPageHeader({
             ))}
 
           {showAiButton && (
-            <Button className="rounded-full h-11 px-6 bg-[#007AFF] hover:bg-[#0062CC] text-white shadow-lg shadow-blue-200/50 transition-all duration-300 font-medium flex items-center gap-2">
+            <Button className="rounded-full h-11 px-6 bg-[#D81A24] hover:bg-[#B5151D] text-white shadow-lg shadow-red-200/50 transition-all duration-300 font-medium flex items-center gap-2">
               <Sparkles className="w-4 h-4" />
               Спросить Balans AI
             </Button>

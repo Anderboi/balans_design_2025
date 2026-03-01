@@ -39,7 +39,7 @@ export default async function ProjectDetailPage({
     notFound();
   }
 
-  const address = project.address || "Адрес не указан";
+  // const address = project.address || "Адрес не указан";
 
   return (
     <div className="space-y-8">
@@ -78,8 +78,8 @@ export default async function ProjectDetailPage({
             </p>
           </div>
 
-          <Button className="rounded-full h-12 px-6 bg-[#7C3AED] hover:bg-[#6D28D9] text-white shadow-lg shadow-purple-200/50 transition-all font-medium flex items-center gap-2">
-            <Sparkles className="w-4 h-4" />
+          <Button variant="outline" className="rounded-full cursor-pointer h-12 px-6 //bg-primary //hover:bg-primary/80 text-primary shadow-lg //shadow-primary/20 transition-all font-medium flex items-center gap-2">
+            <Sparkles className="size-4" />
             Спросить Balans AI
           </Button>
         </div>

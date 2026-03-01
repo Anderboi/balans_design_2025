@@ -43,7 +43,7 @@ export function StageHeader({
           className={cn(
             "flex items-center justify-center w-12 h-12 rounded-full shrink-0",
             isCompleted
-              ? "bg-green-100 text-green-600 border border-green-300 "
+              ? "bg-zinc-900 text-white border-0 //border-green-300 "
               : isInProgress
                 ? "bg-zinc-100 text-zinc-900 border border-zinc-200/50"
                 : "bg-gray-50 text-gray-400",
@@ -68,7 +68,7 @@ export function StageHeader({
                 variant="secondary"
                 className="text-green-600 bg-green-50 border border-green-300 text-[10px] uppercase tracking-wide font-bold"
               >
-                Этап завершен
+                завершен
               </Badge>
             )}
             {isInProgress && (
@@ -96,7 +96,7 @@ export function StageHeader({
             </span>
             <div className="w-24 h-1 bg-gray-100 rounded-full overflow-hidden">
               <div
-                className="bg-black h-full rounded-full"
+                className="bg-foreground h-full rounded-full"
                 style={{
                   width: `${
                     (stage.progress.current / stage.progress.total) * 100

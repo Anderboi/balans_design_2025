@@ -13,7 +13,7 @@ export function HeroCard({ userName }: HeroCardProps) {
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-900/20 blur-[100px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/3" />
 
       <div className="relative z-10">
-        <div className="flex items-center gap-2 text-purple-400 mb-6">
+        <div className="flex items-center gap-2 text-primary mb-6">
           <Sparkles className="h-5 w-5" />
           <span className="text-sm font-medium tracking-wide uppercase">
             Balans OS Assistant

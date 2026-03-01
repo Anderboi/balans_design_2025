@@ -23,7 +23,7 @@ export function getStageBadgeClass(stage: string | ProjectStage): string {
     case ProjectStage.CONCEPT:
       return "bg-blue-100 border-blue-300 text-blue-700"; // Light blue for concept
     case ProjectStage.WORKING:
-      return "bg-indigo-100 border-indigo-300 text-indigo-700"; // Indigo for working stage
+      return "bg-red-50 border-red-200 text-red-700"; // Red for working stage
     case ProjectStage.SUPERVISION:
       return "bg-amber-100 border-amber-300 text-amber-700"; // Amber for supervision
     case ProjectStage.COMPLETION:
