@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Contact, ContactType, CompanyType } from "@/types";
 import { Button } from "@/components/ui/button";
+import { FormRow } from "@/components/ui/form-row";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +12,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -103,12 +103,12 @@ export default function AddContactDialog({
               notes: "",
             }
           : {}),
-      } as any;
+      };
 
       if (companyId) {
         return { ...base, company_id: companyId };
       }
-      const { company_id, ...rest } = base;
+      const { ...rest } = base;
       return rest;
     });
     setCompanyName(defaultCompanyName || (isOpening ? "" : companyName));
@@ -129,7 +129,7 @@ export default function AddContactDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload: any = { ...formData };
+    const payload: Partial<Contact> & { company_id?: string } = { ...formData };
     // если company_id не указан, но заполнено название компании — создаем компанию
     if (!payload.company_id && companyName && companyName.trim().length > 0) {
       try {
@@ -155,7 +155,10 @@ export default function AddContactDialog({
     if (!payload.company_id) {
       delete payload.company_id;
     }
-    onSubmit(payload);
+    if (!payload.name) {
+      return;
+    }
+    onSubmit(payload as Omit<Contact, "id" | "created_at" | "updated_at">);
     resetForm();
   };
 
@@ -188,43 +191,34 @@ export default function AddContactDialog({
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             {!companyId && !isClient && (
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="company_name" className="text-right">
-                  Название компании
-                </Label>
+              <FormRow label="Название компании" htmlFor="company_name">
                 <Input
                   id="company_name"
                   name="company_name"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
-                  className="col-span-3"
                 />
-              </div>
+              </FormRow>
             )}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
-                Ф.И.О.
-              </Label>
+
+            <FormRow label="Ф.И.О." htmlFor="name" required>
               <Input
                 id="name"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className="col-span-3"
                 required
               />
-            </div>
+            </FormRow>
+
             {!companyId && (
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="type" className="text-right">
-                  Тип
-                </Label>
+              <FormRow label="Тип" htmlFor="type">
                 <Select
                   value={formData.type}
                   onValueChange={(value) => handleSelectChange(value, "type")}
                   required
                 >
-                  <SelectTrigger className="col-span-3">
+                  <SelectTrigger id="type">
                     <SelectValue placeholder="Выберите тип контакта" />
                   </SelectTrigger>
                   <SelectContent>
@@ -234,75 +228,66 @@ export default function AddContactDialog({
                     </SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
+              </FormRow>
             )}
+
             {!isClient && (
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="position" className="text-right">
-                  Должность
-                </Label>
+              <FormRow
+                label="Должность"
+                htmlFor="position"
+                required={!isClient}
+              >
                 <Input
                   id="position"
                   name="position"
                   value={formData.position}
                   onChange={handleChange}
-                  className="col-span-3"
                   required={!isClient}
                 />
-              </div>
+              </FormRow>
             )}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="phone" className="text-right">
-                Телефон
-              </Label>
+
+            <FormRow label="Телефон" htmlFor="phone">
               <Input
                 id="phone"
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                className="col-span-3"
               />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="email" className="text-right">
-                Email
-              </Label>
+            </FormRow>
+
+            <FormRow label="Email" htmlFor="email">
               <Input
                 id="email"
                 name="email"
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="col-span-3"
               />
-            </div>
+            </FormRow>
+
             {!isClient && (
               <>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="address" className="text-right">
-                    Адрес (не обязательно)
-                  </Label>
+                <FormRow label="Адрес" htmlFor="address">
                   <Input
                     id="address"
                     name="address"
                     value={formData.address}
                     onChange={handleChange}
-                    className="col-span-3"
+                    placeholder="Не обязательно"
                   />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="notes" className="text-right">
-                    Заметки (не обязательно)
-                  </Label>
+                </FormRow>
+
+                <FormRow label="Заметки" htmlFor="notes">
                   <Textarea
                     id="notes"
                     name="notes"
                     value={formData.notes}
                     onChange={handleChange}
-                    className="col-span-3"
                     rows={3}
+                    placeholder="Не обязательно"
                   />
-                </div>
+                </FormRow>
               </>
             )}
           </div>

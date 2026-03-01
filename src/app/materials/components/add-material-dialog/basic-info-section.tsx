@@ -1,12 +1,7 @@
 import { Control } from "react-hook-form";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { FormControl, FormField } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { FormRow } from "@/components/ui/form-row";
 import {
   Select,
   SelectContent,
@@ -27,18 +22,20 @@ export function BasicInfoSection({
   materialTypes,
 }: BasicInfoSectionProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-0">
       <FormField
         control={control}
         name="name"
         render={({ field }) => (
-          <FormItem>
-            <FormLabel>Наименование *</FormLabel>
+          <FormRow label="Наименование" htmlFor="name" required>
             <FormControl>
-              <Input placeholder="Наименование материала" {...field} />
+              <Input
+                id="name"
+                placeholder="Наименование материала"
+                {...field}
+              />
             </FormControl>
-            <FormMessage />
-          </FormItem>
+          </FormRow>
         )}
       />
 
@@ -46,15 +43,14 @@ export function BasicInfoSection({
         control={control}
         name="type"
         render={({ field }) => (
-          <FormItem>
-            <FormLabel>Категория *</FormLabel>
+          <FormRow label="Категория" htmlFor="type" required>
             <Select
               onValueChange={field.onChange}
               defaultValue={field.value}
               value={field.value}
             >
               <FormControl>
-                <SelectTrigger>
+                <SelectTrigger id="type">
                   <SelectValue placeholder="Выберите категорию" />
                 </SelectTrigger>
               </FormControl>
@@ -66,8 +62,7 @@ export function BasicInfoSection({
                 ))}
               </SelectContent>
             </Select>
-            <FormMessage />
-          </FormItem>
+          </FormRow>
         )}
       />
 
@@ -75,13 +70,15 @@ export function BasicInfoSection({
         control={control}
         name="description"
         render={({ field }) => (
-          <FormItem>
-            <FormLabel>Описание</FormLabel>
+          <FormRow label="Описание" htmlFor="description">
             <FormControl>
-              <Input placeholder="Описание материала" {...field} />
+              <Input
+                id="description"
+                placeholder="Описание материала"
+                {...field}
+              />
             </FormControl>
-            <FormMessage />
-          </FormItem>
+          </FormRow>
         )}
       />
 
@@ -89,13 +86,15 @@ export function BasicInfoSection({
         control={control}
         name="manufacturer"
         render={({ field }) => (
-          <FormItem>
-            <FormLabel>Производитель</FormLabel>
+          <FormRow label="Производитель" htmlFor="manufacturer">
             <FormControl>
-              <Input placeholder="Название производителя" {...field} />
+              <Input
+                id="manufacturer"
+                placeholder="Название производителя"
+                {...field}
+              />
             </FormControl>
-            <FormMessage />
-          </FormItem>
+          </FormRow>
         )}
       />
     </div>

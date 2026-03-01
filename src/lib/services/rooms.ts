@@ -1,9 +1,9 @@
 import { supabase } from "@/lib/supabase";
-import { Room } from "@/types";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { RoomType } from "@/lib/schemas/brief-schema";
 
 export type CreateRoomData = {
+  id?: string;
   name: string;
   order: number;
   type?: RoomType;
@@ -14,8 +14,9 @@ export const roomsService = {
   // Получение всех помещений проекта
   async getRoomsByProjectId(
     projectId: string,
-    client?: SupabaseClient
-  ): Promise<Room[]> {
+    client?: SupabaseClient,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any[]> {
     if (!projectId) return [];
 
     const supabaseClient = client || supabase;
@@ -28,7 +29,7 @@ export const roomsService = {
     if (error) {
       console.error(
         `Ошибка при получении помещений для проекта ${projectId}:`,
-        error
+        error,
       );
       throw error;
     }
@@ -40,41 +41,37 @@ export const roomsService = {
   async bulkUpsertRooms(
     projectId: string,
     rooms: CreateRoomData[],
-    client?: SupabaseClient
+    client?: SupabaseClient,
   ): Promise<void> {
     if (!projectId) throw new Error("ID проекта обязателен");
 
     const supabaseClient = client || supabase;
 
-    // 1. Получаем текущие помещения, чтобы понять, какие нужно удалить
+    // 1. Получаем текущие помещения для диффа
     const { data: currentRooms } = await supabaseClient
       .from("rooms")
       .select("id")
       .eq("project_id", projectId);
 
-    // В реальном приложении мы бы делали умный дифф, но для простоты
-    // и гарантии порядка проще удалить все и создать заново,
-    // ИЛИ использовать upsert если у нас есть ID.
-    // В форме у нас пока нет ID помещений, поэтому стратегия:
-    // Удалить все старые -> Создать новые.
-    // Это безопасно, так как у нас нет зависимых данных (пока что).
+    const currentIds = currentRooms?.map((r) => r.id) || [];
+    const newIds = rooms.map((r) => r.id).filter(Boolean) as string[];
 
-    // Если будут зависимые данные (мебель), то нужно будет делать upsert по ID.
-    // Сейчас реализуем стратегию "полная перезапись" для простоты синхронизации порядка.
+    // 2. Находим ID для удаления (те, что есть в БД, но нет в новом списке)
+    const idsToDelete = currentIds.filter((id) => !newIds.includes(id));
 
-    // Удаляем старые
-    if (currentRooms && currentRooms.length > 0) {
+    if (idsToDelete.length > 0) {
       const { error: deleteError } = await supabaseClient
         .from("rooms")
         .delete()
-        .eq("project_id", projectId);
+        .in("id", idsToDelete);
 
       if (deleteError) throw deleteError;
     }
 
-    // Создаем новые
+    // 3. Upsert новых и измененных данных
     if (rooms.length > 0) {
-      const roomsToInsert = rooms.map((room) => ({
+      const roomsToUpsert = rooms.map((room) => ({
+        ...(room.id ? { id: room.id } : {}),
         project_id: projectId,
         name: room.name,
         order: room.order,
@@ -82,11 +79,11 @@ export const roomsService = {
         area: room.area || 0,
       }));
 
-      const { error: insertError } = await supabaseClient
+      const { error: upsertError } = await supabaseClient
         .from("rooms")
-        .insert(roomsToInsert);
+        .upsert(roomsToUpsert);
 
-      if (insertError) throw insertError;
+      if (upsertError) throw upsertError;
     }
   },
 };

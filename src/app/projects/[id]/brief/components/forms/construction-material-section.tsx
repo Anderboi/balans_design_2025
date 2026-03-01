@@ -1,7 +1,7 @@
 // src/features/brief/components/construction-material-section.tsx
 "use client";
 
-import { Control, useFieldArray } from "react-hook-form";
+import { Control, useFieldArray, useFormContext } from "react-hook-form";
 import { ConstructionFormValues } from "@/lib/schemas/brief-schema";
 import { Room } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -48,29 +48,42 @@ export function MaterialSection({
   onToggleExpanded,
   itemCount,
 }: MaterialSectionProps) {
+  const { getValues } = useFormContext<ConstructionFormValues>();
+
   const { fields, append, remove, update } = useFieldArray({
     control,
     name: category,
   });
 
   const toggleRoom = (sectionIndex: number, roomId: string) => {
-    const field = fields[sectionIndex];
-    const currentRooms = field.rooms || [];
+    const currentValues = getValues(category);
+    if (!currentValues || !currentValues[sectionIndex]) return;
+
+    const currentItem = currentValues[sectionIndex];
+    const currentRooms = currentItem.rooms || [];
 
     const updatedRooms = currentRooms.includes(roomId)
       ? currentRooms.filter((r) => r !== roomId)
       : [...currentRooms, roomId];
 
-    update(sectionIndex, { ...field, rooms: updatedRooms });
+    update(sectionIndex, {
+      ...currentItem,
+      rooms: updatedRooms,
+    });
   };
 
   const selectAllRooms = (sectionIndex: number) => {
-    const field = fields[sectionIndex];
+    const currentValues = getValues(category);
+    if (!currentValues || !currentValues[sectionIndex] || !roomList.length)
+      return;
+
+    const currentItem = currentValues[sectionIndex];
     const allRoomIds = roomList.map((room) => room.id);
-    const allSelected = allRoomIds.every((id) => field.rooms?.includes(id));
+    const currentRooms = currentItem.rooms || [];
+    const allSelected = allRoomIds.every((id) => currentRooms.includes(id));
 
     update(sectionIndex, {
-      ...field,
+      ...currentItem,
       rooms: allSelected ? [] : allRoomIds,
     });
   };
@@ -175,7 +188,7 @@ export function MaterialSection({
                         "text-xs h-7 font-bold ",
                         field.rooms?.length === roomList.length
                           ? "text-zinc-900 hover:text-zinc-700"
-                          : "text-zinc-400 hover:text-zinc-900"
+                          : "text-zinc-400 hover:text-zinc-900",
                       )}
                     >
                       {field.rooms?.length === roomList.length

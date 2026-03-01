@@ -31,7 +31,7 @@ import {
   InputGroupTextarea,
 } from "@/components/ui/input-group";
 import FormSubmitButton from "./form-submit-button";
-import { projectsService } from "@/lib/services/projects";
+import { updateProjectBriefAction } from "@/lib/actions/brief";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import AddItemButton from "@/components/ui/add-item-button";
@@ -85,9 +85,13 @@ export function ResidentsForm({ projectId, initialData }: ResidentsFormProps) {
     }
 
     try {
-      await projectsService.updateProjectBrief(projectId, {
+      const result = await updateProjectBriefAction(projectId, {
         residents: data,
       });
+
+      if (!result.success) {
+        throw new Error(result.error as string);
+      }
 
       if (action === "complete") {
         await completeBriefSectionAction(projectId, "residents", true);

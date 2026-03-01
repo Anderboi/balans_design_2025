@@ -1,12 +1,7 @@
 import { Control } from "react-hook-form";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { FormControl, FormField } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { FormRow } from "@/components/ui/form-row";
 import { AddMaterialFormValues } from "@/lib/schemas/materials";
 
 interface SpecificationsSectionProps {
@@ -15,18 +10,16 @@ interface SpecificationsSectionProps {
 
 export function SpecificationsSection({ control }: SpecificationsSectionProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-0">
       <FormField
         control={control}
         name="color"
         render={({ field }) => (
-          <FormItem>
-            <FormLabel>Цвет</FormLabel>
+          <FormRow label="Цвет" htmlFor="color">
             <FormControl>
-              <Input placeholder="Цвет материала" {...field} />
+              <Input id="color" placeholder="Цвет материала" {...field} />
             </FormControl>
-            <FormMessage />
-          </FormItem>
+          </FormRow>
         )}
       />
 
@@ -34,13 +27,11 @@ export function SpecificationsSection({ control }: SpecificationsSectionProps) {
         control={control}
         name="material"
         render={({ field }) => (
-          <FormItem>
-            <FormLabel>Материал</FormLabel>
+          <FormRow label="Материал" htmlFor="material">
             <FormControl>
-              <Input placeholder="Материал" {...field} />
+              <Input id="material" placeholder="Материал" {...field} />
             </FormControl>
-            <FormMessage />
-          </FormItem>
+          </FormRow>
         )}
       />
 
@@ -48,13 +39,11 @@ export function SpecificationsSection({ control }: SpecificationsSectionProps) {
         control={control}
         name="finish"
         render={({ field }) => (
-          <FormItem>
-            <FormLabel>Покрытие</FormLabel>
+          <FormRow label="Покрытие" htmlFor="finish">
             <FormControl>
-              <Input placeholder="Покрытие" {...field} />
+              <Input id="finish" placeholder="Покрытие" {...field} />
             </FormControl>
-            <FormMessage />
-          </FormItem>
+          </FormRow>
         )}
       />
 
@@ -62,13 +51,11 @@ export function SpecificationsSection({ control }: SpecificationsSectionProps) {
         control={control}
         name="size"
         render={({ field }) => (
-          <FormItem>
-            <FormLabel>Размер</FormLabel>
+          <FormRow label="Размер" htmlFor="size">
             <FormControl>
-              <Input placeholder="Размер материала" {...field} />
+              <Input id="size" placeholder="Размер материала" {...field} />
             </FormControl>
-            <FormMessage />
-          </FormItem>
+          </FormRow>
         )}
       />
     </div>

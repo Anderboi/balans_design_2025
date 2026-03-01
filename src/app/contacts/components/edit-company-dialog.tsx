@@ -1,11 +1,18 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Company, CompanyType } from '@/types';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useState } from "react";
+import { Company, CompanyType } from "@/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { FormRow } from "@/components/ui/form-row";
 import {
   Dialog,
   DialogContent,
@@ -13,7 +20,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 
 interface EditCompanyDialogProps {
   open: boolean;
@@ -22,40 +29,48 @@ interface EditCompanyDialogProps {
   company: Company | null;
 }
 
-export function EditCompanyDialog({ open, onOpenChange, onUpdateCompany, company }: EditCompanyDialogProps) {
-  const [formData, setFormData] = useState<Partial<Company>>({});
+export function EditCompanyDialog({
+  open,
+  onOpenChange,
+  onUpdateCompany,
+  company,
+}: EditCompanyDialogProps) {
+  const [formData, setFormData] = useState<Partial<Company>>(company || {});
 
-  useEffect(() => {
-    if (company) {
-      setFormData(company);
-    }
-  }, [company]);
+  // Update form data if company prop changes (e.g. if dialog is reused)
+  const [prevCompany, setPrevCompany] = useState(company);
+  if (company !== prevCompany) {
+    setPrevCompany(company);
+    setFormData(company || {});
+  }
 
-  const [tag, setTag] = useState('');
+  const [tag, setTag] = useState("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleTypeChange = (value: string) => {
-    setFormData(prev => ({ ...prev, type: value as CompanyType }));
+    setFormData((prev) => ({ ...prev, type: value as CompanyType }));
   };
 
   const handleAddTag = () => {
     if (tag.trim()) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        tags: [...(prev.tags || []), tag.trim()]
+        tags: [...(prev.tags || []), tag.trim()],
       }));
-      setTag('');
+      setTag("");
     }
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      tags: prev.tags?.filter(t => t !== tagToRemove)
+      tags: prev.tags?.filter((t) => t !== tagToRemove),
     }));
   };
 
@@ -75,94 +90,76 @@ export function EditCompanyDialog({ open, onOpenChange, onUpdateCompany, company
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="name" className="text-right">
-                Название
-              </label>
+            <FormRow label="Название" htmlFor="name" required>
               <Input
                 id="name"
                 name="name"
-                value={formData.name || ''}
+                value={formData.name || ""}
                 onChange={handleChange}
-                className="col-span-3"
                 required
               />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="type" className="text-right">
-                Тип
-              </label>
-              <Select
-                value={formData.type}
-                onValueChange={handleTypeChange}
-              >
-                <SelectTrigger className="col-span-3">
+            </FormRow>
+
+            <FormRow label="Тип" htmlFor="type">
+              <Select value={formData.type} onValueChange={handleTypeChange}>
+                <SelectTrigger id="type">
                   <SelectValue placeholder="Выберите тип" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={CompanyType.CLIENT}>Клиент</SelectItem>
-                  <SelectItem value={CompanyType.SUPPLIER}>Поставщик</SelectItem>
+                  <SelectItem value={CompanyType.SUPPLIER}>
+                    Поставщик
+                  </SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="website" className="text-right">
-                Веб-сайт
-              </label>
+            </FormRow>
+
+            <FormRow label="Веб-сайт" htmlFor="website">
               <Input
                 id="website"
                 name="website"
-                value={formData.website || ''}
+                value={formData.website || ""}
                 onChange={handleChange}
-                className="col-span-3"
               />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="email" className="text-right">
-                Email
-              </label>
+            </FormRow>
+
+            <FormRow label="Email" htmlFor="email" required>
               <Input
                 id="email"
                 name="email"
                 type="email"
-                value={formData.email || ''}
+                value={formData.email || ""}
                 onChange={handleChange}
-                className="col-span-3"
                 required
               />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="phone" className="text-right">
-                Телефон
-              </label>
+            </FormRow>
+
+            <FormRow label="Телефон" htmlFor="phone" required>
               <Input
                 id="phone"
                 name="phone"
-                value={formData.phone || ''}
+                value={formData.phone || ""}
                 onChange={handleChange}
-                className="col-span-3"
                 required
               />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="address" className="text-right">
-                Адрес
-              </label>
+            </FormRow>
+
+            <FormRow label="Адрес" htmlFor="address">
               <Input
                 id="address"
                 name="address"
-                value={formData.address || ''}
+                value={formData.address || ""}
                 onChange={handleChange}
-                className="col-span-3"
               />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="tags" className="text-right">
-                Теги
-              </label>
-              <div className="col-span-3 flex flex-wrap gap-2">
+            </FormRow>
+
+            <FormRow label="Теги" htmlFor="tags">
+              <div className="flex flex-wrap gap-2 mb-2">
                 {formData.tags?.map((t, index) => (
-                  <div key={index} className="flex items-center bg-secondary text-secondary-foreground px-2 py-1 rounded-md">
+                  <div
+                    key={index}
+                    className="flex items-center bg-secondary text-secondary-foreground px-2 py-1 rounded-md"
+                  >
                     {t}
                     <Button
                       type="button"
@@ -174,33 +171,35 @@ export function EditCompanyDialog({ open, onOpenChange, onUpdateCompany, company
                       ×
                     </Button>
                   </div>
-                )) || ''}
-                <div className="flex gap-2">
-                  <Input
-                    id="tag"
-                    value={tag}
-                    onChange={(e) => setTag(e.target.value)}
-                    className="w-32"
-                    placeholder="Новый тег"
-                  />
-                  <Button type="button" variant="outline" size="sm" onClick={handleAddTag}>
-                    +
-                  </Button>
-                </div>
+                ))}
               </div>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="notes" className="text-right">
-                Примечания
-              </label>
+              <div className="flex gap-2">
+                <Input
+                  id="tag"
+                  value={tag}
+                  onChange={(e) => setTag(e.target.value)}
+                  className="w-32"
+                  placeholder="Новый тег"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAddTag}
+                >
+                  +
+                </Button>
+              </div>
+            </FormRow>
+
+            <FormRow label="Примечания" htmlFor="notes">
               <Textarea
                 id="notes"
                 name="notes"
-                value={formData.notes || ''}
+                value={formData.notes || ""}
                 onChange={handleChange}
-                className="col-span-3"
               />
-            </div>
+            </FormRow>
           </div>
           <DialogFooter>
             <Button type="submit">Сохранить</Button>

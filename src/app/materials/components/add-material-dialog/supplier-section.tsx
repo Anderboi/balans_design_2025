@@ -1,14 +1,9 @@
 import { Control } from "react-hook-form";
 import { ChevronDownIcon, Plus } from "lucide-react";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { FormControl, FormField } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { FormRow } from "@/components/ui/form-row";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,12 +35,12 @@ export function SupplierSection({
       control={control}
       name="supplier"
       render={({ field }) => (
-        <FormItem>
-          <FormLabel>Поставщик</FormLabel>
+        <FormRow label="Поставщик" htmlFor="supplier-trigger">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <FormControl>
                 <Button
+                  id="supplier-trigger"
                   variant="outline"
                   className="w-full justify-between font-normal"
                 >
@@ -86,8 +81,7 @@ export function SupplierSection({
               )}
             </DropdownMenuContent>
           </DropdownMenu>
-          <FormMessage />
-        </FormItem>
+        </FormRow>
       )}
     />
   );

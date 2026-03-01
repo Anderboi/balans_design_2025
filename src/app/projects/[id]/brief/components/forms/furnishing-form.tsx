@@ -18,7 +18,7 @@ import {
 import { Room } from "@/types";
 import SubBlockCard from "@/components/ui/sub-block-card";
 import FormSubmitButton from "./form-submit-button";
-import { projectsService } from "@/lib/services/projects";
+import { updateProjectBriefAction } from "@/lib/actions/brief";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import DeleteIconButton from "@/components/ui/delete-button";
@@ -147,9 +147,13 @@ export function FurnishingForm({
         })),
       };
 
-      await projectsService.updateProjectBrief(projectId, {
+      const result = await updateProjectBriefAction(projectId, {
         equipment: data,
       });
+
+      if (!result.success) {
+        throw new Error(result.error as string);
+      }
 
       if (action === "complete") {
         await completeBriefSectionAction(projectId, "furnishing", true);

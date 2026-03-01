@@ -8,18 +8,10 @@ import {
 import { Room } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useTransition } from "react";
-import {
-  FieldArrayWithId,
-  UseFieldArrayAppend,
-  UseFieldArrayRemove,
-  useFieldArray,
-  useForm,
-  Path,
-  FieldErrors,
-} from "react-hook-form";
+import { useForm, FieldErrors } from "react-hook-form";
 import { toast } from "sonner";
 import FormSubmitButton from "./form-submit-button";
-import { projectsService } from "@/lib/services/projects";
+import { updateProjectBriefAction } from "@/lib/actions/brief";
 import { useRouter } from "next/navigation";
 import { CONSTRUCTION_TYPES } from "../../constants/construction-options";
 import { MaterialSection } from "./construction-material-section";
@@ -95,9 +87,13 @@ export function ConstructionForm({
             ) || [],
         };
 
-        await projectsService.updateProjectBrief(projectId, {
+        const result = await updateProjectBriefAction(projectId, {
           construction: cleanedData,
         });
+
+        if (!result.success) {
+          throw new Error(result.error as string);
+        }
 
         if (action === "complete") {
           await completeBriefSectionAction(projectId, "construction", true);

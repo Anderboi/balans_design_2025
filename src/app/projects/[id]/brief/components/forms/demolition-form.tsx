@@ -21,7 +21,7 @@ import { Switch } from "@/components/ui/switch";
 import SubBlockCard from "@/components/ui/sub-block-card";
 import { DoorOpen, Grid2x2, Hammer, Sofa } from "lucide-react";
 import FormSubmitButton from "./form-submit-button";
-import { projectsService } from "@/lib/services/projects";
+import { updateProjectBriefAction } from "@/lib/actions/brief";
 import { toast } from "sonner";
 import { completeBriefSectionAction } from "@/lib/actions/stages";
 
@@ -62,9 +62,13 @@ export function DemolitionForm({
     try {
       setIsLoading(true);
 
-      await projectsService.updateProjectBrief(projectId, {
+      const result = await updateProjectBriefAction(projectId, {
         demolition: data,
       });
+
+      if (!result.success) {
+        throw new Error(result.error as string);
+      }
 
       if (action === "complete") {
         await completeBriefSectionAction(projectId, "demolition", true);

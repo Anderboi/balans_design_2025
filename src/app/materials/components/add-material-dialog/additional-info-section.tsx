@@ -1,14 +1,8 @@
 import { Control } from "react-hook-form";
 import { Plus, X } from "lucide-react";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { FormControl, FormField } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { FormRow } from "@/components/ui/form-row";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { AddMaterialFormValues } from "@/lib/schemas/materials";
@@ -33,31 +27,28 @@ export function AdditionalInfoSection({
   handleKeyPress,
 }: AdditionalInfoSectionProps) {
   return (
-    <>
+    <div className="space-y-4">
       <FormField
         control={control}
         name="product_url"
         render={({ field }) => (
-          <FormItem>
-            <FormLabel>URL продукта</FormLabel>
+          <FormRow label="URL продукта" htmlFor="product_url">
             <FormControl>
               <Input
+                id="product_url"
                 placeholder="https://example.com"
                 {...field}
                 value={field.value || ""}
               />
             </FormControl>
-            <FormMessage />
-          </FormItem>
+          </FormRow>
         )}
       />
 
-      <div className="space-y-2">
-        <Label className="data-[error=true]:text-destructive text-[10.5px] font-bold uppercase tracking-wider text-zinc-500 ml-1">
-          Теги
-        </Label>
+      <FormRow label="Теги" htmlFor="tag-input">
         <div className="flex gap-2">
           <Input
+            id="tag-input"
             value={tagInput}
             onChange={(e) => setTagInput(e.target.value)}
             onKeyPress={handleKeyPress}
@@ -93,7 +84,7 @@ export function AdditionalInfoSection({
             ))}
           </div>
         )}
-      </div>
-    </>
+      </FormRow>
+    </div>
   );
 }

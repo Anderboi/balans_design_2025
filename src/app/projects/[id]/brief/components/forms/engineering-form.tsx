@@ -12,10 +12,10 @@ import {
 import { Room } from "@/types";
 import { Form } from "@/components/ui/form";
 import FormSubmitButton from "./form-submit-button";
-import { projectsService } from "@/lib/services/projects";
 import { EngineeringSection } from "./engineering-section";
 import { ENGINEERING_OPTIONS } from "../../constants/engineering-options";
 import { completeBriefSectionAction } from "@/lib/actions/stages";
+import { updateProjectBriefAction } from "@/lib/actions/brief";
 
 interface EngineeringFormProps {
   projectId: string;
@@ -43,12 +43,20 @@ export function EngineeringForm({
 
   const form = useForm<EngineeringSystemsType>({
     resolver: zodResolver(EngineeringSystemsSchema),
-    defaultValues: initialData || {
-      heatingSystem: [{ system: "", rooms: [] }],
-      warmFloorRooms: [{ system: "", rooms: [] }],
-      conditioningSystem: [{ system: "", rooms: [] }],
-      purificationSystem: [{ system: "", rooms: [] }],
-      electricSystem: [{ system: "", rooms: [] }],
+    defaultValues: {
+      heatingSystem: initialData?.heatingSystem || [{ system: "", rooms: [] }],
+      warmFloorRooms: initialData?.warmFloorRooms || [
+        { system: "", rooms: [] },
+      ],
+      conditioningSystem: initialData?.conditioningSystem || [
+        { system: "", rooms: [] },
+      ],
+      purificationSystem: initialData?.purificationSystem || [
+        { system: "", rooms: [] },
+      ],
+      electricSystem: initialData?.electricSystem || [
+        { system: "", rooms: [] },
+      ],
     },
   });
 
@@ -88,9 +96,13 @@ export function EngineeringForm({
             data.electricSystem?.filter((item) => item?.system) || [],
         };
 
-        await projectsService.updateProjectBrief(projectId, {
+        const result = await updateProjectBriefAction(projectId, {
           engineering: cleanedData,
         });
+
+        if (!result.success) {
+          throw new Error(result.error);
+        }
 
         if (action === "complete") {
           await completeBriefSectionAction(projectId, "engineering", true);

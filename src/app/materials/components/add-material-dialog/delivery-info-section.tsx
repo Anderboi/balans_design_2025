@@ -1,13 +1,7 @@
 import { Control } from "react-hook-form";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { FormControl, FormField } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
+import { FormRow } from "@/components/ui/form-row";
 import { AddMaterialFormValues } from "@/lib/schemas/materials";
 
 interface DeliveryInfoSectionProps {
@@ -17,18 +11,20 @@ interface DeliveryInfoSectionProps {
 export function DeliveryInfoSection({ control }: DeliveryInfoSectionProps) {
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-0">
         <FormField
           control={control}
           name="article"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Артикул</FormLabel>
+            <FormRow label="Артикул" htmlFor="article">
               <FormControl>
-                <Input placeholder="Артикул материала" {...field} />
+                <Input
+                  id="article"
+                  placeholder="Артикул материала"
+                  {...field}
+                />
               </FormControl>
-              <FormMessage />
-            </FormItem>
+            </FormRow>
           )}
         />
 
@@ -36,10 +32,10 @@ export function DeliveryInfoSection({ control }: DeliveryInfoSectionProps) {
           control={control}
           name="lead_time"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Срок поставки (дней)</FormLabel>
+            <FormRow label="Срок поставки (дней)" htmlFor="lead_time">
               <FormControl>
                 <Input
+                  id="lead_time"
                   type="number"
                   min="0"
                   placeholder="0"
@@ -47,8 +43,7 @@ export function DeliveryInfoSection({ control }: DeliveryInfoSectionProps) {
                   onFocus={(e) => e.target.select()}
                 />
               </FormControl>
-              <FormMessage />
-            </FormItem>
+            </FormRow>
           )}
         />
       </div>

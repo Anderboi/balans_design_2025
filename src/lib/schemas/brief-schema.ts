@@ -271,11 +271,17 @@ const EngineeringSystemItemSchema = z.object({
 });
 
 export const EngineeringSystemsSchema = z.object({
-  heatingSystem: z.array(EngineeringSystemItemSchema).optional(),
-  warmFloorRooms: z.array(EngineeringSystemItemSchema).optional(),
-  conditioningSystem: z.array(EngineeringSystemItemSchema).optional(),
-  purificationSystem: z.array(EngineeringSystemItemSchema).optional(),
-  electricSystem: z.array(EngineeringSystemItemSchema).optional(),
+  heatingSystem: z.array(EngineeringSystemItemSchema).nullable().optional(),
+  warmFloorRooms: z.array(EngineeringSystemItemSchema).nullable().optional(),
+  conditioningSystem: z
+    .array(EngineeringSystemItemSchema)
+    .nullable()
+    .optional(),
+  purificationSystem: z
+    .array(EngineeringSystemItemSchema)
+    .nullable()
+    .optional(),
+  electricSystem: z.array(EngineeringSystemItemSchema).nullable().optional(),
 });
 export type EngineeringSystemsType = z.infer<typeof EngineeringSystemsSchema>;
 

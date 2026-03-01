@@ -17,8 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import SubBlockCard from "@/components/ui/sub-block-card";
 import { toast } from "sonner";
-import { projectsService } from "@/lib/services/projects";
-import { contactsService } from "@/lib/services/contacts";
+import { updateCommonInfoAction } from "@/lib/actions/brief";
 import { useRouter } from "next/navigation";
 import FormSubmitButton from "./form-submit-button";
 import { completeBriefSectionAction } from "@/lib/actions/stages";
@@ -55,40 +54,11 @@ export function CommonInfoForm({
     }
 
     try {
-      // 1. Update Project Data
-      await projectsService.updateProject(projectId, {
-        address: data.address,
-        area: data.area,
-      });
+      const result = await updateCommonInfoAction(projectId, data, contactId);
 
-      // 1.1 Update Brief General Info
-      await projectsService.updateProjectBrief(projectId, {
-        general_info: {
-          contractNumber: data.contractNumber,
-          startDate: data.startDate,
-          finalDate: data.finalDate,
-        },
-      });
-
-      // 2. Update Contact Data
-      if (contactId) {
-        const fullName = `${data.clientName} ${data.clientSurname}`.trim();
-        await contactsService.updateContact(contactId, {
-          name: fullName,
-          email: data.email,
-          phone: data.phone,
-        });
-      } else if (clientId) {
+      if (!result.success) {
+        throw new Error(result.error as string);
       }
-
-      // 3. Mark stage item as completed
-      // Using 'preproject' stage and 'object_info' item based on config
-      await projectsService.toggleProjectStageItem(
-        projectId,
-        "preproject",
-        "object_info",
-        true,
-      );
 
       // 4. Update brief section status
       if (action === "complete") {

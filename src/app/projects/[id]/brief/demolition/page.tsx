@@ -1,12 +1,11 @@
 import { projectsService } from "@/lib/services/projects";
 import { notFound } from "next/navigation";
-import PageHeader from "@/components/ui/page-header";
 import PageContainer from "@/components/ui/page-container";
-import { BriefBreadcrumb } from "../components/brief-breadcrumb";
 import { DemolitionForm } from "../components/forms/demolition-form";
 import MainBlockCard from "@/components/ui/main-block-card";
 import { createClient } from "@/lib/supabase/server";
 import { DemolitionType } from "@/lib/schemas/brief-schema";
+import { ProjectPageHeader } from "@/components/project-page-header";
 
 export default async function BriefDemolitionPage({
   params,
@@ -30,17 +29,21 @@ export default async function BriefDemolitionPage({
 
   return (
     <PageContainer>
-      <div className="space-y-8">
-        <BriefBreadcrumb
-          projectId={id}
-          projectName={project.name}
-          currentPage="Демонтаж"
-        />
+      <ProjectPageHeader
+        projectId={id}
+        projectName={project.name}
+        title="Демонтаж"
+        middleLink={{
+          href: `/projects/${id}/brief`,
+          label: "Техническое задание",
+        }}
+      />
+
+      <div className="mt-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+        <MainBlockCard className="p-8 md:p-12">
+          <DemolitionForm projectId={id} initialData={initialData} />
+        </MainBlockCard>
       </div>
-      <MainBlockCard className="space-y-6 p-8 md:p-12">
-        <PageHeader title="Демонтаж" />
-        <DemolitionForm projectId={id} initialData={initialData} />
-      </MainBlockCard>
     </PageContainer>
   );
 }

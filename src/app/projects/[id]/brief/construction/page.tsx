@@ -1,12 +1,12 @@
 import { projectsService } from "@/lib/services/projects";
 import { notFound } from "next/navigation";
 import PageContainer from "@/components/ui/page-container";
-import { BriefBreadcrumb } from "../components/brief-breadcrumb";
 import MainBlockCard from "@/components/ui/main-block-card";
 import { ConstructionForm } from "../components/forms/construction-form";
 import { createClient } from "@/lib/supabase/server";
 import { roomsService } from "@/lib/services/rooms";
 import { ConstructionFormValues } from "@/lib/schemas/brief-schema";
+import { ProjectPageHeader } from "@/components/project-page-header";
 
 export default async function BriefConstructionPage({
   params,
@@ -31,21 +31,25 @@ export default async function BriefConstructionPage({
 
   return (
     <PageContainer>
-      <div className="space-y-8">
-        <BriefBreadcrumb
-          projectId={id}
-          projectName={project.name}
-          currentPage="Монтаж"
-        />
-      </div>
+      <ProjectPageHeader
+        projectId={id}
+        projectName={project.name}
+        title="Монтаж"
+        middleLink={{
+          href: `/projects/${id}/brief`,
+          label: "Техническое задание",
+        }}
+      />
 
-      <MainBlockCard className="space-y-6 p-8 md:p-12">
-        <ConstructionForm
-          projectId={id}
-          roomList={rooms}
-          initialData={initialData}
-        />
-      </MainBlockCard>
+      <div className="mt-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+        <MainBlockCard className="p-8 md:p-12">
+          <ConstructionForm
+            projectId={id}
+            roomList={rooms}
+            initialData={initialData}
+          />
+        </MainBlockCard>
+      </div>
     </PageContainer>
   );
 }

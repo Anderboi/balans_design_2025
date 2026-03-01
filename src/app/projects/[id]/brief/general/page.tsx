@@ -1,12 +1,11 @@
 import { projectsService } from "@/lib/services/projects";
 import { notFound } from "next/navigation";
-import PageHeader from "@/components/ui/page-header";
 import PageContainer from "@/components/ui/page-container";
 import { CommonInfoForm } from "@/app/projects/[id]/brief/components/forms/common-info-form";
 import MainBlockCard from "@/components/ui/main-block-card";
 import { CommonFormValues } from "@/lib/schemas/brief-schema";
 import { createClient } from "@/lib/supabase/server";
-import { BriefBreadcrumb } from "../components/brief-breadcrumb";
+import { ProjectPageHeader } from "@/components/project-page-header";
 
 export default async function BriefGeneralPage({
   params,
@@ -46,23 +45,26 @@ export default async function BriefGeneralPage({
 
   return (
     <PageContainer>
-      <div className="space-y-8">
-        <BriefBreadcrumb
-          projectId={id}
-          projectName={project.name}
-          currentPage="Общая информация"
-        />
-      </div>
+      <ProjectPageHeader
+        projectId={id}
+        projectName={project.name}
+        title="Общая информация"
+        middleLink={{
+          href: `/projects/${id}/brief`,
+          label: "Техническое задание",
+        }}
+      />
 
-      <MainBlockCard className="space-y-6 p-8 md:p-12">
-        <PageHeader title="Общая информация" />
-        <CommonInfoForm
-          projectId={id}
-          initialData={initialData}
-          contactId={project.contacts?.id}
-          clientId={project.client_id || undefined}
-        />
-      </MainBlockCard>
+      <div className="mt-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+        <MainBlockCard className="p-8 md:p-12">
+          <CommonInfoForm
+            projectId={id}
+            initialData={initialData}
+            contactId={project.contacts?.id}
+            clientId={project.client_id || undefined}
+          />
+        </MainBlockCard>
+      </div>
     </PageContainer>
   );
 }

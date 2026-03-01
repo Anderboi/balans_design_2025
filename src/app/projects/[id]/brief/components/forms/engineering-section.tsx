@@ -1,11 +1,9 @@
 "use client";
 
-import { useFieldArray, Control } from "react-hook-form";
+import { useFieldArray, Control, useFormContext } from "react-hook-form";
 import {
   ChevronDown,
   ChevronUp,
-  Plus,
-  Trash2,
   Thermometer,
   Fan,
   Droplets,
@@ -65,34 +63,42 @@ export function EngineeringSection({
 }: EngineeringSectionProps) {
   const Icon = ICONS[icon];
 
+  const { getValues } = useFormContext<EngineeringSystemsType>();
+
   const { fields, append, remove, update } = useFieldArray({
     control,
     name: category,
   });
 
   const toggleRoom = (sectionIndex: number, roomId: string) => {
-    const field = fields[sectionIndex];
-    if (!field) return; 
+    const currentValues = getValues(category);
+    if (!currentValues || !currentValues[sectionIndex]) return;
 
-    const currentRooms = field.rooms || [];
+    const currentItem = currentValues[sectionIndex];
+    const currentRooms = currentItem.rooms || [];
 
     const updatedRooms = currentRooms.includes(roomId)
       ? currentRooms.filter((r) => r !== roomId)
       : [...currentRooms, roomId];
 
-    update(sectionIndex, { ...field, rooms: updatedRooms });
+    update(sectionIndex, {
+      ...currentItem,
+      rooms: updatedRooms,
+    });
   };
 
   const selectAllRooms = (sectionIndex: number) => {
-    const field = fields[sectionIndex];
-    if (!field || !roomList.length) return; 
+    const currentValues = getValues(category);
+    if (!currentValues || !currentValues[sectionIndex] || !roomList.length)
+      return;
 
+    const currentItem = currentValues[sectionIndex];
     const allRoomIds = roomList.map((room) => room.id);
-    const currentRooms = field.rooms || [];
+    const currentRooms = currentItem.rooms || [];
     const allSelected = allRoomIds.every((id) => currentRooms.includes(id));
 
     update(sectionIndex, {
-      ...field,
+      ...currentItem,
       rooms: allSelected ? [] : allRoomIds,
     });
   };
@@ -223,7 +229,7 @@ export function EngineeringSection({
                               "px-3 py-1.5 rounded-lg text-xs font-medium transition-all border",
                               isSelected
                                 ? "bg-zinc-900 text-white border-zinc-900 shadow-sm"
-                                : "bg-background text-zinc-500 border-zinc-200 hover:border-zinc-300 hover:text-zinc-700"
+                                : "bg-background text-zinc-500 border-zinc-200 hover:border-zinc-300 hover:text-zinc-700",
                             )}
                           >
                             {room.order && (

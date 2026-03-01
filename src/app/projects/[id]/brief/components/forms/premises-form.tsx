@@ -10,14 +10,15 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import StyledSelect from "@/components/ui/styled-select";
-import { roomsService } from "@/lib/services/rooms";
 import { toast } from "sonner";
+import { CreateRoomData } from "@/lib/services/rooms";
+import { updateRoomsAction } from "@/lib/actions/brief";
+import { completeBriefSectionAction } from "@/lib/actions/stages";
+import { useRouter } from "next/navigation";
 import SubBlockCard from "@/components/ui/sub-block-card";
 import DeleteIconButton from "@/components/ui/delete-button";
 import FormSubmitButton from "./form-submit-button";
 import AddItemButton from "@/components/ui/add-item-button";
-import { useRouter } from "next/navigation";
-import { completeBriefSectionAction } from "@/lib/actions/stages";
 
 interface PremisesFormProps {
   projectId: string;
@@ -192,7 +193,20 @@ export function PremisesForm({ projectId, initialData }: PremisesFormProps) {
 
     setIsSaving(true);
     try {
-      await roomsService.bulkUpsertRooms(projectId, data.rooms);
+      // Mapping with ID preservation
+      const roomsToSave: CreateRoomData[] = data.rooms.map((room, index) => ({
+        id: (room as any).id, // Preserve ID if it exists in initialData
+        name: room.name,
+        order: index + 1,
+        type: room.type as any,
+        area: room.area,
+      }));
+
+      const result = await updateRoomsAction(projectId, roomsToSave);
+
+      if (!result.success) {
+        throw new Error(result.error as string);
+      }
 
       if (action === "complete") {
         await completeBriefSectionAction(projectId, "rooms", true);

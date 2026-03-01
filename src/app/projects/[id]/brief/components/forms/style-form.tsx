@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import FormSubmitButton from "./form-submit-button";
-import { projectsService } from "@/lib/services/projects";
+import { updateProjectBriefAction } from "@/lib/actions/brief";
 import { completeBriefSectionAction } from "@/lib/actions/stages";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -45,9 +45,13 @@ export function StyleForm({ projectId, initialData }: StyleFormProps) {
 
   async function onSubmit(data: StyleFormValues) {
     try {
-      await projectsService.updateProjectBrief(projectId, {
+      const result = await updateProjectBriefAction(projectId, {
         style: data,
       });
+
+      if (!result.success) {
+        throw new Error(result.error as string);
+      }
 
       if (action === "complete") {
         await completeBriefSectionAction(projectId, "style", true);

@@ -1,12 +1,7 @@
 import { Control } from "react-hook-form";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { FormControl, FormField } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { FormRow } from "@/components/ui/form-row";
 import {
   Select,
   SelectContent,
@@ -23,15 +18,15 @@ interface PricingSectionProps {
 
 export function PricingSection({ control, commonUnits }: PricingSectionProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-0">
       <FormField
         control={control}
         name="price"
         render={({ field }) => (
-          <FormItem>
-            <FormLabel>Цена (₽)</FormLabel>
+          <FormRow label="Цена (₽)" htmlFor="price">
             <FormControl>
               <Input
+                id="price"
                 type="number"
                 min="0"
                 step="0.01"
@@ -40,8 +35,7 @@ export function PricingSection({ control, commonUnits }: PricingSectionProps) {
                 onFocus={(e) => e.target.select()}
               />
             </FormControl>
-            <FormMessage />
-          </FormItem>
+          </FormRow>
         )}
       />
 
@@ -49,15 +43,14 @@ export function PricingSection({ control, commonUnits }: PricingSectionProps) {
         control={control}
         name="unit"
         render={({ field }) => (
-          <FormItem>
-            <FormLabel>Единица измерения</FormLabel>
+          <FormRow label="Единица измерения" htmlFor="unit">
             <Select
               onValueChange={field.onChange}
               defaultValue={field.value}
               value={field.value}
             >
               <FormControl>
-                <SelectTrigger>
+                <SelectTrigger id="unit">
                   <SelectValue placeholder="Выберите единицу" />
                 </SelectTrigger>
               </FormControl>
@@ -69,8 +62,7 @@ export function PricingSection({ control, commonUnits }: PricingSectionProps) {
                 ))}
               </SelectContent>
             </Select>
-            <FormMessage />
-          </FormItem>
+          </FormRow>
         )}
       />
     </div>
