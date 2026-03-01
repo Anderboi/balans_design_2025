@@ -10,7 +10,7 @@ import { CompanyCard } from "./company-card";
 import { toast } from "sonner";
 import { AddCompanyDialog } from "./add-company-dialog";
 import AddContactDialog from "./add-contact-dialog";
-import { ContactCard } from "./contact-card";
+import { ContactListItem } from "./contact-list-item";
 import { EditContactDrawer } from "./edit-contact-drawer";
 import {
   createCompany,
@@ -56,6 +56,23 @@ export function ContactsPageClient({
   const filteredAll = useMemo(() => {
     return [...filteredCompanies, ...filteredClients];
   }, [filteredCompanies, filteredClients]);
+
+  const groupedClientsByLetter = useMemo(() => {
+    const sorted = [...filteredClients].sort((a, b) =>
+      a.name.localeCompare(b.name),
+    );
+    const groups: Record<string, Contact[]> = {};
+
+    sorted.forEach((client) => {
+      const firstLetter = client.name.charAt(0).toUpperCase();
+      if (!groups[firstLetter]) {
+        groups[firstLetter] = [];
+      }
+      groups[firstLetter].push(client);
+    });
+
+    return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
+  }, [filteredClients]);
 
   const [activeTab, setActiveTab] = useState("all");
   const [isAddCompanyOpen, setIsAddCompanyOpen] = useState(false);
@@ -150,24 +167,24 @@ export function ContactsPageClient({
       <div className="flex items-center space-x-2">
         <div className="w-full flex flex-col md:flex-row gap-4 items-center justify-between bg-background p-2 rounded-2xl shadow-lg shadow-zinc-300/50">
           <div className="relative w-full //md:w-96 group">
-          <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Поиск..."
-            className="pl-8 w-full"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          {searchQuery && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute right-0 top-0 h-full px-3 py-2"
-              onClick={() => setSearchQuery("")}
-            >
-              <X className="size-4" />
-            </Button>
-          )}
+            <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Поиск..."
+              className="pl-8 w-full"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute right-0 top-0 h-full px-3 py-2"
+                onClick={() => setSearchQuery("")}
+              >
+                <X className="size-4" />
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -176,27 +193,49 @@ export function ContactsPageClient({
         <TabsList>
           <TabsTrigger value="all">Все</TabsTrigger>
           <TabsTrigger value="companies">Компании</TabsTrigger>
-          <TabsTrigger value="clients">Клиенты</TabsTrigger>
+          <TabsTrigger value="clients">Люди</TabsTrigger>
         </TabsList>
-        <TabsContent value="all" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredAll.map((item) =>
-              "company_id" in item ? (
-                <ContactCard
-                  key={item.id}
-                  contact={item}
-                  onClick={() => handleContactClick(item)}
-                />
-              ) : (
-                <CompanyCard key={item.id} company={item} />
-              ),
-            )}
-            {filteredAll.length === 0 && (
-              <div className="col-span-full text-center py-10">
-                <p className="text-muted-foreground">Ничего не найдено.</p>
+        <TabsContent value="all" className="mt-6 flex flex-col gap-10">
+          {filteredCompanies.length > 0 && (
+            <div className="flex flex-col gap-4">
+              <h3 className="text-lg font-bold px-1">Компании</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredCompanies.map((company) => (
+                  <CompanyCard key={company.id} company={company} />
+                ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
+
+          {filteredClients.length > 0 && (
+            <div className="flex flex-col gap-4">
+              <h3 className="text-lg font-bold px-1">Люди</h3>
+              <div className="flex flex-col gap-6">
+                {groupedClientsByLetter.map(([letter, groupClients]) => (
+                  <div key={letter} className="flex flex-col gap-2">
+                    <div className="text-xs font-bold text-muted-foreground px-4">
+                      {letter}
+                    </div>
+                    <div className="flex flex-col bg-white rounded-2xl border border-zinc-100 shadow-sm overflow-hidden">
+                      {groupClients.map((client) => (
+                        <ContactListItem
+                          key={client.id}
+                          contact={client}
+                          onClick={() => handleContactClick(client)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {filteredAll.length === 0 && (
+            <div className="text-center py-10">
+              <p className="text-muted-foreground">Ничего не найдено.</p>
+            </div>
+          )}
         </TabsContent>
         <TabsContent value="companies" className="mt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -211,13 +250,22 @@ export function ContactsPageClient({
           </div>
         </TabsContent>
         <TabsContent value="clients" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredClients.map((client) => (
-              <ContactCard
-                key={client.id}
-                contact={client}
-                onClick={() => handleContactClick(client)}
-              />
+          <div className="flex flex-col gap-8">
+            {groupedClientsByLetter.map(([letter, groupClients]) => (
+              <div key={letter} className="flex flex-col gap-2">
+                <div className="text-xs font-bold text-muted-foreground px-4">
+                  {letter}
+                </div>
+                <div className="flex flex-col bg-white rounded-2xl border border-zinc-100 shadow-sm overflow-hidden">
+                  {groupClients.map((client) => (
+                    <ContactListItem
+                      key={client.id}
+                      contact={client}
+                      onClick={() => handleContactClick(client)}
+                    />
+                  ))}
+                </div>
+              </div>
             ))}
             {filteredClients.length === 0 && (
               <div className="col-span-full text-center py-10">
