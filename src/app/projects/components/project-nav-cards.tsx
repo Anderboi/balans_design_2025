@@ -24,7 +24,7 @@ function NavCard({
   description,
 }: NavCardProps) {
   return (
-    <Link href={href} className="group flex-1 min-w-[200px]">
+    <Link href={href} className="group flex-1 sm:min-w-[200px]">
       <div className="glass-card h-full bg-white hover:bg-zinc-50 border border-gray-200/80 rounded-4xl p-5 transition-all duration-300 //shadow-sm //hover:shadow-md flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <div
@@ -33,7 +33,7 @@ function NavCard({
             <Icon className="size-6" />
           </div>
           <div className="size-8 rounded-full flex items-center justify-center  transition-all group-hover:translate-x-1 ">
-            <ChevronRight className="size-4 text-zinc-400 group-hover:text-black" />
+            <ChevronRight className="size-4 text-zinc-400 group-hover:text-black hidden sm:block" />
           </div>
         </div>
         <div>
@@ -78,7 +78,7 @@ export function ProjectNavCards({ projectId }: { projectId: string }) {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 w-full">
       {cards.map((card) => (
         <NavCard key={card.title} {...card} />
       ))}

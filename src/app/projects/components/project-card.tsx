@@ -38,7 +38,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
           {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
+          <div className="absolute inset-0 bg-linear-to-t from-black via-black/50 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
         </div>
         <div className="absolute top-6 right-6 z-10">
           <Badge

@@ -6,14 +6,17 @@ import {
   AvatarFallback,
   AvatarGroup,
   AvatarGroupCount,
-  AvatarImage,
 } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
-import { CompanyType } from "@/types";
+import { CompanyType, ContactType } from "@/types";
 import { useEffect, useState } from "react";
 import { contactsService } from "@/lib/services/contacts";
+import AddContactDialog from "./add-contact-dialog";
+import { createContact } from "../actions";
+import { toast } from "sonner";
+import { Plus } from "lucide-react";
 
 interface CompanyCardProps {
   company: Company | Contact;
@@ -22,6 +25,7 @@ interface CompanyCardProps {
 export function CompanyCard({ company }: CompanyCardProps) {
   const router = useRouter();
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [isAddContactOpen, setIsAddContactOpen] = useState(false);
 
   useEffect(() => {
     const fetchContacts = async () => {
@@ -33,6 +37,31 @@ export function CompanyCard({ company }: CompanyCardProps) {
 
     fetchContacts();
   }, [company.id]);
+
+  const fetchContacts = async () => {
+    const companyContacts = await contactsService.getContactsByCompany(
+      company.id,
+    );
+    setContacts(companyContacts);
+  };
+
+  const handleAddContact = async (
+    contact: Omit<Contact, "id" | "created_at" | "updated_at">,
+  ) => {
+    try {
+      const result = await createContact(contact);
+      if (result.success) {
+        toast.success("Контакт успешно добавлен");
+        await fetchContacts();
+        setIsAddContactOpen(false);
+      } else {
+        toast.error(result.error || "Не удалось добавить контакт");
+      }
+    } catch (error) {
+      console.error("Ошибка при добавлении контакта:", error);
+      toast.error("Не удалось добавить контакт");
+    }
+  };
 
   const getInitials = (name: string) => {
     return name
@@ -88,16 +117,23 @@ export function CompanyCard({ company }: CompanyCardProps) {
           <AvatarGroup className="grayscale">
             {contacts.length > 0 ? (
               contacts.slice(0, 3).map((contact) => (
-                <Avatar key={contact.id} size='lg'>
-                  {/* <AvatarImage
-                    src="https://github.com/shadcn.png"
-                    alt="@shadcn"
-                  /> */}
+                <Avatar key={contact.id} size="lg">
                   <AvatarFallback>{getInitials(contact.name)}</AvatarFallback>
                 </Avatar>
               ))
             ) : (
-              <p className="text-sm text-gray-500">Нет контактов</p>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2 text-sky-600 hover:text-sky-700 hover:bg-sky-50 -ml-2"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsAddContactOpen(true);
+                }}
+              >
+                <Plus className="mr-1 size-3" />
+                Добавить контакт
+              </Button>
             )}
             {contacts.length > 3 && (
               <Button
@@ -116,6 +152,18 @@ export function CompanyCard({ company }: CompanyCardProps) {
           </AvatarGroup>
         </div>
       </div>
+      <AddContactDialog
+        isOpen={isAddContactOpen}
+        onOpenChange={setIsAddContactOpen}
+        onSubmit={handleAddContact}
+        companyId={company.id}
+        defaultCompanyName={company.name}
+        defaultType={
+          company.type === CompanyType.SUPPLIER
+            ? ContactType.SUPPLIER
+            : ContactType.CLIENT
+        }
+      />
     </div>
   );
 }

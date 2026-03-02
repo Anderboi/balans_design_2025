@@ -86,7 +86,7 @@ export default async function ProjectDetailPage({
       </div>
 
       {/* Main Content Section */}
-      <div className="space-y-10">
+      <div className="space-y-6 sm:space-y-10">
         {/* Карточка "Информация об объекте" над стадиями */}
         <ObjectInfoCard
           projectId={id}
