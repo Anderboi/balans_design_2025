@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { companiesService } from "@/lib/services/companies";
+import { createCompany } from "../actions";
 
 interface AddContactDialogProps {
   isOpen: boolean;
@@ -133,7 +133,7 @@ export default function AddContactDialog({
     // если company_id не указан, но заполнено название компании — создаем компанию
     if (!payload.company_id && companyName && companyName.trim().length > 0) {
       try {
-        const company = await companiesService.createCompany({
+        const result = await createCompany({
           name: companyName.trim(),
           type:
             payload.type === ContactType.SUPPLIER
@@ -146,7 +146,9 @@ export default function AddContactDialog({
           tags: [],
           notes: "",
         });
-        payload.company_id = company.id;
+        if (result.success && result.data) {
+          payload.company_id = result.data.id;
+        }
       } catch (err) {
         console.error("Ошибка при создании компании:", err);
       }

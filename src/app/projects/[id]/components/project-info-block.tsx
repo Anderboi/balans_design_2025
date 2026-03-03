@@ -1,15 +1,19 @@
 import { Button } from "@/components/ui/button";
-import { Pencil } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import DataLabelValue from "@/components/ui/data-label-value";
 import { contactsService } from "@/lib/services/contacts";
 import { Project } from "@/types";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
 
 import { ProjectInfoEditDialog } from "./project-info-edit-dialog";
 
 const ProjectInfoBlock = async ({ project }: { project: Project | null }) => {
-  const client = await contactsService.getContactById(project?.client_id || "");
+  const supabase = await createClient();
+  const client = await contactsService.getContactById(
+    project?.client_id || "",
+    supabase,
+  );
 
   return (
     <div>

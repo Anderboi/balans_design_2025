@@ -22,7 +22,7 @@ export const companiesService = {
   // Получение компаний по типу
   async getCompaniesByType(
     type: CompanyType,
-    client?: SupabaseClient
+    client?: SupabaseClient,
   ): Promise<Company[]> {
     const supabaseClient = client || supabase;
     const { data, error } = await supabaseClient
@@ -42,7 +42,7 @@ export const companiesService = {
   // Получение компании по ID
   async getCompanyById(
     id: string,
-    client?: SupabaseClient
+    client?: SupabaseClient,
   ): Promise<Company | null> {
     if (!id) {
       console.error("ID компании не указан");
@@ -67,7 +67,7 @@ export const companiesService = {
   // Получение контактов компании
   async getCompanyContacts(
     companyId: string,
-    client?: SupabaseClient
+    client?: SupabaseClient,
   ): Promise<Contact[]> {
     if (!companyId) {
       console.error("ID компании не указан");
@@ -91,8 +91,10 @@ export const companiesService = {
 
   // Создание новой компании
   async createCompany(
-    company: Omit<Company, "id" | "created_at" | "updated_at">,
-    client?: SupabaseClient
+    company: Omit<Company, "id" | "created_at" | "updated_at"> & {
+      user_id?: string | null;
+    },
+    client?: SupabaseClient,
   ): Promise<Company> {
     const supabaseClient = client || supabase;
     const { data, error } = await supabaseClient
@@ -119,7 +121,7 @@ export const companiesService = {
   async updateCompany(
     id: string,
     company: Partial<Company>,
-    client?: SupabaseClient
+    client?: SupabaseClient,
   ): Promise<Company> {
     const supabaseClient = client || supabase;
     const { data, error } = await supabaseClient

@@ -8,6 +8,8 @@ import {
 import PageErrorBoundary from "@/components/page-error-boundary";
 import { MaterialsPageClient } from "./components/materials-page-client";
 
+export const revalidate = 0;
+
 async function MaterialsPageContent() {
   // Параллельная загрузка данных на сервере
   const [materials, categories, projects, suppliers, supplierCompanies] =

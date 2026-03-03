@@ -43,11 +43,11 @@ export enum ProjectStage {
 export interface Room {
   id: string;
   name: string;
-  area: number;
-  order?: number;
-  type?: "living" | "wet" | "utility" | "technical";
-  furniture_equipment: string[];
-  preferred_finishes?: string;
+  area: number | null;
+  order?: number | null;
+  type?: "living" | "wet" | "utility" | "technical" | null;
+  furniture_equipment?: string[];
+  preferred_finishes?: string | null;
 }
 
 // Типы для задач
@@ -173,6 +173,7 @@ export interface Material {
   tags?: string[];
   custom_specifications?: { label: string; value: string }[];
   attachments?: MaterialAttachment[];
+  user_id?: string | null;
   created_at?: string;
   updated_at?: string;
 }

@@ -1,15 +1,17 @@
 "use server";
-
 import { projectsService } from "@/lib/services/projects";
 import { materialsService } from "@/lib/services/materials";
+import { getUser } from "@/lib/supabase/getuser";
 import { contactsService } from "@/lib/services/contacts";
 import { companiesService } from "@/lib/services/companies";
 import { Material, ContactType, CompanyType } from "@/types";
 import { revalidatePath } from "next/cache";
+import { createClient } from "@/lib/supabase/server";
 
 export async function getProjects() {
   try {
-    return await projectsService.getProjects();
+    const supabase = await createClient();
+    return await projectsService.getProjects(supabase);
   } catch (error) {
     console.error("Ошибка при загрузке проектов:", error);
     return [];
@@ -18,7 +20,8 @@ export async function getProjects() {
 
 export async function getMaterials() {
   try {
-    return await materialsService.getMaterials();
+    const supabase = await createClient();
+    return await materialsService.getMaterials(supabase);
   } catch (error) {
     console.error("Ошибка при загрузке материалов:", error);
     throw error;
@@ -27,17 +30,21 @@ export async function getMaterials() {
 
 export async function getCategories() {
   try {
-    return await materialsService.getCategories();
+    const supabase = await createClient();
+    return await materialsService.getCategories(supabase);
   } catch (error) {
     console.error("Ошибка при загрузке категорий:", error);
-    // Возвращаем пустой массив вместо выброса ошибки
     return [];
   }
 }
 
 export async function getSuppliers() {
   try {
-    return await contactsService.getContactsByType(ContactType.SUPPLIER);
+    const supabase = await createClient();
+    return await contactsService.getContactsByType(
+      ContactType.SUPPLIER,
+      supabase,
+    );
   } catch (error) {
     console.error("Ошибка при загрузке поставщиков:", error);
     return [];
@@ -46,7 +53,11 @@ export async function getSuppliers() {
 
 export async function getSupplierCompanies() {
   try {
-    return await companiesService.getCompaniesByType(CompanyType.SUPPLIER);
+    const supabase = await createClient();
+    return await companiesService.getCompaniesByType(
+      CompanyType.SUPPLIER,
+      supabase,
+    );
   } catch (error) {
     console.error("Ошибка при загрузке компаний:", error);
     return [];
@@ -54,10 +65,18 @@ export async function getSupplierCompanies() {
 }
 
 export async function createMaterial(
-  material: Omit<Material, "id" | "created_at" | "updated_at">
+  material: Omit<Material, "id" | "created_at" | "updated_at">,
 ) {
   try {
-    const result = await materialsService.createMaterial(material);
+    const supabase = await createClient();
+    const user = await getUser();
+    const result = await materialsService.createMaterial(
+      {
+        ...material,
+        user_id: user?.id,
+      },
+      supabase,
+    );
     revalidatePath("/materials");
     return { success: true, data: result };
   } catch (error) {
@@ -68,7 +87,8 @@ export async function createMaterial(
 
 export async function updateMaterial(id: string, updates: Partial<Material>) {
   try {
-    await materialsService.updateMaterial(id, updates);
+    const supabase = await createClient();
+    await materialsService.updateMaterial(id, updates, supabase);
     revalidatePath("/materials");
     return { success: true };
   } catch (error) {
@@ -79,7 +99,8 @@ export async function updateMaterial(id: string, updates: Partial<Material>) {
 
 export async function deleteMaterial(id: string) {
   try {
-    await materialsService.deleteMaterial(id);
+    const supabase = await createClient();
+    await materialsService.deleteMaterial(id, supabase);
     revalidatePath("/materials");
     return { success: true };
   } catch (error) {

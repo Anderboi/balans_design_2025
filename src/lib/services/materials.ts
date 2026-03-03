@@ -22,7 +22,7 @@ export const materialsService = {
   // Получить материалы по типу
   async getMaterialsByType(
     type: MaterialType,
-    client?: SupabaseClient
+    client?: SupabaseClient,
   ): Promise<Material[]> {
     const supabaseClient = client || supabase;
     const { data, error } = await supabaseClient
@@ -42,14 +42,14 @@ export const materialsService = {
   // Поиск материалов
   async searchMaterials(
     query: string,
-    client?: SupabaseClient
+    client?: SupabaseClient,
   ): Promise<Material[]> {
     const supabaseClient = client || supabase;
     const { data, error } = await supabaseClient
       .from("materials")
       .select("*")
       .or(
-        `name.ilike.%${query}%,description.ilike.%${query}%,manufacturer.ilike.%${query}%`
+        `name.ilike.%${query}%,description.ilike.%${query}%,manufacturer.ilike.%${query}%`,
       )
       .order("created_at", { ascending: false });
 
@@ -64,7 +64,7 @@ export const materialsService = {
   // Получить материал по ID
   async getMaterialById(
     id: string,
-    client?: SupabaseClient
+    client?: SupabaseClient,
   ): Promise<Material | null> {
     const supabaseClient = client || supabase;
     const { data, error } = await supabaseClient
@@ -83,8 +83,10 @@ export const materialsService = {
 
   // Создать новый материал
   async createMaterial(
-    material: Omit<Material, "id" | "created_at" | "updated_at">,
-    client?: SupabaseClient
+    material: Omit<Material, "id" | "created_at" | "updated_at"> & {
+      user_id?: string | null;
+    },
+    client?: SupabaseClient,
   ): Promise<Material> {
     const supabaseClient = client || supabase;
     const { data, error } = await supabaseClient
@@ -105,7 +107,7 @@ export const materialsService = {
   async updateMaterial(
     id: string,
     updates: Partial<Omit<Material, "id" | "created_at" | "updated_at">>,
-    client?: SupabaseClient
+    client?: SupabaseClient,
   ): Promise<Material> {
     const supabaseClient = client || supabase;
     const { data, error } = await supabaseClient
@@ -157,7 +159,7 @@ export const materialsService = {
   // Получение спецификаций для проекта
   async getSpecifications(
     projectId: string,
-    client?: SupabaseClient
+    client?: SupabaseClient,
   ): Promise<SpecificationMaterial[]> {
     const supabaseClient = client || supabase;
     const { data, error } = await supabaseClient
@@ -168,7 +170,7 @@ export const materialsService = {
     if (error) {
       console.error(
         `Ошибка при получении спецификаций для проекта ${projectId}:`,
-        error
+        error,
       );
       throw error;
     }
@@ -179,7 +181,7 @@ export const materialsService = {
   // Получить материалы спецификации по типу
   async getSpecMaterialsByType(
     type: SpecificationMaterial,
-    client?: SupabaseClient
+    client?: SupabaseClient,
   ): Promise<SpecificationMaterial[]> {
     const supabaseClient = client || supabase;
     const { data, error } = await supabaseClient
@@ -199,7 +201,7 @@ export const materialsService = {
   // Добавление спецификации
   async addSpecification(
     spec: Omit<SpecificationMaterial, "id" | "created_at" | "updated_at">,
-    client?: SupabaseClient
+    client?: SupabaseClient,
   ): Promise<SpecificationMaterial> {
     const supabaseClient = client || supabase;
     const { data, error } = await supabaseClient
@@ -222,7 +224,7 @@ export const materialsService = {
     updates: Partial<
       Omit<SpecificationMaterial, "id" | "created_at" | "updated_at">
     >,
-    client?: SupabaseClient
+    client?: SupabaseClient,
   ): Promise<SpecificationMaterial> {
     const supabaseClient = client || supabase;
     const { data, error } = await supabaseClient
@@ -255,7 +257,7 @@ export const materialsService = {
       price: number;
       notes: string;
     }>,
-    client?: SupabaseClient
+    client?: SupabaseClient,
   ) {
     const supabaseClient = client || supabase;
     // Подготавливаем данные для обновления
@@ -278,7 +280,7 @@ export const materialsService = {
   // Удаление спецификации
   async deleteSpecification(
     id: string,
-    client?: SupabaseClient
+    client?: SupabaseClient,
   ): Promise<void> {
     const supabaseClient = client || supabase;
     const { error } = await supabaseClient
@@ -296,7 +298,7 @@ export const materialsService = {
   async getSpecificationsByRoom(
     projectId: string,
     roomId: string,
-    client?: SupabaseClient
+    client?: SupabaseClient,
   ): Promise<SpecificationMaterial[]> {
     const supabaseClient = client || supabase;
     const { data, error } = await supabaseClient
@@ -308,7 +310,7 @@ export const materialsService = {
     if (error) {
       console.error(
         `Ошибка при получении спецификаций для помещения ${roomId}:`,
-        error
+        error,
       );
       throw error;
     }

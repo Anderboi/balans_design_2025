@@ -22,7 +22,7 @@ export const contactsService = {
   // Получение контактов по типу
   async getContactsByType(
     type: ContactType,
-    client?: SupabaseClient
+    client?: SupabaseClient,
   ): Promise<Contact[]> {
     const supabaseClient = client || supabase;
     const { data, error } = await supabaseClient
@@ -42,7 +42,7 @@ export const contactsService = {
   // Получение контактов компании
   async getContactsByCompany(
     companyId: string,
-    client?: SupabaseClient
+    client?: SupabaseClient,
   ): Promise<Contact[]> {
     const supabaseClient = client || supabase;
     const { data, error } = await supabaseClient
@@ -62,7 +62,7 @@ export const contactsService = {
   // Получение контакта по ID
   async getContactById(
     id: string,
-    client?: SupabaseClient
+    client?: SupabaseClient,
   ): Promise<Contact | null> {
     if (!id) {
       console.error("ID контакта не указан");
@@ -86,8 +86,10 @@ export const contactsService = {
 
   // Создание нового контакта
   async createContact(
-    contact: Omit<Contact, "id" | "created_at" | "updated_at">,
-    client?: SupabaseClient
+    contact: Omit<Contact, "id" | "created_at" | "updated_at"> & {
+      user_id?: string | null;
+    },
+    client?: SupabaseClient,
   ): Promise<Contact> {
     const supabaseClient = client || supabase;
     const { data, error } = await supabaseClient
@@ -114,7 +116,7 @@ export const contactsService = {
   async updateContact(
     id: string,
     contact: Partial<Contact>,
-    client?: SupabaseClient
+    client?: SupabaseClient,
   ): Promise<Contact> {
     const supabaseClient = client || supabase;
     const { data, error } = await supabaseClient

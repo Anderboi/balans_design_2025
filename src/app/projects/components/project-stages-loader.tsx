@@ -1,6 +1,7 @@
 import { projectsService } from "@/lib/services/projects";
 import { ProjectStages } from "./project-stages";
 import { Skeleton } from "@/components/ui/skeleton";
+import { createClient } from "@/lib/supabase/server";
 
 interface ProjectStagesLoaderProps {
   projectId: string;
@@ -11,7 +12,11 @@ export async function ProjectStagesLoader({
   projectId,
   isStrictMode = true,
 }: ProjectStagesLoaderProps) {
-  const stageItems = await projectsService.getProjectStageItems(projectId);
+  const supabase = await createClient();
+  const stageItems = await projectsService.getProjectStageItems(
+    projectId,
+    supabase,
+  );
 
   return (
     <ProjectStages initialStageItems={stageItems} isStrictMode={isStrictMode} />

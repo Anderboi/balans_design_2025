@@ -15,7 +15,7 @@ import { EditContactDrawer } from "./edit-contact-drawer";
 import {
   createCompany,
   createContact,
-  getClients,
+  getContacts,
   getCompanies,
 } from "../actions";
 import PageContainer from "@/components/ui/page-container";
@@ -82,7 +82,7 @@ export function ContactsPageClient({
 
   const loadContacts = async () => {
     try {
-      const data = await getClients();
+      const data = await getContacts();
       setClients(data);
     } catch (error) {
       console.error("Ошибка при загрузке контактов:", error);
