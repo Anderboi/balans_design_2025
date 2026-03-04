@@ -244,9 +244,20 @@ export function MaterialsPageClient({
           title="Библиотека"
           description="Каталог материалов, оборудования и мебели."
         />
-        <Button onClick={() => setIsAddDialogOpen(true)}>
-          <Plus className="size-4 mr-2" />
+        <Button
+          size="lg"
+          className="rounded-full hidden sm:flex"
+          onClick={() => setIsAddDialogOpen(true)}
+        >
+          <Plus className="size-5 mr-2" />
           Добавить материал
+        </Button>
+        <Button
+          size="icon-lg"
+          className="rounded-full flex sm:hidden size-12"
+          onClick={() => setIsAddDialogOpen(true)}
+        >
+          <Plus className="size-5" />
         </Button>
       </div>
 

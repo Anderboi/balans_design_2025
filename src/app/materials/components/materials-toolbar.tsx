@@ -78,6 +78,8 @@ export function MaterialsToolbar({
         />
       </div>
       <div className="flex items-center //gap-2 sm:w-full md:w-auto overflow-x-auto mr-1 no-scrollbar">
+        
+        {/* Режим отображения */}
         <div className="flex items-center gap-1 bg-zinc-100 p-1 rounded-lg ">
           <Button
             variant={viewMode === "grid" ? "default" : "ghost"}
@@ -105,13 +107,15 @@ export function MaterialsToolbar({
         <div className="h-6 w-px bg-zinc-200 mx-2 hidden md:block" />
 
         <ButtonGroup>
+
+          {/* Фильтры */}
           <Button
             variant={"ghost"}
             className="cursor-pointer"
             onClick={onFilterClick}
           >
             <Funnel className="size-4" />
-            Фильтры
+            <span className="hidden sm:block">Фильтры</span>
             {(activeFilters.types.length > 0 ||
               activeFilters.suppliers.length > 0 ||
               activeFilters.priceMin ||
@@ -126,11 +130,12 @@ export function MaterialsToolbar({
             )}
           </Button>
 
+          {/* Группировка */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant={"ghost"} className="cursor-pointer">
                 <Layers className="size-4 mr-2" />
-                Группировка
+                <span className="hidden sm:block">Группировка</span>
                 {groupBy && (
                   <Badge
                     variant="secondary"
@@ -165,11 +170,12 @@ export function MaterialsToolbar({
             </DropdownMenuContent>
           </DropdownMenu>
 
+          {/* Сортировка */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant={"ghost"} className="cursor-pointer">
                 <SlidersHorizontal className="size-4 mr-2" />
-                Сортировка
+                <span className="hidden sm:block">Сортировка</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
