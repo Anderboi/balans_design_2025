@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Bell, Check, Trash2 } from "lucide-react";
 import {
   Popover,
@@ -10,72 +9,47 @@ import {
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils/utils";
+import { useNotifications } from "@/hooks/useNotifications";
+import { Notification } from "@/types/notifications";
+import { formatDistanceToNow } from "date-fns";
+import { ru } from "date-fns/locale";
+import { useState } from "react";
 
-interface Notification {
-  id: string;
-  title: string;
-  description: string;
-  time: string;
-  read: boolean;
-  type: "info" | "success" | "warning" | "error";
-  link?: string;
+interface NotificationsPopoverProps {
+  initialNotifications: Notification[];
+  userId: string;
 }
 
-const initialNotifications: Notification[] = [
-  {
-    id: "1",
-    title: "Новый комментарий",
-    description: "Анна оставила комментарий к планировке Кухни-гостиной.",
-    time: "5 мин назад",
-    read: false,
-    type: "info",
-    link: "/projects/1/planning",
-  },
-  {
-    id: "2",
-    title: "Стадия завершена",
-    description: "Стадия 'Техническое задание' успешно согласована клиентом.",
-    time: "2 часа назад",
-    read: false,
-    type: "success",
-    link: "/projects/1/brief",
-  },
-  {
-    id: "3",
-    title: "Обновление спецификации",
-    description: "Добавлено 3 новых позиций в спецификацию материалов.",
-    time: "Вчера",
-    read: true,
-    type: "info",
-    link: "/projects/1/specifications",
-  },
-];
+function formatTime(dateStr: string): string {
+  try {
+    return formatDistanceToNow(new Date(dateStr), {
+      addSuffix: true,
+      locale: ru,
+    });
+  } catch {
+    return "";
+  }
+}
 
-export function NotificationsPopover() {
-  const [notifications, setNotifications] = useState(initialNotifications);
+export function NotificationsPopover({
+  initialNotifications,
+  userId,
+}: NotificationsPopoverProps) {
+  const {
+    notifications,
+    unreadCount,
+    markAsRead,
+    markAllAsRead,
+    deleteNotification,
+  } = useNotifications({ initialNotifications, userId });
+
   const [isOpen, setIsOpen] = useState(false);
-
-  const unreadCount = notifications.filter((n) => !n.read).length;
-
-  const markAsRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
-    );
-  };
-
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  };
-
-  const deleteNotification = (id: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-  };
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <button className="relative p-2 text-gray-500 hover:text-zinc-900 transition-colors rounded-full hover:bg-zinc-100 outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
-          <Bell className="h-5 w-5" />
+        <button className="relative p-2 text-gray-500 hover:text-zinc-900 transition-colors rounded-full hover:bg-zinc-100 outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 cursor-pointer">
+          <Bell className="size-5" />
           {unreadCount > 0 && (
             <span className="absolute top-1.5 right-1.5 flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
@@ -149,12 +123,14 @@ export function NotificationsPopover() {
                         {notification.title}
                       </p>
                       <span className="text-[10px] font-medium text-gray-400 shrink-0 whitespace-nowrap">
-                        {notification.time}
+                        {formatTime(notification.created_at)}
                       </span>
                     </div>
-                    <p className="text-xs text-zinc-500 line-clamp-2 leading-relaxed">
-                      {notification.description}
-                    </p>
+                    {notification.body && (
+                      <p className="text-xs text-zinc-500 line-clamp-2 leading-relaxed">
+                        {notification.body}
+                      </p>
+                    )}
                     {notification.link && (
                       <a
                         href={notification.link}
