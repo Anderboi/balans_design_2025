@@ -1,3 +1,5 @@
+"use client";
+
 import { Draggable } from "@hello-pangea/dnd";
 import { Card, CardContent } from "@/components/ui/card";
 import { Task } from "@/types";
@@ -45,7 +47,7 @@ export const KanbanCard = ({
                         task.priority === "Средний" &&
                           "bg-yellow-100 text-yellow-700",
                         task.priority === "Низкий" &&
-                          "bg-green-100 text-green-700"
+                          "bg-green-100 text-green-700",
                       )}
                     >
                       {task.priority}

@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { Droppable } from "@hello-pangea/dnd";
 import { Task, TaskPriority, TaskStatus } from "@/types";
@@ -62,7 +64,9 @@ export const KanbanColumn = ({
   };
 
   return (
-    <div className={`${color} flex flex-col w-80 shrink-0 border rounded-2xl border-transparent transition-colors hover:border-zinc-200/50`}>
+    <div
+      className={`${color} flex flex-col w-80 shrink-0 border rounded-2xl border-transparent transition-colors hover:border-zinc-200/50`}
+    >
       <div className="mb-3 p-4 font-semibold text-sm text-muted-foreground flex items-center justify-between">
         <span>{title}</span>
         <span className="px-2 py-0.5 rounded-full text-xs text-foreground">

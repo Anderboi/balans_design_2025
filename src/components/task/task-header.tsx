@@ -1,3 +1,5 @@
+"use client";
+
 import { Task, TaskPriority } from "@/types";
 import { DialogTitle } from "@/components/ui/dialog";
 import {
@@ -40,7 +42,7 @@ export function TaskHeader({ task, onUpdateTask }: TaskHeaderProps) {
               <DropdownMenuTrigger asChild>
                 <button
                   className={`flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md border transition-colors outline-none ${getTaskPriorityColor(
-                    task.priority
+                    task.priority,
                   )} hover:brightness-95`}
                 >
                   {task.priority || "Без приоритета"}
@@ -67,7 +69,7 @@ export function TaskHeader({ task, onUpdateTask }: TaskHeaderProps) {
 
             <span
               className={`px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md ${getTaskStatusColor(
-                task.status
+                task.status,
               )}`}
             >
               {getTaskStatusLabel(task.status)}

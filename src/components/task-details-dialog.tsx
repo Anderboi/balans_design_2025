@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { Task, Participant } from "@/types";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
