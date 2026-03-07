@@ -34,8 +34,22 @@ export const KanbanCard = ({
             onUpdateTask={onUpdateTask}
           >
             <Card className="cursor-pointer hover:shadow-md transition-shadow">
-              <CardContent className="p-3 space-y-2">
-                <div className="font-medium text-sm">{task.title}</div>
+              <CardContent className="p-3 space-y-3">
+                <div className="space-y-1.5">
+                  <div className="font-medium text-sm leading-tight">{task.title}</div>
+                  {task.tags && task.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {task.tags.map((tag) => (
+                        <span 
+                          key={tag} 
+                          className="px-1.5 py-0.5 rounded-md bg-zinc-100 text-[10px] text-zinc-600 font-medium border border-zinc-200/50"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <div className="flex justify-between items-center text-xs text-muted-foreground">
                   <span>{new Date(task.due_date).toLocaleDateString()}</span>
                   {task.priority && (

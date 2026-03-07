@@ -97,10 +97,18 @@ export const KanbanBoard = ({ initialTasks, projectId }: KanbanBoardProps) => {
     }
   };
 
-  const handleUpdateTask = (taskId: string, updates: Partial<Task>) => {
+  const handleUpdateTask = async (taskId: string, updates: Partial<Task>) => {
+    // Optimistic update
     setTasks((prev) =>
       prev.map((t) => (t.id === taskId ? { ...t, ...updates } : t))
     );
+
+    try {
+      await tasksService.updateTask(taskId, updates);
+    } catch (error) {
+      console.error("Failed to update task", error);
+      toast.error("Не удалось сохранить изменения");
+    }
   };
 
   return (

@@ -35,7 +35,10 @@ export default async function BriefStylePage({
       />
 
       <div className="mt-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-        <StyleForm projectId={id} initialData={brief?.style} />
+        <StyleForm 
+          projectId={id} 
+          initialData={brief?.style as { preferences?: string; pinterestLink?: string; } | undefined} 
+        />
       </div>
     </PageContainer>
   );

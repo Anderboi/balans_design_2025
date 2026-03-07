@@ -180,7 +180,7 @@ export function FurnishingForm({
       const equipment = roomsEquipment[room.id] || [];
       const allSuggestions = getMemoizedEquipmentSuggestions(
         room.name,
-        room.type,
+        room.type as "living" | "wet" | "utility" | "technical" | undefined
       );
       const selectedNames = new Set(equipment.map((eq) => eq.name));
       suggestionsMap[room.id] = allSuggestions.filter(

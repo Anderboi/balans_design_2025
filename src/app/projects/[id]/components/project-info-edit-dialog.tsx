@@ -40,15 +40,17 @@ import { toast } from 'sonner';
 
 const projectInfoSchema = z.object({
   address: z.string().min(1, "Адрес обязателен"),
-  area: z.coerce.number().min(0, "Площадь должна быть положительным числом"),
+  area: z.preprocess(
+    (val) => (val === "" ? 0 : Number(val)),
+    z.number().min(0, "Площадь не может быть отрицательной")
+  ),
   stage: z.nativeEnum(ProjectStage),
   residents: z.string().optional(),
 });
 
-type ProjectInfoFormValues = z.infer<typeof projectInfoSchema>;
-
 interface ProjectInfoEditDialogProps {
   project: Project;
+  onProjectUpdated?: () => void;
 }
 
 export function ProjectInfoEditDialog({ project }: ProjectInfoEditDialogProps) {
@@ -57,17 +59,17 @@ export function ProjectInfoEditDialog({ project }: ProjectInfoEditDialogProps) {
   const router = useRouter();
   // const { toast } = useToast();
 
-  const form = useForm<ProjectInfoFormValues>({
+  const form = useForm<z.infer<typeof projectInfoSchema>>({
     resolver: zodResolver(projectInfoSchema),
     defaultValues: {
       address: project.address || "",
       area: project.area || 0,
-      stage: project.stage,
+      stage: (project.stage as ProjectStage) || ProjectStage.ONBOARDING,
       residents: project.residents || "",
     },
   });
 
-  const onSubmit = async (data: ProjectInfoFormValues) => {
+  const onSubmit = async (data: z.infer<typeof projectInfoSchema>) => {
     try {
       setIsLoading(true);
       await projectsService.updateProject(project.id, data);
