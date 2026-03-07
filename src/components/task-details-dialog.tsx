@@ -12,6 +12,7 @@ import { TaskParticipants } from "@/components/task/task-participants";
 import { TaskDescription } from "@/components/task/task-description";
 import { TaskAttachments } from "@/components/task/task-attachments";
 import { TaskActivity } from "@/components/task/task-activity";
+import { TaskChecklists } from "@/components/task/task-checklists";
 
 interface TaskDetailsDialogProps {
   children?: React.ReactNode;
@@ -45,7 +46,7 @@ export function TaskDetailsDialog({
                 <TaskHeader task={task} onUpdateTask={onUpdateTask} />
 
                 {/* Actions Row */}
-                <TaskActions />
+                <TaskActions task={task} onUpdateTask={onUpdateTask} />
 
                 {/* Participants Row */}
                 <TaskParticipants
@@ -63,9 +64,15 @@ export function TaskDetailsDialog({
                 </div>
                 <div>
                   <div className="text-[10px] uppercase font-bold tracking-wider text-zinc-400 leading-tight mb-0.5">
-                    Срок
+                    Даты
                   </div>
-                  <div className="font-medium text-zinc-900">
+                  <div className="font-medium text-zinc-900 flex flex-col sm:flex-row sm:gap-1">
+                    {task.start_date && (
+                      <span>
+                        {new Date(task.start_date).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })}
+                        {" - "}
+                      </span>
+                    )}
                     {task.due_date
                       ? new Date(task.due_date).toLocaleDateString("ru-RU", {
                           day: "numeric",
@@ -80,12 +87,16 @@ export function TaskDetailsDialog({
 
           <div className="h-px bg-zinc-100 mx-8" />
 
-          {/* Description & Attachments */}
+          {/* Description & Checklists & Attachments */}
           <div className="p-8 pt-6 space-y-6 flex-1">
             <TaskDescription
               key={task.id}
               task={task}
               onUpdateTask={onUpdateTask}
+            />
+            <TaskChecklists 
+              task={task} 
+              onUpdateTask={onUpdateTask} 
             />
             <TaskAttachments task={task} />
           </div>

@@ -59,6 +59,8 @@ export interface Task {
   status: TaskStatus;
   priority?: TaskPriority;
   due_date: string;
+  start_date?: string | null;
+  tags?: string[];
   assigned_to: string | null;
   created_at: string;
   updated_at: string;
@@ -69,6 +71,7 @@ export interface Task {
   comments?: Comment[];
   history?: TaskHistoryItem[];
   attachments?: TaskAttachment[];
+  checklists?: TaskChecklist[];
 }
 
 export interface Participant {
@@ -147,6 +150,24 @@ export interface TaskAttachment {
   file_url: string;
   file_size?: number;
   file_type?: string;
+  created_at: string;
+}
+
+export interface TaskChecklist {
+  id: string;
+  task_id: string;
+  title: string;
+  position: number;
+  created_at: string;
+  items?: TaskChecklistItem[];
+}
+
+export interface TaskChecklistItem {
+  id: string;
+  checklist_id: string;
+  title: string;
+  is_completed: boolean;
+  position: number;
   created_at: string;
 }
 

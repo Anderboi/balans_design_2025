@@ -80,6 +80,19 @@ export function TaskHeader({ task, onUpdateTask }: TaskHeaderProps) {
         <DialogTitle className="text-2xl font-semibold text-zinc-900 leading-tight">
           {task.title}
         </DialogTitle>
+
+        {task.tags && task.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {task.tags.map((tag) => (
+              <span 
+                key={tag} 
+                className="px-2 py-0.5 rounded-full bg-zinc-100 text-[11px] text-zinc-600 font-medium border border-zinc-200"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
