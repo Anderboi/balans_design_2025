@@ -18,7 +18,6 @@ interface TaskDetailsDialogProps {
   children?: React.ReactNode;
   task: Task;
   onOpenChange?: (open: boolean) => void;
-  onAddComment?: (taskId: string, text: string) => void;
   onUpdateTask?: (taskId: string, updates: Partial<Task>) => void;
   members?: Participant[];
 }
@@ -27,7 +26,6 @@ export function TaskDetailsDialog({
   children,
   task,
   onOpenChange,
-  onAddComment = (id, text) => console.log("Add comment:", id, text),
   onUpdateTask = (id, updates) => console.log("Update task:", id, updates),
   members = [],
 }: TaskDetailsDialogProps) {
@@ -103,7 +101,7 @@ export function TaskDetailsDialog({
         </div>
 
         {/* Right Column: Activity (Chat & History) */}
-        <TaskActivity task={task} onAddComment={onAddComment} />
+        <TaskActivity task={task} />
       </DialogContent>
     </Dialog>
   );

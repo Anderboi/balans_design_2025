@@ -2,33 +2,43 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Task } from "@/types";
-import { MessageSquare, Activity, Send, Clock } from "lucide-react";
+import { MessageSquare, Activity, Send, Clock, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { useTaskComments } from "./hooks/use-task-comments";
 
 interface TaskActivityProps {
   task: Task;
-  onAddComment: (taskId: string, text: string) => void;
 }
 
-export function TaskActivity({ task, onAddComment }: TaskActivityProps) {
+export function TaskActivity({ task }: TaskActivityProps) {
   const [activeTab, setActiveTab] = useState<"chat" | "history">("chat");
   const [newComment, setNewComment] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { comments, isLoading, sendComment } = useTaskComments(task.id);
+  const [isSending, setIsSending] = useState(false);
 
+  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (activeTab === "chat") {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
-  }, [task.comments, activeTab]);
+  }, [comments, activeTab]);
 
-  const handleSubmitComment = (e: React.FormEvent) => {
+  const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newComment.trim()) return;
+    if (!newComment.trim() || isSending) return;
 
-    onAddComment(task.id, newComment);
-    setNewComment("");
+    const text = newComment;
+    setNewComment(""); // Clear input immediately
+    setIsSending(true);
+
+    try {
+      await sendComment(text);
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (
@@ -65,14 +75,19 @@ export function TaskActivity({ task, onAddComment }: TaskActivityProps) {
       <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4">
         {activeTab === "chat" ? (
           <>
-            {task.comments?.length === 0 ? (
+            {isLoading ? (
+              <div className="h-full flex flex-col items-center justify-center text-zinc-400 gap-2 min-h-[200px]">
+                <Loader2 size={24} className="animate-spin opacity-40" />
+                <span className="text-xs">Загрузка сообщений...</span>
+              </div>
+            ) : comments.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-zinc-400 gap-2 min-h-[200px]">
                 <MessageSquare size={32} className="opacity-20" />
                 <span className="text-xs">Нет сообщений</span>
               </div>
             ) : (
               <div className="space-y-4">
-                {task.comments?.map((comment) => (
+                {comments.map((comment) => (
                   <div key={comment.id} className="flex gap-3 group">
                     <Avatar className="h-8 w-8 mt-1 border-2 border-white shadow-sm">
                       <AvatarImage src={comment.userAvatar} />
@@ -93,7 +108,13 @@ export function TaskActivity({ task, onAddComment }: TaskActivityProps) {
                           })}
                         </span>
                       </div>
-                      <div className="bg-white p-3 rounded-2xl rounded-tl-sm border border-zinc-100 shadow-sm text-sm text-zinc-700 leading-relaxed">
+                      <div
+                        className={`bg-white p-3 rounded-2xl rounded-tl-sm border border-zinc-100 shadow-sm text-sm text-zinc-700 leading-relaxed ${
+                          comment.id.startsWith("optimistic-")
+                            ? "opacity-60"
+                            : ""
+                        }`}
+                      >
                         {comment.text}
                       </div>
                     </div>
@@ -185,10 +206,14 @@ export function TaskActivity({ task, onAddComment }: TaskActivityProps) {
             <Button
               size="icon"
               type="submit"
-              disabled={!newComment.trim()}
+              disabled={!newComment.trim() || isSending}
               className="absolute bottom-3 right-3 h-8 w-8 rounded-lg bg-zinc-900 hover:bg-zinc-800 disabled:opacity-50 transition-all"
             >
-              <Send size={14} className="text-white" />
+              {isSending ? (
+                <Loader2 size={14} className="text-white animate-spin" />
+              ) : (
+                <Send size={14} className="text-white" />
+              )}
             </Button>
           </form>
         </div>
