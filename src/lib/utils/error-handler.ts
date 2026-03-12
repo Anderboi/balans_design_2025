@@ -64,12 +64,12 @@ export const handleServiceError = (
   code: string = ERROR_CODES.UNKNOWN_ERROR
 ): never => {
   // Log for debugging (only in development)
-  if (process.env.NODE_ENV === "development") {
+  if (process.env.NODE_ENV === "development" || typeof window === "undefined") {
     console.error(`[${context}]`, error);
   }
 
-  // Show user-friendly message
-  if (userMessage) {
+  // Show user-friendly message only on client
+  if (userMessage && typeof window !== 'undefined') {
     toast.error(userMessage);
   }
 

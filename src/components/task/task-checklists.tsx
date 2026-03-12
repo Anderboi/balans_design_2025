@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Task, TaskChecklist, TaskChecklistItem } from "@/types";
+import { Task, TaskChecklistItem } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CheckSquare, Plus, Trash2 } from "lucide-react";
@@ -61,8 +61,12 @@ export function TaskChecklists({ task, onUpdateTask }: TaskChecklistsProps) {
   };
 
   const toggleItem = async (checklistId: string, item: TaskChecklistItem) => {
-    // Optimistic update
     const updatedStatus = !item.is_completed;
+    
+    await tasksService.updateChecklistItem(item.id, {
+      is_completed: updatedStatus,
+    });
+
     if (onUpdateTask && task.checklists) {
       const updatedChecklists = task.checklists.map((c) => 
         c.id === checklistId 
@@ -71,25 +75,21 @@ export function TaskChecklists({ task, onUpdateTask }: TaskChecklistsProps) {
       );
       onUpdateTask(task.id, { checklists: updatedChecklists as any[] });
     }
-
-    await tasksService.updateChecklistItem(item.id, {
-      is_completed: updatedStatus,
-    });
   };
 
   const deleteChecklist = async (id: string) => {
-    // Optimistic update
+    await tasksService.deleteChecklist(id);
+
     if (onUpdateTask && task.checklists) {
       onUpdateTask(task.id, { 
         checklists: task.checklists.filter(c => c.id !== id) 
       });
     }
-
-    await tasksService.deleteChecklist(id);
   };
 
   const deleteItem = async (checklistId: string, itemId: string) => {
-    // Optimistic update
+    await tasksService.deleteChecklistItem(itemId);
+
     if (onUpdateTask && task.checklists) {
       const updatedChecklists = task.checklists.map((c) => 
         c.id === checklistId 
@@ -98,8 +98,6 @@ export function TaskChecklists({ task, onUpdateTask }: TaskChecklistsProps) {
       );
       onUpdateTask(task.id, { checklists: updatedChecklists as any[] });
     }
-
-    await tasksService.deleteChecklistItem(itemId);
   };
 
   if (!task.checklists?.length && !addingChecklist) {

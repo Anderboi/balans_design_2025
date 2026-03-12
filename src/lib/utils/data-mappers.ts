@@ -1,4 +1,4 @@
-import { Participant, Comment } from "@/types";
+import { Participant, Comment, TaskHistoryItem } from "@/types";
 
 /**
  * Interface for raw observer data from Supabase
@@ -29,6 +29,19 @@ interface RawComment {
  */
 interface RawAssignee {
   full_name: string;
+}
+
+/**
+ * Interface for raw history data from Supabase
+ */
+interface RawHistory {
+  id: string;
+  action: string;
+  created_at: string;
+  details?: any;
+  user?: {
+    full_name: string;
+  };
 }
 
 /**
@@ -75,4 +88,22 @@ export const mapCommentsData = (comments?: RawComment[]): Comment[] => {
  */
 export const mapAssigneeName = (assignee?: RawAssignee): string | undefined => {
   return assignee?.full_name;
+};
+
+/**
+ * Maps a raw history object from Supabase to a TaskHistoryItem
+ */
+export const mapHistoryData = (history: RawHistory): TaskHistoryItem => ({
+  id: history.id,
+  userName: history.user?.full_name || "Unknown",
+  action: history.action,
+  createdAt: history.created_at,
+  details: history.details,
+});
+
+/**
+ * Maps an array of history objects to TaskHistoryItem array
+ */
+export const mapHistoriesData = (histories?: RawHistory[]): TaskHistoryItem[] => {
+  return histories?.map(mapHistoryData) || [];
 };

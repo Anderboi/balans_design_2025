@@ -88,7 +88,10 @@ export const KanbanBoard = ({ initialTasks, projectId }: KanbanBoardProps) => {
     setTasks(updatedTasks);
 
     try {
-      await tasksService.updateTask(draggableId, { status: newStatus });
+      const updatedTask = await tasksService.updateTask(draggableId, { status: newStatus });
+      setTasks((prev) =>
+        prev.map((t) => (t.id === draggableId ? updatedTask : t))
+      );
       toast.success("Статус обновлен");
     } catch (error) {
       console.error("Failed to update task status", error);
@@ -104,7 +107,10 @@ export const KanbanBoard = ({ initialTasks, projectId }: KanbanBoardProps) => {
     );
 
     try {
-      await tasksService.updateTask(taskId, updates);
+      const updatedTask = await tasksService.updateTask(taskId, updates);
+      setTasks((prev) =>
+        prev.map((t) => (t.id === taskId ? updatedTask : t))
+      );
     } catch (error) {
       console.error("Failed to update task", error);
       toast.error("Не удалось сохранить изменения");

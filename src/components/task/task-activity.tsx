@@ -118,13 +118,46 @@ export function TaskActivity({ task, onAddComment }: TaskActivityProps) {
                       {item.userName}
                     </span>
                     <span className="text-zinc-400 text-[10px]">
-                      {new Date(item.createdAt).toLocaleDateString()}
+                      {new Date(item.createdAt).toLocaleString("ru-RU", { 
+                        day: "numeric", 
+                        month: "short", 
+                        hour: "2-digit", 
+                        minute: "2-digit" 
+                      })}
                     </span>
                   </div>
                   <div className="text-zinc-500">
-                    {item.action === "created"
-                      ? "создал(а) задачу"
-                      : "обновил(а) статус"}
+                    {(() => {
+                      const d = item.details || {};
+                      if (item.action === "created") return "создал(а) задачу";
+                      if (item.action === "status_changed") {
+                        const statusLabels: Record<string, string> = {
+                          "TODO": "К выполнению",
+                          "IN_PROGRESS": "В процессе",
+                          "REVIEW": "На проверке",
+                          "DONE": "Выполнено"
+                        };
+                        return `изменил(а) статус на «${statusLabels[d.status] || d.status}»`;
+                      }
+                      
+                      // Detailed updates
+                      if (d.title) return `переименовал(а) задачу: «${d.title}»`;
+                      if (d.description_changed) return "изменил(а) описание";
+                      if (d.priority) return `изменил(а) приоритет на «${d.priority}»`;
+                      if (d.due_date) return `изменил(а) срок на ${new Date(d.due_date).toLocaleDateString("ru-RU")}`;
+                      if (d.assignee_changed) return "изменил(а) исполнителя";
+                      
+                      // Checklists & Items
+                      if (d.checklist_added) return `добавил(а) чек-лист: «${d.checklist_added}»`;
+                      if (d.checklist_renamed) return `переименовал(а) чек-лист на «${d.checklist_renamed}»`;
+                      if (d.checklist_removed) return `удалил(а) чек-лист: «${d.checklist_removed}»`;
+                      if (d.checklist_item_added) return `добавил(а) пункт: «${d.checklist_item_added}»`;
+                      if (d.checklist_completed) return `отметил(а) выполненным: «${d.checklist_completed}»`;
+                      if (d.checklist_uncompleted) return `снял(а) отметку: «${d.checklist_uncompleted}»`;
+                      if (d.checklist_item_removed) return `удалил(а) пункт: «${d.checklist_item_removed}»`;
+                      
+                      return "обновил(а) задачу";
+                    })()}
                   </div>
                 </div>
               </div>

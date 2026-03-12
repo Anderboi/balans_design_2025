@@ -113,6 +113,7 @@ export interface TaskHistoryItem {
   userName: string;
   action: string;
   createdAt: string;
+  details?: any;
 }
 
 export enum TaskPriority {

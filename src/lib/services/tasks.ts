@@ -5,6 +5,7 @@ import {
   mapObserversToParticipants,
   mapCommentsData,
   mapAssigneeName,
+  mapHistoriesData,
 } from "@/lib/utils/data-mappers";
 import { handleServiceError, ERROR_CODES } from "@/lib/utils/error-handler";
 
@@ -17,7 +18,8 @@ export const tasksService = {
         *,
         assignee:profiles!tasks_assigned_to_fkey(id, full_name, avatar_url),
         observers:task_participants(user:profiles(id, full_name, avatar_url)),
-        checklists:task_checklists(*, items:task_checklist_items(*))
+        checklists:task_checklists(*, items:task_checklist_items(*)),
+        history:task_history(*, user:profiles(full_name))
       `
     );
 
@@ -42,16 +44,19 @@ export const tasksService = {
         .map((checklist: any) => ({
           ...checklist,
           items: (checklist.items || []).sort(
-            (a: any, b: any) => (a.position || 0) - (b.position || 0)
+            (a: any, b: any) => (Number(a.position) || 0) - (Number(b.position) || 0)
           ),
         }))
-        .sort((a: any, b: any) => (a.position || 0) - (b.position || 0));
+        .sort((a: any, b: any) => (Number(a.position) || 0) - (Number(b.position) || 0));
 
       return {
         ...task,
         assigneeName: mapAssigneeName(task.assignee),
         observers: mapObserversToParticipants(task.observers),
         checklists: sortedChecklists,
+        history: mapHistoriesData(task.history).sort(
+          (a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        ),
       };
     }) as Task[];
   },
@@ -74,7 +79,8 @@ export const tasksService = {
         checklists:task_checklists(
           *,
           items:task_checklist_items(*)
-        )
+        ),
+        history:task_history(*, user:profiles(full_name))
       `
       )
       .eq("id", id)
@@ -108,6 +114,9 @@ export const tasksService = {
       comments: mapCommentsData((data as any).comments),
       attachments: (data as any).attachments || [],
       checklists: sortedChecklists,
+      history: mapHistoriesData((data as any).history).sort(
+        (a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      ),
     } as unknown as Task;
   },
 
@@ -132,8 +141,11 @@ export const tasksService = {
         ERROR_CODES.DB_INSERT_FAILED
       );
     }
+ 
+    // Log history
+    await (this as any).logHistory(data.id, "created", {}, client);
 
-    return data;
+    return data as Task;
   },
 
   // Обновление задачи
@@ -144,6 +156,10 @@ export const tasksService = {
   ): Promise<Task> {
     const supabaseClient = client || supabase;
     
+    // Fetch existing task to compare changes
+    const oldTask = await this.getTaskById(id, client);
+    if (!oldTask) throw new Error(`Задача ${id} не найдена`);
+
     // Strip virtual properties that don't belong to the tasks table
     const updatePayload: any = { ...task };
     const virtualFields = [
@@ -152,29 +168,48 @@ export const tasksService = {
     ];
     virtualFields.forEach(field => delete updatePayload[field]);
 
-    if (Object.keys(updatePayload).length === 0) {
-      // If nothing to update on the main table, just return the task
-      return task as Task;
+    if (Object.keys(updatePayload).length > 0) {
+      const { error } = await supabaseClient
+        .from("tasks")
+        .update(updatePayload)
+        .eq("id", id);
+
+      if (error) {
+        handleServiceError(
+          error,
+          "tasksService.updateTask",
+          `Не удалось обновить задачу с ID ${id}`,
+          ERROR_CODES.DB_UPDATE_FAILED
+        );
+      }
     }
 
-    const { data, error } = await supabaseClient
-      .from("tasks") // Kept original table 'tasks'
-      .update(updatePayload)
-      .eq("id", id)
-      .select()
-      .single()
-      .returns<any>(); // Added .returns<any>()
-
-    if (error) {
-      handleServiceError(
-        error,
-        "tasksService.updateTask",
-        `Не удалось обновить задачу с ID ${id}`,
-        ERROR_CODES.DB_UPDATE_FAILED
-      );
+    // Identify specific changes for history logging
+    const details: any = {};
+    if (task.status && task.status !== oldTask.status) details.status = task.status;
+    if (task.title && task.title !== oldTask.title) details.title = task.title;
+    if (task.description && task.description !== oldTask.description) details.description_changed = true;
+    if (task.priority && task.priority !== oldTask.priority) details.priority = task.priority;
+    if (task.due_date && task.due_date !== oldTask.due_date) details.due_date = task.due_date;
+    if (task.assigned_to !== undefined && task.assigned_to !== oldTask.assigned_to) {
+      details.assignee_changed = true;
     }
 
-    return data;
+    // Log history if anything significant changed
+    if (Object.keys(details).length > 0) {
+      const action = details.status ? "status_changed" : "updated";
+      await (this as any).logHistory(id, action, details, client);
+    } else if (Object.keys(updatePayload).length > 0) {
+      // Fallback for other fields
+      await (this as any).logHistory(id, "updated", {}, client);
+    }
+
+    // Return the updated task WITH HISTORY
+    const updatedFullTask = await this.getTaskById(id, client);
+    if (!updatedFullTask) {
+      throw new Error(`Не удалось загрузить задачу ${id} после обновления`);
+    }
+    return updatedFullTask;
   },
 
   // Удаление задачи
@@ -198,7 +233,7 @@ export const tasksService = {
     client?: SupabaseClient
   ): Promise<TaskComment[]> {
     const supabaseClient = client || supabase;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const { data, error } = await supabaseClient
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .from("task_comments" as any)
@@ -228,7 +263,7 @@ export const tasksService = {
     client?: SupabaseClient
   ): Promise<TaskComment> {
     const supabaseClient = client || supabase;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const { data, error } = await supabaseClient
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .from("task_comments" as any)
@@ -280,7 +315,7 @@ export const tasksService = {
     client?: SupabaseClient
   ): Promise<void> {
     const supabaseClient = client || supabase;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const { error } = await supabaseClient
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .from("task_participants" as any)
@@ -376,7 +411,7 @@ export const tasksService = {
     }
 
     // 2. Удаление из БД
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const { error: dbError } = await supabaseClient
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .from("task_attachments" as any)
@@ -401,7 +436,7 @@ export const tasksService = {
     client?: SupabaseClient
   ): Promise<import("@/types").TaskChecklist> {
     const supabaseClient = client || supabase;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const { data, error } = await supabaseClient
       .from("task_checklists" as any)
       .insert({
@@ -431,6 +466,22 @@ export const tasksService = {
     client?: SupabaseClient
   ): Promise<void> {
     const supabaseClient = client || supabase;
+    
+    // Attempt to log history if title changed
+    try {
+      if (updates.title) {
+        const { data: checklistData } = await supabaseClient
+          .from("task_checklists")
+          .select("task_id, title")
+          .eq("id", id)
+          .single();
+          
+        if (checklistData?.task_id && updates.title !== checklistData.title) {
+          await (this as any).logHistory(checklistData.task_id, "updated", { checklist_renamed: updates.title }, client);
+        }
+      }
+    } catch (e) { console.error(e); }
+
     const { error } = await supabaseClient
       .from("task_checklists")
       .update(updates)
@@ -448,7 +499,20 @@ export const tasksService = {
 
   async deleteChecklist(id: string, client?: SupabaseClient): Promise<void> {
     const supabaseClient = client || supabase;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
+    // Get task_id before deleting
+    let taskId: string | null = null;
+    let checklistTitle: string | null = null;
+    try {
+      const { data } = await supabaseClient
+        .from("task_checklists")
+        .select("task_id, title")
+        .eq("id", id)
+        .single();
+      taskId = data?.task_id;
+      checklistTitle = data?.title;
+    } catch (e) { console.error(e); }
+
     const { error } = await supabaseClient
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .from("task_checklists" as any)
@@ -462,6 +526,8 @@ export const tasksService = {
         "Не удалось удалить чек-лист",
         ERROR_CODES.DB_DELETE_FAILED
       );
+    } else if (taskId && checklistTitle) {
+      await (this as any).logHistory(taskId, "updated", { checklist_removed: checklistTitle }, client);
     }
   },
 
@@ -473,7 +539,7 @@ export const tasksService = {
     client?: SupabaseClient
   ): Promise<import("@/types").TaskChecklistItem> {
     const supabaseClient = client || supabase;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const { data, error } = await supabaseClient
       .from("task_checklist_items" as any)
       .insert({
@@ -493,6 +559,22 @@ export const tasksService = {
         ERROR_CODES.DB_INSERT_FAILED
       );
     }
+    
+    // Attempt to log history (non-blocking)
+    try {
+      if (data && data.checklist_id) {
+        // Find the task ID this checklist belongs to
+        const { data: checklistData } = await supabaseClient
+          .from("task_checklists")
+          .select("task_id")
+          .eq("id", checklistId)
+          .single();
+          
+        if (checklistData?.task_id) {
+          await (this as any).logHistory(checklistData.task_id, "updated", { checklist_item_added: title }, client);
+        }
+      }
+    } catch(e) { console.error(e) }
 
     return data;
   },
@@ -504,7 +586,7 @@ export const tasksService = {
   ): Promise<void> {
     const supabaseClient = client || supabase;
     const { error } = await supabaseClient
-      .from("task_checklist_items")
+      .from("task_checklist_items" as any)
       .update(updates)
       .eq("id", id);
 
@@ -516,6 +598,31 @@ export const tasksService = {
         ERROR_CODES.DB_UPDATE_FAILED
       );
     }
+    
+    // Attempt to log history
+    try {
+      if (updates.is_completed !== undefined) {
+        // Find task ID
+        const { data: itemData } = await supabaseClient
+          .from("task_checklist_items")
+          .select("checklist_id, title")
+          .eq("id", id)
+          .single();
+          
+        if (itemData?.checklist_id) {
+          const { data: checklistData } = await supabaseClient
+            .from("task_checklists")
+            .select("task_id")
+            .eq("id", itemData.checklist_id)
+            .single();
+            
+          if (checklistData?.task_id) {
+            const actionStr = updates.is_completed ? "checklist_completed" : "checklist_uncompleted";
+            await (this as any).logHistory(checklistData.task_id, "updated", { [actionStr]: itemData.title }, client);
+          }
+        }
+      }
+    } catch(e) { console.error(e) }
   },
 
   async deleteChecklistItem(
@@ -523,7 +630,28 @@ export const tasksService = {
     client?: SupabaseClient
   ): Promise<void> {
     const supabaseClient = client || supabase;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
+    // Get info before deleting
+    let taskId: string | null = null;
+    let itemTitle: string | null = null;
+    try {
+      const { data: itemData } = await supabaseClient
+        .from("task_checklist_items")
+        .select("checklist_id, title")
+        .eq("id", id)
+        .single();
+        
+      if (itemData?.checklist_id) {
+        itemTitle = itemData.title;
+        const { data: checklistData } = await supabaseClient
+          .from("task_checklists")
+          .select("task_id")
+          .eq("id", itemData.checklist_id)
+          .single();
+        taskId = checklistData?.task_id;
+      }
+    } catch (e) { console.error(e); }
+
     const { error } = await supabaseClient
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .from("task_checklist_items" as any)
@@ -537,6 +665,36 @@ export const tasksService = {
         "Не удалось удалить элемент чек-листа",
         ERROR_CODES.DB_DELETE_FAILED
       );
+    } else if (taskId && itemTitle) {
+      await (this as any).logHistory(taskId, "updated", { checklist_item_removed: itemTitle }, client);
+    }
+  },
+
+  // Private helper to log history
+  async logHistory(taskId: string, action: string, details: any = {}, client?: SupabaseClient) {
+    const supabaseClient = client || supabase;
+    
+    try {
+      // Use getUser instead of getSession for more reliable auth check
+      const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+      if (userError || !user) {
+        console.warn("Could not get user for history log:", userError?.message);
+        return;
+      }
+
+      const { error: insertError } = await supabaseClient.from("task_history" as any).insert({
+        task_id: taskId,
+        user_id: user.id,
+        action: action,
+        details: details
+      });
+
+      if (insertError) {
+        console.error("Failed to insert task_history row:", insertError);
+      }
+    } catch (e) {
+      console.error("Failed to log history exception:", e);
+      // We don't want to throw here as history logging is secondary
     }
   },
 };
