@@ -5,7 +5,8 @@ import MaterialListControls from "../components/material-list-controls";
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { ProjectPageHeader } from "@/components/project-page-header";
-import { Plus } from "lucide-react";
+import { AddMaterialButton } from "./components/add-material-button";
+import { getSuppliers, getSupplierCompanies } from "@/app/materials/actions";
 
 const ScheduleCategoryPage = async ({
   params,
@@ -20,9 +21,11 @@ const ScheduleCategoryPage = async ({
 
   const supabase = await createClient();
 
-  const [projectInfo, specifications] = await Promise.all([
+  const [projectInfo, specifications, suppliers, supplierCompanies] = await Promise.all([
     projectsService.getProjectById(id, supabase),
     materialsService.getSpecifications(id, supabase),
+    getSuppliers(),
+    getSupplierCompanies(),
   ]);
 
   if (!projectInfo) {
@@ -35,12 +38,13 @@ const ScheduleCategoryPage = async ({
         projectId={id}
         projectName={projectInfo.name}
         title={scheduleName}
-        actionProps={{
-          label: "Добавить материал",
-          href: "", // Add logic for href if needed, currently empty
-          icon: <Plus className="size-4" />,
-        }}
-      />
+      >
+        <AddMaterialButton
+          projectId={id}
+          initialSuppliers={suppliers}
+          initialSupplierCompanies={supplierCompanies}
+        />
+      </ProjectPageHeader>
 
       <div className="mt-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
         <MaterialListControls materials={specifications} />

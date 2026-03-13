@@ -20,6 +20,7 @@ interface ProjectPageHeaderProps {
     icon?: React.ReactNode;
   };
   showAiButton?: boolean;
+  children?: React.ReactNode;
 }
 
 export function ProjectPageHeader({
@@ -29,6 +30,7 @@ export function ProjectPageHeader({
   middleLink,
   actionProps,
   showAiButton = false,
+  children,
 }: ProjectPageHeaderProps) {
   return (
     <div className="space-y-6">
@@ -69,6 +71,8 @@ export function ProjectPageHeader({
                 {actionProps.label}
               </Button>
             ))}
+
+          {children}
 
           {showAiButton && (
             <Button className="rounded-full h-11 px-6 bg-[#D81A24] hover:bg-[#B5151D] text-white shadow-lg shadow-red-200/50 transition-all duration-300 font-medium flex items-center gap-2">
