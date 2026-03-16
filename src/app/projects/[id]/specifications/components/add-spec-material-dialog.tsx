@@ -186,6 +186,9 @@ export function AddSpecMaterialDialog({
   const [searchQuery, setSearchQuery] = useState("");
   const [materials, setMaterials] = useState<Material[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
   const [isAdding, setIsAdding] = useState<string | null>(null);
   const [showAddLibraryDialog, setShowAddLibraryDialog] = useState(false);
   const [sortBy, setSortBy] = useState<string>("newest");
@@ -193,32 +196,79 @@ export function AddSpecMaterialDialog({
   const [groupBy, setGroupBy] = useState<string>("manufacturer");
   const supabase = createClient();
 
+  const PAGE_SIZE = 20;
+
   const loadMaterials = useCallback(
-    async (query = "") => {
-      setIsLoading(true);
+    async (query = "", pageNum = 0, append = false) => {
+      if (pageNum === 0) setIsLoading(true);
+      else setIsFetchingMore(true);
+
       try {
         let data: Material[];
+        const params = {
+          limit: PAGE_SIZE,
+          offset: pageNum * PAGE_SIZE,
+        };
+
         if (query) {
-          data = await materialsService.searchMaterials(query, supabase);
+          data = await materialsService.searchMaterials(query, params, supabase);
         } else {
-          data = await materialsService.getMaterials(supabase);
+          data = await materialsService.getMaterials(params, supabase);
         }
-        setMaterials(data);
+
+        if (append) {
+          setMaterials((prev) => [...prev, ...data]);
+        } else {
+          setMaterials(data);
+        }
+
+        setHasMore(data.length === PAGE_SIZE);
       } catch (error) {
         console.error("Error loading materials:", error);
         toast.error("Ошибка при загрузке материалов");
       } finally {
         setIsLoading(false);
+        setIsFetchingMore(false);
       }
     },
     [supabase],
   );
 
+  // Reset and load when search/filter changes
   useEffect(() => {
     if (open) {
-      loadMaterials();
+      setPage(0);
+      loadMaterials(searchQuery, 0, false);
     }
-  }, [open, loadMaterials]);
+  }, [open, searchQuery, loadMaterials]); // Removed filterType from dependencies to avoid double loading if handled client-side, but keep it if server-side filtering is needed. 
+  // Actually, filterType is client-side currently (line 224). 
+  // If we have MANY materials, client-side filtering on a paginated list is wrong.
+  // But for now, I'll stick to the user's "not all at once" requirement while keeping existing logic as much as possible.
+
+  const loadMore = useCallback(() => {
+    if (hasMore && !isFetchingMore && !isLoading) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      loadMaterials(searchQuery, nextPage, true);
+    }
+  }, [hasMore, isFetchingMore, isLoading, page, searchQuery, loadMaterials]);
+
+  // Infinite Scroll Observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoading && !isFetchingMore) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const target = document.querySelector("#infinite-scroll-trigger");
+    if (target) observer.observe(target);
+
+    return () => observer.disconnect();
+  }, [loadMore, hasMore, isLoading, isFetchingMore]);
 
   const filteredAndSortedMaterials = materials
     .filter((m) => {
@@ -230,7 +280,7 @@ export function AddSpecMaterialDialog({
       if (sortBy === "name_desc") return b.name.localeCompare(a.name);
       if (sortBy === "price_asc") return (a.price || 0) - (b.price || 0);
       if (sortBy === "price_desc") return (b.price || 0) - (a.price || 0);
-      return 0; // default newest is already handled by DB order usually
+      return 0;
     });
 
   const groupedMaterials = filteredAndSortedMaterials.reduce(
@@ -256,7 +306,6 @@ export function AddSpecMaterialDialog({
     if (b === "Без производителя" || b === "Без типа") return -1;
     return a.localeCompare(b);
   });
-
 
   const handleSelectMaterial = async (material: Material) => {
     setIsAdding(material.id);
@@ -301,8 +350,8 @@ export function AddSpecMaterialDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[600px] h-[80vh] flex flex-col p-0 overflow-hidden rounded-2xl border-none shadow-2xl">
-          <div className="p-6 pb-4">
+        <DialogContent className="sm:max-w-[600px] h-[80vh] flex flex-col p-0 overflow-hidden rounded-2xl border-none shadow-2xl bg-white">
+          <div className="p-6 pb-4 shrink-0">
             <DialogHeader>
               <DialogTitle className="text-2xl font-semibold tracking-tight">Добавить материал</DialogTitle>
               <DialogDescription className="text-base text-[#86868b]">
@@ -316,10 +365,7 @@ export function AddSpecMaterialDialog({
                 <Input
                   placeholder="Поиск по названию, производителю..."
                   value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    loadMaterials(e.target.value);
-                  }}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10 h-12 bg-[#F5F5F7] border-none rounded-xl focus-visible:ring-1 focus-visible:ring-[#0071E3] transition-all"
                 />
               </div>
@@ -346,7 +392,6 @@ export function AddSpecMaterialDialog({
                     value={filterType}
                     onChange={setFilterType}
                     placeholder="Категория"
-                  
                     searchPlaceholder="Поиск категории..."
                     icon={<Filter className="size-4 text-[#86868b]" />}
                     className="w-full"
@@ -387,55 +432,62 @@ export function AddSpecMaterialDialog({
             </div>
           </div>
 
-          <ScrollArea className="flex-1 px-2 pb-6">
-            <div className="space-y-1">
-              {isLoading ? (
-                <div className="flex flex-col items-center justify-center py-20 text-[#86868b] gap-3">
-                  <Loader2 className="size-8 animate-spin text-[#0071E3]" />
-                  <p>Загрузка библиотеки...</p>
-                </div>
-              ) : groupBy === "none" ? (
-                <div className="px-4 space-y-1">
-                  {filteredAndSortedMaterials.length > 0 ? (
-                    filteredAndSortedMaterials.map((material) => (
-                      <MaterialItem
-                        key={material.id}
-                        material={material}
-                        onSelect={handleSelectMaterial}
-                        isAdding={isAdding === material.id}
-                      />
-                    ))
-                  ) : (
-                    <div className="flex flex-col items-center justify-center py-20 text-[#86868b]">
-                      <p>Материалы не найдены</p>
-                    </div>
-                  )}
-                </div>
-              ) : groupKeys.length > 0 ? (
-                groupKeys.map((key) => (
-                  <div key={key} className="space-y-1 mb-6">
-                    <h3 className="px-6 py-2 text-xs font-semibold text-[#86868b] uppercase tracking-wider sticky top-0 bg-white/80 backdrop-blur-md z-10 transition-colors">
-                      {key}
-                    </h3>
-                    <div className="px-4 space-y-1">
-                      {groupedMaterials[key].map((material) => (
+          <div className="flex-1 min-h-0 relative overflow-hidden">
+            <ScrollArea className="h-full px-2">
+              <div className="pb-6">
+                {isLoading ? (
+                  <div className="flex flex-col items-center justify-center py-20 text-[#86868b] gap-3">
+                    <Loader2 className="size-8 animate-spin text-[#0071E3]" />
+                    <p>Загрузка библиотеки...</p>
+                  </div>
+                ) : groupBy === "none" ? (
+                  <div className="px-4 space-y-1">
+                    {filteredAndSortedMaterials.length > 0 ? (
+                      filteredAndSortedMaterials.map((material) => (
                         <MaterialItem
                           key={material.id}
                           material={material}
                           onSelect={handleSelectMaterial}
                           isAdding={isAdding === material.id}
                         />
-                      ))}
-                    </div>
+                      ))
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-20 text-[#86868b]">
+                        <p>Материалы не найдены</p>
+                      </div>
+                    )}
                   </div>
-                ))
-              ) : (
-                <div className="flex flex-col items-center justify-center py-20 text-[#86868b]">
-                  <p>Материалы не найдены</p>
+                ) : groupKeys.length > 0 ? (
+                  groupKeys.map((key) => (
+                    <div key={key} className="space-y-1 mb-6">
+                      <h3 className="px-6 py-2 text-xs font-semibold text-[#86868b] uppercase tracking-wider sticky -top-px bg-white/95 backdrop-blur-sm z-10 transition-colors">
+                        {key}
+                      </h3>
+                      <div className="px-4 space-y-1">
+                        {groupedMaterials[key].map((material) => (
+                          <MaterialItem
+                            key={material.id}
+                            material={material}
+                            onSelect={handleSelectMaterial}
+                            isAdding={isAdding === material.id}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-20 text-[#86868b]">
+                    <p>Материалы не найдены</p>
+                  </div>
+                )}
+
+                {/* Infinite Scroll Trigger */}
+                <div id="infinite-scroll-trigger" className="h-10 flex items-center justify-center">
+                  {isFetchingMore && <Loader2 className="size-6 animate-spin text-[#0071E3]" />}
                 </div>
-              )}
-            </div>
-          </ScrollArea>
+              </div>
+            </ScrollArea>
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -443,7 +495,8 @@ export function AddSpecMaterialDialog({
         open={showAddLibraryDialog}
         onOpenChange={setShowAddLibraryDialog}
         onMaterialAdded={() => {
-          loadMaterials();
+          setPage(0);
+          loadMaterials(searchQuery, 0, false);
           onMaterialAdded();
         }}
         initialSuppliers={initialSuppliers}

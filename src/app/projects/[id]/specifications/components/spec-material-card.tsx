@@ -111,21 +111,21 @@ const SpecMaterialCard = ({
   return (
     <div className="bg-white w-full w-min-[400px] p-1 rounded-lg flex gap-2 border border-muted-foreground/20">
       {material.image_url ? (
-        // <Image
-        //   src={material.image_url}
-        //   alt="product_image"
-        //   className="bg-neutral-200 rounded-md"
-        //   height={120}
-        //   width={120}
-        // />
-        <img
-          src={material.image_url || ""}
-          alt={material.name}
-          className="size-20 object-cover rounded-sm"
+        <Image
+          src={material.image_url}
+          alt="product_image"
+          className="size-24  object-cover rounded-sm"
+          height={96}
+          width={96}
         />
+        // <img
+        //   src={material.image_url || ""}
+        //   alt={material.name}
+        //   className="size-20 object-cover rounded-sm"
+        // />
       ) : (
-        <span className="size-20 bg-muted rounded-sm flex items-center justify-center">
-          <Package className="size-8 text-muted-foreground" />
+        <span className="size-24 bg-muted rounded-sm flex items-center justify-center">
+          <Package className="size-12 text-muted-foreground" />
         </span>
       )}
       <div className="grid grid-cols-1 md:grid-cols-5 //lg:grid-cols-5 w-full gap-4">

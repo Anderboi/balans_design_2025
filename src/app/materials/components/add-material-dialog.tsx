@@ -37,6 +37,7 @@ import { CustomSpecificationsSection } from "./add-material-dialog/custom-specif
 import { AdditionalInfoSection } from "./add-material-dialog/additional-info-section";
 import SubBlockCard from "@/components/ui/sub-block-card";
 import { MaterialFilesSection } from "./add-material-dialog/material-files-section";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 // ... existing imports
 
@@ -144,62 +145,66 @@ export function AddMaterialDialog({
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            {/* Обложка материала */}
-            <ImageUploadSection
-              control={control}
-              imagePreview={imageUpload.imagePreview}
-              onImageSelect={imageUpload.handleImageSelect}
-              onImageRemove={imageUpload.handleImageRemove}
-              fileInputRef={imageUpload.fileInputRef}
-            />
+          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full min-h-0">
+            <ScrollArea className="flex-1 px-1">
+              <div className="p-6 pt-0 space-y-8 pb-6">
+                {/* Обложка материала */}
+                <ImageUploadSection
+                  control={control}
+                  imagePreview={imageUpload.imagePreview}
+                  onImageSelect={imageUpload.handleImageSelect}
+                  onImageRemove={imageUpload.handleImageRemove}
+                  fileInputRef={imageUpload.fileInputRef}
+                />
 
-            <SubBlockCard title="Основная информация">
-              {/* Основная информация */}
-              <BasicInfoSection
-                control={control}
-                materialTypes={materialTypes}
-              />
+                <SubBlockCard title="Основная информация">
+                  {/* Основная информация */}
+                  <BasicInfoSection
+                    control={control}
+                    materialTypes={materialTypes}
+                  />
 
-              {/* Поставщик */}
-              <SupplierSection
-                control={control}
-                filteredSuppliers={supplierSelection.filteredSuppliers}
-                supplierCompaniesMap={supplierSelection.supplierCompaniesMap}
-                supplierQuery={supplierSelection.supplierQuery}
-                setSupplierQuery={supplierSelection.setSupplierQuery}
-                setIsAddSupplierOpen={supplierSelection.setIsAddSupplierOpen}
-              />
+                  {/* Поставщик */}
+                  <SupplierSection
+                    control={control}
+                    filteredSuppliers={supplierSelection.filteredSuppliers}
+                    supplierCompaniesMap={supplierSelection.supplierCompaniesMap}
+                    supplierQuery={supplierSelection.supplierQuery}
+                    setSupplierQuery={supplierSelection.setSupplierQuery}
+                    setIsAddSupplierOpen={supplierSelection.setIsAddSupplierOpen}
+                  />
 
-              {/* Доставка и наличие */}
-              <DeliveryInfoSection control={control} />
+                  {/* Доставка и наличие */}
+                  <DeliveryInfoSection control={control} />
 
-              {/* Цена и единица измерения */}
-              <PricingSection control={control} commonUnits={commonUnits} />
+                  {/* Цена и единица измерения */}
+                  <PricingSection control={control} commonUnits={commonUnits} />
 
-              {/* Дополнительные характеристики */}
-              <SpecificationsSection control={control} />
+                  {/* Дополнительные характеристики */}
+                  <SpecificationsSection control={control} />
 
-              {/* URL и теги */}
-              <AdditionalInfoSection
-                control={control}
-                tagInput={tagManagement.tagInput}
-                setTagInput={tagManagement.setTagInput}
-                currentTags={tagManagement.currentTags}
-                handleAddTag={tagManagement.handleAddTag}
-                handleRemoveTag={tagManagement.handleRemoveTag}
-                handleKeyPress={tagManagement.handleKeyPress}
-              />
-            </SubBlockCard>
-            <SubBlockCard title="Пользовательские характеристики">
-              {/* Пользовательские характеристики */}
-              <CustomSpecificationsSection control={control} />
-            </SubBlockCard>
-            <SubBlockCard title="Прикрепленные файлы">
-              <MaterialFilesSection control={control} />
-            </SubBlockCard>
+                  {/* URL и теги */}
+                  <AdditionalInfoSection
+                    control={control}
+                    tagInput={tagManagement.tagInput}
+                    setTagInput={tagManagement.setTagInput}
+                    currentTags={tagManagement.currentTags}
+                    handleAddTag={tagManagement.handleAddTag}
+                    handleRemoveTag={tagManagement.handleRemoveTag}
+                    handleKeyPress={tagManagement.handleKeyPress}
+                  />
+                </SubBlockCard>
+                <SubBlockCard title="Пользовательские характеристики">
+                  {/* Пользовательские характеристики */}
+                  <CustomSpecificationsSection control={control} />
+                </SubBlockCard>
+                <SubBlockCard title="Прикрепленные файлы">
+                  <MaterialFilesSection control={control} />
+                </SubBlockCard>
+              </div>
+            </ScrollArea>
 
-            <DialogFooter>
+            <DialogFooter className="p-6 pt-2 border-t shrink-0">
               <Button
                 type="button"
                 variant="outline"
@@ -207,7 +212,7 @@ export function AddMaterialDialog({
               >
                 Отмена
               </Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button type="submit" disabled={isLoading} className="bg-[#0071E3] hover:bg-[#0077ED] rounded-xl px-6">
                 {isLoading ? "Создание..." : "Создать материал"}
               </Button>
             </DialogFooter>

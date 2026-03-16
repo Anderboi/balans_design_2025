@@ -4,12 +4,23 @@ import { SupabaseClient } from "@supabase/supabase-js";
 
 export const materialsService = {
   // Получение всех материалов
-  async getMaterials(client?: SupabaseClient): Promise<Material[]> {
+  async getMaterials(
+    params?: { limit?: number; offset?: number },
+    client?: SupabaseClient,
+  ): Promise<Material[]> {
     const supabaseClient = client || supabase;
-    const { data, error } = await supabaseClient
-      .from("materials")
-      .select("*")
-      .order("created_at", { ascending: false });
+    let query = supabaseClient.from("materials").select("*");
+
+    if (params?.limit) {
+      query = query.range(
+        params.offset || 0,
+        (params.offset || 0) + params.limit - 1,
+      );
+    }
+
+    const { data, error } = await query.order("created_at", {
+      ascending: false,
+    });
 
     if (error) {
       console.error("Ошибка при получении материалов:", error);
@@ -41,17 +52,28 @@ export const materialsService = {
 
   // Поиск материалов
   async searchMaterials(
-    query: string,
+    searchQuery: string,
+    params?: { limit?: number; offset?: number },
     client?: SupabaseClient,
   ): Promise<Material[]> {
     const supabaseClient = client || supabase;
-    const { data, error } = await supabaseClient
+    let query = supabaseClient
       .from("materials")
       .select("*")
       .or(
-        `name.ilike.%${query}%,description.ilike.%${query}%,manufacturer.ilike.%${query}%`,
-      )
-      .order("created_at", { ascending: false });
+        `name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,manufacturer.ilike.%${searchQuery}%`,
+      );
+
+    if (params?.limit) {
+      query = query.range(
+        params.offset || 0,
+        (params.offset || 0) + params.limit - 1,
+      );
+    }
+
+    const { data, error } = await query.order("created_at", {
+      ascending: false,
+    });
 
     if (error) {
       console.error("Ошибка при поиске материалов:", error);
@@ -89,9 +111,25 @@ export const materialsService = {
     client?: SupabaseClient,
   ): Promise<Material> {
     const supabaseClient = client || supabase;
+
+    // Получаем текущего пользователя для RLS
+    const {
+      data: { user },
+    } = await supabaseClient.auth.getUser();
+
+    // Удаляем attachments, так как такой колонки нет в таблице materials
+    // Также гарантируем наличие user_id
+    const insertData = { ...material } as any;
+    delete insertData.attachments;
+
     const { data, error } = await supabaseClient
       .from("materials")
-      .insert([material])
+      .insert([
+        {
+          ...insertData,
+          user_id: insertData.user_id || user?.id,
+        },
+      ])
       .select()
       .single();
 
