@@ -9,6 +9,7 @@ interface ProjectPageHeaderProps {
   projectId: string;
   projectName: string;
   title: string;
+  subtitle?: string;
   middleLink?: {
     href: string;
     label: string;
@@ -27,6 +28,7 @@ export function ProjectPageHeader({
   projectId,
   projectName,
   title,
+  subtitle,
   middleLink,
   actionProps,
   showAiButton = false,
@@ -42,9 +44,14 @@ export function ProjectPageHeader({
       />
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <h1 className="text-3xl md:text-5xl font-semibold text-[#1D1D1F] tracking-tight animate-in fade-in slide-in-from-left-2 duration-700">
-          {title}
-        </h1>
+        <div className="flex flex-col space-y-2">
+          <h1 className="text-3xl md:text-5xl font-semibold text-[#1D1D1F] tracking-tight animate-in fade-in slide-in-from-left-2 duration-700">
+            {title}
+          </h1>
+          <p className="text-sm text-[#6E6E73] animate-in fade-in slide-in-from-left-2 duration-700">
+            {subtitle}
+          </p>
+        </div>
 
         <div className="flex items-center gap-3 animate-in fade-in zoom-in-95 duration-700 delay-100">
           {actionProps &&

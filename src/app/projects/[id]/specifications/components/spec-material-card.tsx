@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import Link from 'next/link';
+import Link from "next/link";
 
 const SpecMaterialCard = ({
   material,
@@ -71,15 +71,21 @@ const SpecMaterialCard = ({
   // Сохранение конкретного поля при потере фокуса
   const handleFieldBlur = async (
     fieldName: keyof SpecificationMaterial,
-    value: any
+    value: any,
   ) => {
     // Проверяем, было ли поле изменено
     if (!dirtyFields[fieldName]) return;
 
     try {
+      // Подготавливаем значение (числа должны быть числами)
+      let finalValue = value;
+      if (fieldName === "price" || fieldName === "quantity") {
+        finalValue = Number(value) || 0;
+      }
+
       // Сохраняем только изменённое поле
       const updateData = {
-        [fieldName === "type" ? material.type : fieldName]: value,
+        [fieldName]: finalValue,
       };
 
       await materialsService.updateSpecMaterial(material.id, updateData);
@@ -88,7 +94,7 @@ const SpecMaterialCard = ({
       reset({}, { keepValues: true });
 
       if (onUpdate) {
-        onUpdate({ ...material, [fieldName]: value });
+        onUpdate({ ...material, [fieldName]: finalValue });
       }
 
       // Опционально: показываем уведомление
@@ -118,8 +124,8 @@ const SpecMaterialCard = ({
           className="size-20 object-cover rounded-sm"
         />
       ) : (
-        <span className="w-22 h-20 bg-muted rounded-sm flex items-center justify-center">
-          <Package className="w-8 h-8 text-muted-foreground" />
+        <span className="size-20 bg-muted rounded-sm flex items-center justify-center">
+          <Package className="size-8 text-muted-foreground" />
         </span>
       )}
       <div className="grid grid-cols-1 md:grid-cols-5 //lg:grid-cols-5 w-full gap-4">
@@ -128,11 +134,11 @@ const SpecMaterialCard = ({
             <Textarea
               {...register("name")}
               rows={2}
-              className="placeholder:text-muted-foreground/40 max-h-16 font-semibold placeholder:text-[15px] px-0 border-none shadow-none line-clamp-2"
+              className="placeholder:text-muted-foreground/40 resize-none max-h-16 font-semibold placeholder:text-[15px] px-0 border-none shadow-none line-clamp-2"
               placeholder="наименование"
               disabled={isSubmitting}
               onFocus={(e) => e.target.select()}
-              onBlur={(e) => handleFieldBlur("description", e.target.value)}
+              onBlur={(e) => handleFieldBlur("name", e.target.value)}
             />
           </MaterialData>
 
@@ -205,7 +211,7 @@ const SpecMaterialCard = ({
               className="placeholder:text-muted-foreground/40 h-6 placeholder:text-[15px] px-0 border-none shadow-none"
               placeholder="-"
               disabled={isSubmitting}
-              onBlur={(e) => handleFieldBlur("quantity", e.target.value)}
+              onBlur={(e) => handleFieldBlur("price", e.target.value)}
               onFocus={(e) => e.target.select()}
             />
           </MaterialData>

@@ -38,6 +38,7 @@ const ScheduleCategoryPage = async ({
         projectId={id}
         projectName={projectInfo.name}
         title={scheduleName}
+        subtitle={`${specifications.length} позиции`}
       >
         <AddMaterialButton
           projectId={id}
