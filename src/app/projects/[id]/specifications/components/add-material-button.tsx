@@ -4,19 +4,21 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { AddSpecMaterialDialog } from "./add-spec-material-dialog";
-import { Contact, Company } from "@/types";
+import { Contact, Company, SpecificationMaterial } from "@/types";
 import { useRouter } from "next/navigation";
 
 interface AddMaterialButtonProps {
   projectId: string;
   initialSuppliers: Contact[];
   initialSupplierCompanies: Company[];
+  existingMaterials?: SpecificationMaterial[];
 }
 
 export function AddMaterialButton({
   projectId,
   initialSuppliers,
   initialSupplierCompanies,
+  existingMaterials = [],
 }: AddMaterialButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
@@ -40,6 +42,7 @@ export function AddMaterialButton({
         }}
         initialSuppliers={initialSuppliers}
         initialSupplierCompanies={initialSupplierCompanies}
+        existingMaterials={existingMaterials}
       />
     </>
   );

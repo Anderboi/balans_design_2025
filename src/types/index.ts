@@ -250,6 +250,7 @@ export interface SpecificationMaterial {
   image_url?: string;
   in_stock?: boolean;
   tags?: string[];
+  status?: string;
 }
 
 // Типы для контактов

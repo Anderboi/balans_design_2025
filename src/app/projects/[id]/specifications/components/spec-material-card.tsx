@@ -1,264 +1,321 @@
 "use client";
 
-import Image from "next/image";
-import { Link as LinkIcon, Package } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import MaterialData from "./material-data";
 import { SpecificationMaterial } from "@/types";
 import { useForm } from "react-hook-form";
 import { materialsService } from "@/lib/services/materials";
 import { toast } from "sonner";
-import { Textarea } from "@/components/ui/textarea";
-import { useMemo } from "react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { useCallback, useMemo } from "react";
+import { Separator } from "@/components/ui/separator";
+import Thumbnail from "./thumbnail";
+import StatusDropdown, {
+  STATUS_OPTIONS,
+} from "@/app/projects/[id]/specifications/components/status-dropdown";
+import ActionButtons from "./action-buttons";
+import EditableInput from "@/components/editable-input";
+import { cn } from "@/lib/utils";
 
-const SpecMaterialCard = ({
-  material,
-  onUpdate,
-}: {
+type StatusValue = (typeof STATUS_OPTIONS)[number]["value"];
+
+interface SpecMaterialCardProps {
   material: SpecificationMaterial;
-  onUpdate?: (updatedMaterial: SpecificationMaterial) => void;
-}) => {
+  onUpdate?: (updated: SpecificationMaterial) => void;
+}
+
+const SpecMaterialCard = ({ material, onUpdate }: SpecMaterialCardProps) => {
   const {
     register,
     watch,
-    formState: { isDirty, dirtyFields, isSubmitting },
+    formState: { dirtyFields },
     reset,
-    handleSubmit,
+    getValues,
   } = useForm<SpecificationMaterial>({
     defaultValues: {
-      name: material.name || "-",
-      description: material.description || "-",
-      manufacturer: material.manufacturer || "-",
-      article: material.article || "-",
-      lead_time: material.lead_time || 0,
-      product_url: material.product_url || "-",
-      size: material.size || "-",
-      color: material.color || "-",
-      finish: material.finish || "-",
-      material: material.material || "-",
-      type: material.type,
-      supplier: material.supplier || "-",
-      price: material.price || 0,
-      unit: material.unit || "-",
-      image_url: material.image_url || "-",
-      quantity: material.quantity || 1,
-      notes: material.notes || "",
-      project_article: material.project_article || "-",
+      ...material,
+      name: material.name ?? "",
+      manufacturer: material.manufacturer ?? "",
+      article: material.article ?? "",
+      price: Number(material.price) || 0,
+      quantity: Number(material.quantity) || 1,
+      project_article: material.project_article ?? "",
+      status: material.status ?? "in_progress",
     },
   });
 
+  // Removed useEffect sync to prevent focus loss
+
   const watchQuantity = watch("quantity");
   const watchPrice = watch("price");
-  // const totalPrice = watchQuantity * watchPrice;
+  const watchStatus = watch("status");
+  const manufacturer = watch("manufacturer");
 
   // Вычисляем общую стоимость
-  const totalPrice = useMemo(() => {
-    const quantity = Number(watchQuantity) || 0;
-    const price = Number(watchPrice) || 0;
-    return quantity * price;
-  }, [watchQuantity, watchPrice]);
+  const totalPrice = useMemo(
+    () => (Number(watchQuantity) || 0) * (Number(watchPrice) || 0),
+    [watchQuantity, watchPrice],
+  );
 
   // Форматируем число с пробелами для тысяч
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("ru-RU", {
       minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
+      maximumFractionDigits: 0,
     }).format(price);
   };
 
   // Сохранение конкретного поля при потере фокуса
-  const handleFieldBlur = async (
-    fieldName: keyof SpecificationMaterial,
-    value: any,
+  const handleFieldBlur = useCallback(
+    async (fieldName: keyof SpecificationMaterial) => {
+      // Проверяем, было ли поле изменено
+      if (!dirtyFields[fieldName]) return;
+
+      const currentValues = getValues();
+      const raw = currentValues[fieldName];
+      const value =
+        fieldName === "price" || fieldName === "quantity"
+          ? Number(raw) || 0
+          : raw;
+
+      try {
+        await materialsService.updateSpecMaterial(material.id, {
+          [fieldName]: value,
+        });
+        reset(currentValues);
+        onUpdate?.({ ...material, [fieldName]: value });
+        toast.success("Изменения сохранены", { duration: 1000 });
+      } catch {
+        toast.error("Не удалось сохранить изменения");
+        reset(material);
+      }
+    },
+    [dirtyFields, getValues, material, onUpdate, reset],
+  );
+
+  const handleStatusChange = useCallback(
+    async (value: string) => {
+      try {
+        await materialsService.updateSpecMaterial(material.id, {
+          status: value,
+        });
+        onUpdate?.({ ...material, status: value });
+        // keepValues: true — don't reset other fields, only mark status as clean
+        reset({ ...getValues(), status: value as StatusValue });
+        toast.success("Статус обновлён", { duration: 1000 });
+      } catch {
+        toast.error("Ошибка обновления статуса");
+      }
+    },
+    [getValues, material, onUpdate, reset],
+  );
+
+  // Helper to compose onBlur without duplicating register().onBlur
+  const blurProps = (
+    field: keyof SpecificationMaterial,
+    options?: Parameters<typeof register>[1],
   ) => {
-    // Проверяем, было ли поле изменено
-    if (!dirtyFields[fieldName]) return;
-
-    try {
-      // Подготавливаем значение (числа должны быть числами)
-      let finalValue = value;
-      if (fieldName === "price" || fieldName === "quantity") {
-        finalValue = Number(value) || 0;
-      }
-
-      // Сохраняем только изменённое поле
-      const updateData = {
-        [fieldName]: finalValue,
-      };
-
-      await materialsService.updateSpecMaterial(material.id, updateData);
-
-      // Обновляем состояние формы (помечаем как сохранённое)
-      reset({}, { keepValues: true });
-
-      if (onUpdate) {
-        onUpdate({ ...material, [fieldName]: finalValue });
-      }
-
-      // Опционально: показываем уведомление
-      toast.success("Изменения сохранены", { duration: 1000 });
-    } catch (error) {
-      console.error("Ошибка при сохранении:", error);
-      toast.error("Не удалось сохранить изменения");
-
-      // Возвращаем исходное значение
-      reset();
-    }
+    const reg = register(field, options);
+    return {
+      ...reg,
+      onBlur: async (e: React.FocusEvent<HTMLInputElement>) => {
+        await reg.onBlur(e);
+        handleFieldBlur(field);
+      },
+    };
   };
 
+  const numberInputClass =
+    "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
+
   return (
-    <div className="bg-white w-full w-min-[400px] p-1 rounded-lg flex gap-2 border border-muted-foreground/20">
-      {material.image_url ? (
-        <Image
-          src={material.image_url}
-          alt="product_image"
-          className="size-24  object-cover rounded-sm"
-          height={96}
-          width={96}
+    <div className="bg-white w-full rounded-3xl border border-[#F2F2F7] shadow-sm overflow-hidden transition-all hover:shadow-md group">
+      {/* Desktop Version -------------------------------------------------*/}
+      <div className="hidden md:flex items-stretch p-3 gap-6">
+        {/* Left: Image */}
+        <Thumbnail
+          name={material.name}
+          url={material.image_url}
+          className="size-[88px]"
         />
-        // <img
-        //   src={material.image_url || ""}
-        //   alt={material.name}
-        //   className="size-20 object-cover rounded-sm"
-        // />
-      ) : (
-        <span className="size-24 bg-muted rounded-sm flex items-center justify-center">
-          <Package className="size-12 text-muted-foreground" />
-        </span>
-      )}
-      <div className="grid grid-cols-1 md:grid-cols-5 //lg:grid-cols-5 w-full gap-4">
-        <div className="flex flex-col justify-between h-full">
-          <MaterialData label="">
-            <Textarea
-              {...register("name")}
-              rows={2}
-              className="placeholder:text-muted-foreground/40 resize-none max-h-16 font-semibold placeholder:text-[15px] px-0 border-none shadow-none line-clamp-2"
-              placeholder="наименование"
-              disabled={isSubmitting}
-              onFocus={(e) => e.target.select()}
-              onBlur={(e) => handleFieldBlur("name", e.target.value)}
+
+        {/* Content Area */}
+        <div className="flex flex-1 gap-4">
+          {/* Section 1: Mark & Name */}
+          <div className="flex-1 flex flex-col justify-between">
+            <div className="flex flex-col items-start">
+              <EditableInput
+                {...blurProps("name")}
+                className="resize-none font-semibold text-lg text-[#1D1D1F] leading-tight  flex-1 transition-all"
+              />
+              <span className="text-[11px] text-[#86868B] uppercase tracking-wide">
+                {manufacturer}
+              </span>
+            </div>
+
+            <EditableInput
+              {...blurProps("project_article")}
+              placeholder="Арт."
+              className="px-0 py-0.5 border-none bg-transparent shadow-none font-bold text-[13px] text-[#0071E3] text-start focus-visible:ring-0"
+            />
+          </div>
+
+          <Separator orientation="vertical" className="bg-border" />
+
+          {/* Section 2: Details */}
+          <div className="flex-1">
+            <MaterialData label="Наименование">
+              <EditableInput
+                {...blurProps("description")}
+                className="p-0 border-none shadow-none text-sm font-medium h-auto focus-visible:ring-0 truncate"
+              />
+            </MaterialData>
+          </div>
+
+          {/* Section 3: Quantity and Price */}
+          <div className="flex flex-col justify-between items-end px-4 w-24 text-right">
+            <MaterialData label="Кол-во" className="items-end">
+              <div className="flex items-baseline gap-1">
+                <EditableInput
+                  type="number"
+                  {...blurProps("quantity")}
+                  className={cn(
+                    "text-base font-medium text-right w-10",
+                    numberInputClass,
+                  )}
+                />
+                <span className="text-base text-[#1D1D1F]">
+                  {material.unit ?? "шт"}
+                </span>
+              </div>
+            </MaterialData>
+            <MaterialData label="Цена / шт" className="items-end">
+              <div className="flex items-baseline gap-1">
+                <EditableInput
+                  type="number"
+                  {...blurProps("price")}
+                  className={cn(
+                    "text-base font-medium text-right w-16",
+                    numberInputClass,
+                  )}
+                />
+                <span className="text-base text-foreground">₽</span>
+              </div>
+            </MaterialData>
+          </div>
+
+          <Separator orientation="vertical" className="bg-border" />
+
+          {/* Section 4: Total */}
+          <div className="flex flex-col justify-end h-full items-end w-40 text-right">
+            <span className="text-[20px] font-bold text-[#1D1D1F] leading-none tabular-nums">
+              {formatPrice(totalPrice)} ₽
+            </span>
+            <span className="text-[10px] text-[#8E8E93] uppercase font-medium tracking-widest">
+              Итого
+            </span>
+          </div>
+
+          <Separator orientation="vertical" className="bg-border" />
+
+          {/* Right: Actions & Status */}
+          <div className="flex flex-col justify-between gap-2">
+            <StatusDropdown
+              value={watchStatus ?? "in_progress"}
+              onChange={handleStatusChange}
+            />
+            <ActionButtons productUrl={material.product_url} size="sm" />
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Version --------------------------------------------------*/}
+      <div className="md:hidden flex flex-col gap-4 p-4">
+        {/* Header */}
+        <div className="flex gap-4">
+          <Thumbnail
+            url={material.image_url}
+            name={material.name}
+            className="size-24"
+          />
+
+          {/* Name & Mark */}
+          <div className="flex-1 flex flex-col justify-between">
+            <div
+            // className="flex flex-col items-start"
+            >
+              <EditableInput
+                {...blurProps("name")}
+                className="font-semibold text-[15px] text-[#1D1D1F] leading-snug"
+              />
+              <span className="text-[11px] text-[#86868B] uppercase tracking-wide">
+                {manufacturer}
+              </span>
+            </div>
+
+            <EditableInput
+              {...blurProps("project_article")}
+              className="font-bold text-[12px] text-[#0071E3] //w-10 text-start"
+            />
+          </div>
+          <StatusDropdown
+            value={watchStatus ?? "in_progress"}
+            onChange={handleStatusChange}
+          />
+        </div>
+
+        <Separator className="bg-border" />
+
+        {/* Middle section */}
+        <div className="flex gap-3 flex-2">
+          <MaterialData label="Наименование">
+            <EditableInput
+              {...blurProps("description")}
+              className="text-sm font-medium text-[#1D1D1F]"
             />
           </MaterialData>
 
-          <Input
-            {...register("project_article")}
-            type="text"
-            className="placeholder:text-muted-foreground/40 h-6 placeholder:text-[15px] px-0 border-none shadow-none"
-            placeholder="Марка"
-            disabled={isSubmitting}
-            onBlur={(e) => handleFieldBlur("project_article", e.target.value)}
-            onFocus={(e) => e.target.select()}
-          />
-        </div>
-        <div className="flex flex-col justify-between h-full">
-          <MaterialData label="производитель">
-            <Input
-              {...register("manufacturer")}
-              type="text"
-              className="placeholder:text-muted-foreground/40 h-6 placeholder:text-[15px] px-0 border-none shadow-none"
-              placeholder="-"
-              disabled={isSubmitting}
-              onBlur={(e) => handleFieldBlur("manufacturer", e.target.value)}
-              onFocus={(e) => e.target.select()}
-            />
-          </MaterialData>
-          <MaterialData label="артикул">
-            <Input
-              {...register("article")}
-              type="text"
-              className="placeholder:text-muted-foreground/40 h-6 placeholder:text-[15px] px-0 border-none shadow-none"
-              placeholder="-"
-              disabled={isSubmitting}
-              onBlur={(e) => handleFieldBlur("article", e.target.value)}
-              onFocus={(e) => e.target.select()}
-            />
-          </MaterialData>
-        </div>
-        <div className="flex flex-col justify-between h-full">
-          <div className="flex w-full grow justify-between">
-            <MaterialData label="размер (мм)">
-              <Input
-                {...register("size")}
-                type="text"
-                className="placeholder:text-muted-foreground/40 h-6 placeholder:text-[15px] px-0 border-none shadow-none"
-                placeholder="-"
-                disabled={isSubmitting}
-                onBlur={(e) => handleFieldBlur("size", e.target.value)}
-                onFocus={(e) => e.target.select()}
+          <Separator orientation="vertical" className="bg-border" />
+
+          <MaterialData label="Кол-во" className="items-end flex-1">
+            <div className="flex items-baseline gap-0.5 justify-end">
+              <EditableInput
+                type="number"
+                {...blurProps("quantity")}
+                className={cn("text-end text-sm font-medium", numberInputClass)}
               />
-            </MaterialData>
-            {/* <MaterialData label="д (мм)" value={material.size ||'-'} /> */}
-          </div>
-          <MaterialData label="цвет">
-            <Input
-              {...register("color")}
-              type="text"
-              className="placeholder:text-muted-foreground/40 h-6 placeholder:text-[15px] px-0 border-none shadow-none"
-              placeholder="-"
-              disabled={isSubmitting}
-              onBlur={(e) => handleFieldBlur("color", e.target.value)}
-              onFocus={(e) => e.target.select()}
-            />
-          </MaterialData>
-        </div>
-        <div className="flex flex-col justify-between h-full">
-          <MaterialData label="стоимость">
-            <Input
-              {...register("price")}
-              type="text"
-              className="placeholder:text-muted-foreground/40 h-6 placeholder:text-[15px] px-0 border-none shadow-none"
-              placeholder="-"
-              disabled={isSubmitting}
-              onBlur={(e) => handleFieldBlur("price", e.target.value)}
-              onFocus={(e) => e.target.select()}
-            />
-          </MaterialData>
-          <MaterialData label="кол-во">
-            <Input
-              {...register("quantity")}
-              type="text"
-              className="placeholder:text-muted-foreground/40 h-6 placeholder:text-[15px] px-0 border-none shadow-none"
-              placeholder="-"
-              disabled={isSubmitting}
-              onBlur={(e) => handleFieldBlur("quantity", e.target.value)}
-              onFocus={(e) => e.target.select()}
-            />
-          </MaterialData>
-        </div>
-        <div className="flex flex-col justify-between h-full">
-          <MaterialData label="общая стоимость">
-            <span className="font-bold">{formatPrice(totalPrice)} ₽</span>
-            {/* {watchPrice && watchQuantity && (
-              <span className="text-xs text-muted-foreground">
-                {formatPrice(Number(watchPrice))} × {watchQuantity}
+              <span className="text-sm text-[#1D1D1F]">
+                {material.unit ?? "шт"}
               </span>
-            )} */}
+            </div>
           </MaterialData>
-          <div className="grid grid-cols-4 gap-2 w-full">
-            <Button
-              size={"icon-sm"}
-              variant={"link"}
-              disabled={material.product_url ? false : true}
-              className="hover:cursor-pointer hover:text-blue-500 col-span-1"
-            >
-              <Link
-                href={material.product_url || ""}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <LinkIcon />
-              </Link>
-            </Button>
-            <Button
-              size={"sm"}
-              variant={"secondary"}
-              className="hover:cursor-pointer col-span-3 text-ellipsis overflow-hidden"
-            >
-              Подробнее
-            </Button>
+
+          <Separator orientation="vertical" className="bg-border" />
+
+          <MaterialData label="Цена / шт." className="flex-1 items-end">
+            <div className="flex items-baseline gap-0.5 justify-end">
+              <EditableInput
+                type="number"
+                {...blurProps("price")}
+                className={cn("text-end text-sm font-medium", numberInputClass)}
+              />
+              <span className="text-sm text-[#1D1D1F]">₽</span>
+            </div>
+          </MaterialData>
+        </div>
+
+        <Separator className="bg-border" />
+
+        <div className="flex items-center justify-between">
+          <div
+          className="flex flex-col min-w-[60%]"
+          >
+            <span className="font-bold text-[#1D1D1F] leading-none text-2xl tabular-nums">
+              {formatPrice(totalPrice)} ₽
+            </span>
+            <span className="text-[9px] text-[#8E8E93] uppercase font-medium tracking-widest">
+              Итого
+            </span>
           </div>
+          <ActionButtons productUrl={material.product_url} size="md"/>
         </div>
       </div>
     </div>

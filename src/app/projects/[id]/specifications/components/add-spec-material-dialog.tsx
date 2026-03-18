@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Plus, Loader2, Filter, ArrowUpDown, LayoutGrid } from "lucide-react";
 import { materialsService } from "@/lib/services/materials";
-import { Material, Contact, Company, MaterialType } from "@/types";
+import { Material, Contact, Company, MaterialType, SpecificationMaterial } from "@/types";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { AddMaterialDialog } from "@/app/materials/components/add-material-dialog";
 import { createClient } from "@/lib/supabase/client";
@@ -173,6 +173,7 @@ interface AddSpecMaterialDialogProps {
   onMaterialAdded: () => void;
   initialSuppliers: Contact[];
   initialSupplierCompanies: Company[];
+  existingMaterials?: SpecificationMaterial[];
 }
 
 export function AddSpecMaterialDialog({
@@ -182,6 +183,7 @@ export function AddSpecMaterialDialog({
   onMaterialAdded,
   initialSuppliers,
   initialSupplierCompanies,
+  existingMaterials = [],
 }: AddSpecMaterialDialogProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [materials, setMaterials] = useState<Material[]>([]);
@@ -310,6 +312,40 @@ export function AddSpecMaterialDialog({
   const handleSelectMaterial = async (material: Material) => {
     setIsAdding(material.id);
     try {
+      // Logic for project_article auto-assignment
+      const typeMapping: Record<string, string> = {
+        [MaterialType.ELECTRIC]: "Э-",
+        [MaterialType.FURNITURE]: "М-",
+        [MaterialType.BATHROOM]: "С-",
+        [MaterialType.LIGHTING]: "Ос-",
+        [MaterialType.FINISH]: "От-",
+        [MaterialType.EQUIPMENT]: "Об-",
+        [MaterialType.TEXTILE]: "Т-",
+        [MaterialType.FIXTURES]: "И-",
+        [MaterialType.DECOR]: "Д-",
+        [MaterialType.DOORS]: "Дв-",
+      };
+
+      const prefix = typeMapping[material.type] || "П-";
+      const sameTypeMaterials = existingMaterials.filter(
+        (ex) => ex.type === material.type
+      );
+      
+      // Find the highest sequence number among existing project_articles with the same prefix
+      let maxSeq = 0;
+      sameTypeMaterials.forEach(m => {
+        if (m.project_article && m.project_article.startsWith(prefix)) {
+          const numPart = m.project_article.slice(prefix.length);
+          const seq = parseInt(numPart, 10);
+          if (!isNaN(seq) && seq > maxSeq) {
+            maxSeq = seq;
+          }
+        }
+      });
+
+      const nextSeq = (maxSeq + 1).toString().padStart(2, "0");
+      const autoArticle = `${prefix}${nextSeq}`;
+
       await materialsService.addSpecification(
         {
           project_id: projectId,
@@ -333,6 +369,7 @@ export function AddSpecMaterialDialog({
           product_url: material.product_url || "",
           in_stock: material.in_stock ?? true,
           tags: material.tags || [],
+          project_article: autoArticle,
         },
         supabase,
       );

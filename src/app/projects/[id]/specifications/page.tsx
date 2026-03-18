@@ -44,6 +44,7 @@ const ScheduleCategoryPage = async ({
           projectId={id}
           initialSuppliers={suppliers}
           initialSupplierCompanies={supplierCompanies}
+          existingMaterials={specifications}
         />
       </ProjectPageHeader>
 

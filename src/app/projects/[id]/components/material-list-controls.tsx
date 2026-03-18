@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, Suspense, useState } from "react";
+import { useMemo, Suspense, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { SpecificationMaterial, MaterialType } from "@/types";
 import SpecMaterialCard from "../specifications/components/spec-material-card";
@@ -48,6 +48,20 @@ export default function MaterialListControls({ materials }: Props) {
       sortOrder: "asc",
     },
   });
+  
+  // Local state for materials to allow real-time UI updates
+  const [localMaterials, setLocalMaterials] = useState<SpecificationMaterial[]>(materials);
+
+  // Sync local state if props change (e.g., after adding a new material or navigating)
+  useEffect(() => {
+    setLocalMaterials(materials);
+  }, [materials]);
+
+  const handleMaterialUpdate = (updatedMaterial: SpecificationMaterial) => {
+    setLocalMaterials((prev) =>
+      prev.map((m) => (m.id === updatedMaterial.id ? updatedMaterial : m))
+    );
+  };
 
   // State для управления свернутыми категориями (храним названия типов, которые СВЕРНУТЫ)
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
@@ -71,7 +85,7 @@ export default function MaterialListControls({ materials }: Props) {
 
   // 3. useMemo остается таким же, но теперь зависит от RHF state
   const { groupedMaterials, totalCount, totalSum } = useMemo(() => {
-    let processedMaterials = [...materials];
+    let processedMaterials = [...localMaterials];
 
     // Фильтрация по типу
     if (filterType !== "all") {
@@ -120,7 +134,7 @@ export default function MaterialListControls({ materials }: Props) {
     });
 
     return { groupedMaterials: groups, totalCount: count, totalSum: sum };
-  }, [materials, searchTerm, filterType, sortOrder]);
+  }, [localMaterials, searchTerm, filterType, sortOrder]);
 
   // Функция для переключения сортировки
   const toggleSortOrder = () => {
@@ -140,7 +154,7 @@ export default function MaterialListControls({ materials }: Props) {
   );
 
   return (
-    <div className="flex flex-col gap-4 relative pb-20">
+    <div className="flex flex-col gap-4 relative">
       {/* --- Панель управления--- */}
       <Form {...form}>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 /p-4 //bg-muted/40 rounded-lg //border">
@@ -261,6 +275,7 @@ export default function MaterialListControls({ materials }: Props) {
                           <SpecMaterialCard
                             key={material.id || index}
                             material={material}
+                            onUpdate={handleMaterialUpdate}
                           />
                         ))}
                       </div>
@@ -278,8 +293,8 @@ export default function MaterialListControls({ materials }: Props) {
       </div>
 
       {/* Sticky Footer Summary */}
-      <div className="sticky bottom-0 left-0 right-0 z-10 bg-white/40 backdrop-blur-md border-t border-muted/30 shadow-lg animate-in fade-in slide-in-from-bottom-5 duration-500 rounded-lg">
-        <div className="max-w-7xl mx-auto px-4 py-4 md:px-8 flex items-center justify-between">
+      <div className="sticky bottom-0 left-0 right-0 z-10 bg-white/40 backdrop-blur-md border-t border-muted/30 shadow-lg animate-in fade-in slide-in-from-bottom-5 duration-500 rounded-3xl">
+        <div className="max-w-7xl mx-auto px-4 py-4 md:px-8 md:py-8 flex items-center justify-between">
           <div className="flex flex-col">
             <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-medium">
               Всего позиций

@@ -119,8 +119,8 @@ export const materialsService = {
 
     // Удаляем attachments, так как такой колонки нет в таблице materials
     // Также гарантируем наличие user_id
-    const insertData = { ...material } as any;
-    delete insertData.attachments;
+    const { attachments: _attachments, ...insertData } = material as Record<string, unknown>;
+    void _attachments;
 
     const { data, error } = await supabaseClient
       .from("materials")
@@ -218,7 +218,7 @@ export const materialsService = {
 
   // Получить материалы спецификации по типу
   async getSpecMaterialsByType(
-    type: SpecificationMaterial,
+    type: MaterialType,
     client?: SupabaseClient,
   ): Promise<SpecificationMaterial[]> {
     const supabaseClient = client || supabase;
@@ -236,15 +236,56 @@ export const materialsService = {
     return data || [];
   },
 
+  async getNextProjectArticle(
+    projectId: string,
+    type: MaterialType,
+    client?: SupabaseClient,
+  ): Promise<string> {
+    const supabaseClient = client || supabase;
+    const { count, error } = await supabaseClient
+      .from("specifications")
+      .select("*", { count: "exact", head: true })
+      .eq("project_id", projectId)
+      .eq("type", type);
+
+    if (error) {
+      console.error("Error getting next project article:", error);
+      return "";
+    }
+
+    const prefixes: Record<string, string> = {
+      "Отделка": "От-",
+      "Мебель": "М-",
+      "Оборудование": "Об-",
+      "Сантехника": "С-",
+      "Освещение": "Ос-",
+      "Текстиль": "Т-",
+      "Инженерное оборудование": "И-",
+      "Декор": "Д-",
+      "Двери": "Дв-",
+      "Электрика": "Э-",
+    };
+
+    const prefix = prefixes[type] || "Мат";
+    const nextNumber = (count || 0) + 1;
+    return `${prefix}-${nextNumber.toString().padStart(2, "0")}`;
+  },
+
   // Добавление спецификации
   async addSpecification(
-    spec: Omit<SpecificationMaterial, "id" | "created_at" | "updated_at">,
+    spec: Omit<SpecificationMaterial, "id" | "created_at" | "updated_at"> & { project_article?: string },
     client?: SupabaseClient,
   ): Promise<SpecificationMaterial> {
     const supabaseClient = client || supabase;
+    
+    let project_article = spec.project_article;
+    if (!project_article) {
+      project_article = await this.getNextProjectArticle(spec.project_id, spec.type, supabaseClient);
+    }
+
     const { data, error } = await supabaseClient
       .from("specifications")
-      .insert(spec)
+      .insert({ ...spec, project_article })
       .select()
       .single();
 
@@ -282,19 +323,7 @@ export const materialsService = {
 
   async updateSpecMaterial(
     specMaterialId: string,
-    data: Partial<{
-      name: string;
-      description: string;
-      manufacturer: string;
-      supplier: string;
-      size: string;
-      color: string;
-      material: string;
-      quantity: number;
-      unit: string;
-      price: number;
-      notes: string;
-    }>,
+    data: Partial<SpecificationMaterial>,
     client?: SupabaseClient,
   ) {
     const supabaseClient = client || supabase;
