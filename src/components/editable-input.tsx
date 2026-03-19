@@ -1,18 +1,22 @@
+import * as React from "react";
 import { Input } from "./ui/input";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 
 /** Thin wrapper that keeps Input styling consistent across the card */
-const EditableInput = ({
-  className,
-  ...props
-}: React.ComponentProps<typeof Input>) => (
+const EditableInput = React.forwardRef<
+  HTMLInputElement,
+  React.ComponentProps<typeof Input>
+>(({ className, ...props }, ref) => (
   <Input
+    ref={ref}
     className={cn(
       "p-0 h-auto border-none shadow-none focus-visible:ring-0 bg-transparent",
-      className,
+      className
     )}
     {...props}
   />
-);
+));
+
+EditableInput.displayName = "EditableInput";
 
 export default EditableInput;

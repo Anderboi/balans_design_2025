@@ -12,7 +12,7 @@ import StatusDropdown, {
   STATUS_OPTIONS,
 } from "@/app/projects/[id]/specifications/components/status-dropdown";
 import ActionButtons from "./action-buttons";
-import EditableInput from "@/components/editable-input";
+import { DebouncedInput } from "@/components/debounced-input";
 import { cn } from "@/lib/utils";
 
 type StatusValue = (typeof STATUS_OPTIONS)[number]["value"];
@@ -24,13 +24,13 @@ interface SpecMaterialCardProps {
 
 const SpecMaterialCard = ({ material, onUpdate }: SpecMaterialCardProps) => {
   const {
-    register,
     watch,
     formState: { dirtyFields },
     reset,
     getValues,
+    setValue,
   } = useForm<SpecificationMaterial>({
-    defaultValues: {
+    values: {
       ...material,
       name: material.name ?? "",
       manufacturer: material.manufacturer ?? "",
@@ -40,14 +40,16 @@ const SpecMaterialCard = ({ material, onUpdate }: SpecMaterialCardProps) => {
       project_article: material.project_article ?? "",
       status: material.status ?? "in_progress",
     },
+    resetOptions: {
+      keepDirtyValues: true,
+    },
   });
 
-  // Removed useEffect sync to prevent focus loss
-
-  const watchQuantity = watch("quantity");
-  const watchPrice = watch("price");
-  const watchStatus = watch("status");
-  const manufacturer = watch("manufacturer");
+  const formValues = watch();
+  const watchQuantity = formValues.quantity;
+  const watchPrice = formValues.price;
+  const watchStatus = formValues.status;
+  const manufacturer = formValues.manufacturer;
 
   // Вычисляем общую стоимость
   const totalPrice = useMemo(
@@ -108,16 +110,16 @@ const SpecMaterialCard = ({ material, onUpdate }: SpecMaterialCardProps) => {
     [getValues, material, onUpdate, reset],
   );
 
-  // Helper to compose onBlur without duplicating register().onBlur
-  const blurProps = (
+  // Helper to retrieve props for debounced controlled inputs
+  const debouncedProps = (
     field: keyof SpecificationMaterial,
-    options?: Parameters<typeof register>[1],
   ) => {
-    const reg = register(field, options);
+    const val = formValues[field];
     return {
-      ...reg,
-      onBlur: async (e: React.FocusEvent<HTMLInputElement>) => {
-        await reg.onBlur(e);
+      name: field,
+      value: (val !== undefined && val !== null ? val : "") as string | number,
+      onChange: (debouncedValue: string) => {
+        setValue(field, debouncedValue, { shouldDirty: true, shouldTouch: true });
         handleFieldBlur(field);
       },
     };
@@ -142,8 +144,8 @@ const SpecMaterialCard = ({ material, onUpdate }: SpecMaterialCardProps) => {
           {/* Section 1: Mark & Name */}
           <div className="flex-1 flex flex-col justify-between">
             <div className="flex flex-col items-start">
-              <EditableInput
-                {...blurProps("name")}
+              <DebouncedInput
+                {...debouncedProps("name")}
                 className="resize-none font-semibold text-lg text-[#1D1D1F] leading-tight  flex-1 transition-all"
               />
               <span className="text-[11px] text-[#86868B] uppercase tracking-wide">
@@ -151,8 +153,8 @@ const SpecMaterialCard = ({ material, onUpdate }: SpecMaterialCardProps) => {
               </span>
             </div>
 
-            <EditableInput
-              {...blurProps("project_article")}
+            <DebouncedInput
+              {...debouncedProps("project_article")}
               placeholder="Арт."
               className="px-0 py-0.5 border-none bg-transparent shadow-none font-bold text-[13px] text-[#0071E3] text-start focus-visible:ring-0"
             />
@@ -163,8 +165,8 @@ const SpecMaterialCard = ({ material, onUpdate }: SpecMaterialCardProps) => {
           {/* Section 2: Details */}
           <div className="flex-1">
             <MaterialData label="Наименование">
-              <EditableInput
-                {...blurProps("description")}
+              <DebouncedInput
+                {...debouncedProps("description")}
                 className="p-0 border-none shadow-none text-sm font-medium h-auto focus-visible:ring-0 truncate"
               />
             </MaterialData>
@@ -174,9 +176,9 @@ const SpecMaterialCard = ({ material, onUpdate }: SpecMaterialCardProps) => {
           <div className="flex flex-col justify-between items-end px-4 w-24 text-right">
             <MaterialData label="Кол-во" className="items-end">
               <div className="flex items-baseline gap-1">
-                <EditableInput
+                <DebouncedInput
                   type="number"
-                  {...blurProps("quantity")}
+                  {...debouncedProps("quantity")}
                   className={cn(
                     "text-base font-medium text-right w-10",
                     numberInputClass,
@@ -189,9 +191,9 @@ const SpecMaterialCard = ({ material, onUpdate }: SpecMaterialCardProps) => {
             </MaterialData>
             <MaterialData label="Цена / шт" className="items-end">
               <div className="flex items-baseline gap-1">
-                <EditableInput
+                <DebouncedInput
                   type="number"
-                  {...blurProps("price")}
+                  {...debouncedProps("price")}
                   className={cn(
                     "text-base font-medium text-right w-16",
                     numberInputClass,
@@ -242,8 +244,8 @@ const SpecMaterialCard = ({ material, onUpdate }: SpecMaterialCardProps) => {
             <div
             // className="flex flex-col items-start"
             >
-              <EditableInput
-                {...blurProps("name")}
+              <DebouncedInput
+                {...debouncedProps("name")}
                 className="font-semibold text-[15px] text-[#1D1D1F] leading-snug"
               />
               <span className="text-[11px] text-[#86868B] uppercase tracking-wide">
@@ -251,8 +253,8 @@ const SpecMaterialCard = ({ material, onUpdate }: SpecMaterialCardProps) => {
               </span>
             </div>
 
-            <EditableInput
-              {...blurProps("project_article")}
+            <DebouncedInput
+              {...debouncedProps("project_article")}
               className="font-bold text-[12px] text-[#0071E3] //w-10 text-start"
             />
           </div>
@@ -267,8 +269,8 @@ const SpecMaterialCard = ({ material, onUpdate }: SpecMaterialCardProps) => {
         {/* Middle section */}
         <div className="flex gap-3 flex-2">
           <MaterialData label="Наименование">
-            <EditableInput
-              {...blurProps("description")}
+            <DebouncedInput
+              {...debouncedProps("description")}
               className="text-sm font-medium text-[#1D1D1F]"
             />
           </MaterialData>
@@ -277,9 +279,9 @@ const SpecMaterialCard = ({ material, onUpdate }: SpecMaterialCardProps) => {
 
           <MaterialData label="Кол-во" className="items-end flex-1">
             <div className="flex items-baseline gap-0.5 justify-end">
-              <EditableInput
+              <DebouncedInput
                 type="number"
-                {...blurProps("quantity")}
+                {...debouncedProps("quantity")}
                 className={cn("text-end text-sm font-medium", numberInputClass)}
               />
               <span className="text-sm text-[#1D1D1F]">
@@ -292,9 +294,9 @@ const SpecMaterialCard = ({ material, onUpdate }: SpecMaterialCardProps) => {
 
           <MaterialData label="Цена / шт." className="flex-1 items-end">
             <div className="flex items-baseline gap-0.5 justify-end">
-              <EditableInput
+              <DebouncedInput
                 type="number"
-                {...blurProps("price")}
+                {...debouncedProps("price")}
                 className={cn("text-end text-sm font-medium", numberInputClass)}
               />
               <span className="text-sm text-[#1D1D1F]">₽</span>
