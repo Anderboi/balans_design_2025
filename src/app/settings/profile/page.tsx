@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import MainBlockCard from "@/components/ui/main-block-card";
 import PageHeader from "@/components/ui/page-header";
-import { profilesService } from "@/lib/services/profiles";
 import { ProfileForm } from "./profile-form";
 import { redirect } from "next/navigation";
 

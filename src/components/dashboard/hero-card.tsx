@@ -37,13 +37,13 @@ export function HeroCard({ userName }: HeroCardProps) {
           </div>
 
           <div className="flex gap-4">
-            <div className="bg-white/5 backdrop-blur-md rounded-2xl p-6 w-40 border border-white/10">
+            <div className="flex flex-col justify-between bg-white/5 backdrop-blur-md rounded-2xl p-6 w-40 border border-white/10">
               <div className="text-xs text-zinc-400 uppercase tracking-wider mb-2">
                 Активные проекты
               </div>
               <div className="text-4xl font-light">1</div>
             </div>
-            <div className="bg-white/5 backdrop-blur-md rounded-2xl p-6 w-40 border border-white/10">
+            <div className="flex flex-col justify-between bg-white/5 backdrop-blur-md rounded-2xl p-6 w-40 border border-white/10">
               <div className="text-xs text-zinc-400 uppercase tracking-wider mb-2">
                 Всего задач
               </div>
