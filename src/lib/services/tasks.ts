@@ -19,7 +19,8 @@ export const tasksService = {
         assignee:profiles!tasks_assigned_to_fkey(id, full_name, avatar_url),
         observers:task_participants(user:profiles(id, full_name, avatar_url)),
         checklists:task_checklists(*, items:task_checklist_items(*)),
-        history:task_history(*, user:profiles(full_name))
+        history:task_history(*, user:profiles(full_name)),
+        project:projects(id, name)
       `
     );
 

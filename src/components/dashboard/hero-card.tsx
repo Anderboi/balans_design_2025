@@ -29,8 +29,8 @@ export function HeroCard({ userName, activeTasksCount, activeProjectsCount, tota
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-normal leading-[1.1] mb-12 max-w-3xl">
           Доброе утро, {userName}.
           <br />У вас{" "}
-          <Link 
-            href="/tasks" 
+          <Link
+            href="/tasks"
             className="text-zinc-400 hover:text-white transition-colors underline decoration-white/20 underline-offset-8"
           >
             {activeTasksCount} {declineTasks(activeTasksCount)}
@@ -41,8 +41,8 @@ export function HeroCard({ userName, activeTasksCount, activeProjectsCount, tota
         </h1>
 
         <div className="flex flex-col md:flex-row gap-6 items-end justify-between">
-          <div className="bg-white/5 backdrop-blur-md rounded-2xl p-6 md:max-w-md border border-white/10">
-            <p className="text-lg text-zinc-200 leading-relaxed">
+          <div className="bg-white/5 backdrop-blur-md rounded-2xl p-6 //md:max-w-md w-full h-32 line-clamp-3 border border-white/10">
+            <p className="sm:text-lg text-zinc-200 leading-relaxed">
               &quot;Хамовники&quot; идет с опережением графика. Согласуйте
               финальные выкрасы в &quot;Репино&quot;, чтобы не задержать
               малярные работы.
