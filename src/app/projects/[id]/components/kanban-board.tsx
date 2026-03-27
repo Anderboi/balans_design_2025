@@ -12,7 +12,7 @@ import { Participant } from "@/types";
 
 interface KanbanBoardProps {
   initialTasks: Task[];
-  projectId: string;
+  projectId?: string;
 }
 
 const COLUMNS = [

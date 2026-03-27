@@ -1,12 +1,16 @@
 "use client";
 
+import { declineTasks } from '@/lib/utils';
 import { Sparkles } from "lucide-react";
+import Link from "next/link";
 
 interface HeroCardProps {
   userName: string;
+  activeTasksCount: number;
 }
 
-export function HeroCard({ userName }: HeroCardProps) {
+
+export function HeroCard({ userName, activeTasksCount }: HeroCardProps) {
   return (
     <div className="bg-[#111111] text-white rounded-4xl p-8 md:p-12 relative overflow-hidden">
       {/* Background gradient/blob effect */}
@@ -22,7 +26,14 @@ export function HeroCard({ userName }: HeroCardProps) {
 
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-normal leading-[1.1] mb-12 max-w-3xl">
           Доброе утро, {userName}.
-          <br />У вас <span className="text-zinc-400">4 задачи</span> в
+          <br />У вас{" "}
+          <Link 
+            href="/tasks" 
+            className="text-zinc-400 hover:text-white transition-colors underline decoration-white/20 underline-offset-8"
+          >
+            {activeTasksCount} {declineTasks(activeTasksCount)}
+          </Link>{" "}
+          в
           <br />
           фокусе.
         </h1>

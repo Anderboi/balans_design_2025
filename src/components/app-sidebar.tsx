@@ -42,6 +42,11 @@ const items = [
     icon: BriefcaseBusiness,
   },
   {
+    title: "Все задачи",
+    href: "/tasks",
+    icon: SquareKanban,
+  },
+  {
     title: "Материалы",
     href: "/materials",
     icon: Package,

@@ -9,6 +9,7 @@ import PageContainer from '@/components/ui/page-container';
 export default async function Home() {
   const user = await getUser()
   let userName = "Пользователь";
+  let activeTasksCount = 0;
 
   if (user) {
     const supabase = await createClient();
@@ -35,13 +36,21 @@ export default async function Home() {
         user.email?.split("@")[0] || 
         "Пользователь";
     }
+
+    // Fetch active task count for current user (TODO or IN_PROGRESS)
+    const { count } = await supabase
+      .from("tasks")
+      .select("*", { count: "exact", head: true })
+      .in("status", ["TODO", "IN_PROGRESS", "REVIEW"]);
+      
+    activeTasksCount = count || 0;
   }
 
   return (
     <PageContainer>
       {/* Hero Section */}
       <section>
-        <HeroCard userName={userName} />
+        <HeroCard userName={userName} activeTasksCount={activeTasksCount} />
       </section>
 
       {/* Widgets Grid */}

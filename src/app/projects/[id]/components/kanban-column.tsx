@@ -14,7 +14,7 @@ interface KanbanColumnProps {
   id: string;
   title: string;
   tasks: Task[];
-  projectId: string;
+  projectId?: string;
   onTaskCreated: (task: Task) => void;
   onUpdateTask: (taskId: string, updates: Partial<Task>) => void;
   members: import("@/types").Participant[];
@@ -43,7 +43,7 @@ export const KanbanColumn = ({
     try {
       const newTask = await tasksService.createTask({
         title: newTaskTitle,
-        project_id: projectId,
+        project_id: projectId || null,
         status: id as TaskStatus,
         priority: TaskPriority.MEDIUM,
         due_date: new Date().toISOString(),
