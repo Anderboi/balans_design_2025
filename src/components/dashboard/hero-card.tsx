@@ -7,10 +7,12 @@ import Link from "next/link";
 interface HeroCardProps {
   userName: string;
   activeTasksCount: number;
+  activeProjectsCount: number;
+  totalTasksCount: number;
 }
 
 
-export function HeroCard({ userName, activeTasksCount }: HeroCardProps) {
+export function HeroCard({ userName, activeTasksCount, activeProjectsCount, totalTasksCount }: HeroCardProps) {
   return (
     <div className="bg-[#111111] text-white rounded-4xl p-8 md:p-12 relative overflow-hidden">
       {/* Background gradient/blob effect */}
@@ -52,13 +54,13 @@ export function HeroCard({ userName, activeTasksCount }: HeroCardProps) {
               <div className="text-xs text-zinc-400 uppercase tracking-wider mb-2">
                 Активные проекты
               </div>
-              <div className="text-4xl font-light">1</div>
+              <div className="text-4xl font-light">{activeProjectsCount}</div>
             </div>
             <div className="flex flex-col justify-between bg-white/5 backdrop-blur-md rounded-2xl p-6 w-40 border border-white/10">
               <div className="text-xs text-zinc-400 uppercase tracking-wider mb-2">
                 Всего задач
               </div>
-              <div className="text-4xl font-light">12</div>
+              <div className="text-4xl font-light">{totalTasksCount}</div>
             </div>
           </div>
         </div>

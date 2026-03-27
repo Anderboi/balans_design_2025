@@ -10,6 +10,8 @@ export default async function Home() {
   const user = await getUser()
   let userName = "Пользователь";
   let activeTasksCount = 0;
+  let activeProjectsCount = 0;
+  let totalTasksCount = 0;
 
   if (user) {
     const supabase = await createClient();
@@ -37,20 +39,40 @@ export default async function Home() {
         "Пользователь";
     }
 
-    // Fetch active task count for current user (TODO or IN_PROGRESS)
-    const { count } = await supabase
+    // Fetch active task count for current user (TODO, IN_PROGRESS, REVIEW)
+    const { count: focusTasks } = await supabase
       .from("tasks")
       .select("*", { count: "exact", head: true })
       .in("status", ["TODO", "IN_PROGRESS", "REVIEW"]);
       
-    activeTasksCount = count || 0;
+    activeTasksCount = focusTasks || 0;
+
+    // Fetch total active projects count
+    const { count: projectsCount } = await supabase
+      .from("projects")
+      .select("*", { count: "exact", head: true })
+      .neq("stage", "Комплектация"); // Or any other logic; if stage isn't Completation, it's active
+
+    activeProjectsCount = projectsCount || 0;
+
+    // Fetch total tasks count
+    const { count: totalTasks } = await supabase
+      .from("tasks")
+      .select("*", { count: "exact", head: true });
+
+    totalTasksCount = totalTasks || 0;
   }
 
   return (
     <PageContainer>
       {/* Hero Section */}
       <section>
-        <HeroCard userName={userName} activeTasksCount={activeTasksCount} />
+        <HeroCard 
+          userName={userName} 
+          activeTasksCount={activeTasksCount} 
+          activeProjectsCount={activeProjectsCount}
+          totalTasksCount={totalTasksCount}
+        />
       </section>
 
       {/* Widgets Grid */}
