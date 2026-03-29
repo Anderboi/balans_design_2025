@@ -1,92 +1,102 @@
-"use client";
-
 import { Clock } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from '../ui/button';
+import { createClient } from "@/lib/supabase/server";
+import { ACTION_STYLES, DEFAULT_ACTION_STYLE, describeAction, relativeTime } from "./history-utils";
+import { HistorySheetClient } from "./history-sheet-client";
 
-export function HistoryWidget() {
+export async function HistoryWidget() {
+  const supabase = await createClient();
+
+  // Fetch recent history entries across ALL projects, joining task + project + user
+  const { data: historyItems } = await supabase
+    .from("task_history" as any)
+    .select("id, action, details, created_at, task:tasks(id, title, project:projects(name)), user:profiles(full_name)")
+    .order("created_at", { ascending: false })
+    .limit(20)
+    .returns<any[]>();
+
+  const items = (historyItems ?? []).slice(0, 4);
+  const totalCount = historyItems?.length ?? 0;
+
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold">История изменений</h3>
-        <Clock className="size-4 text-gray-300" />
+    <div className="flex flex-col h-full bg-white shadow-lg shadow-zinc-200/40 rounded-4xl p-6 border border-zinc-100/50">
+      {/* Header */}
+      <div className="flex items-start justify-between mb-2">
+        <div>
+          <h3 className="text-lg font-semibold text-zinc-900 tracking-tight mb-1">
+            Последние изменения
+          </h3>
+          <p className="text-sm text-gray-400 mb-4">
+            {totalCount > 0
+              ? `${totalCount} событий за сутки`
+              : "Нет изменений"}
+          </p>
+        </div>
+        <Clock className="size-5 text-gray-300" />
       </div>
 
-      <div className="bg-white rounded-4xl p-6 shadow-lg shadow-zinc-300/50 flex-1">
-        <div className="space-y-6 relative">
-          {/* Timeline line */}
-          <div className="absolute left-[19px] top-8 bottom-0 w-px bg-gray-100" />
+      {/* History List */}
+      <div className="flex-1 flex flex-col">
+        {items.length > 0 ? (
+          <div className="space-y-2">
+            {items.map((item: any) => {
+              const actionStyle = ACTION_STYLES[item.action] || DEFAULT_ACTION_STYLE;
+              const Icon = actionStyle.icon;
+              const taskTitle = item.task?.title || "Задача";
+              const projectName = item.task?.project?.name || "";
+              const userName = item.user?.full_name || "";
+              const description = describeAction(item.action, item.details);
 
-          <div className="relative flex gap-4">
-            <Avatar className="size-10 border-2 border-white shadow-sm shrink-0 z-10">
-              <AvatarFallback>ЕС</AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="text-sm font-medium leading-none mb-1.5 pt-1">
-                Елена Смирнова{" "}
-                <span className="text-gray-400 font-normal">
-                  утвердила материал
-                </span>
-              </p>
-              <p className="text-sm text-gray-600 mb-2">
-                &quot;Инженерная доска Дуб Натур&quot;
-              </p>
-              <div className="flex items-center gap-2 text-xs text-gray-400">
-                <span className="w-2 h-2 rounded-full bg-green-400" />
-                АПАРТАМЕНТЫ ХАМОВНИКИ • 17:30
-              </div>
-            </div>
+              return (
+                <div
+                  key={item.id}
+                  className="flex items-center gap-3 p-3 rounded-2xl hover:bg-gray-50/80 transition-colors cursor-default"
+                >
+                  {/* Leading Icon */}
+                  <div className={`size-11 ${actionStyle.bg} rounded-xl flex items-center justify-center shrink-0`}>
+                    <Icon className={`size-5 ${actionStyle.text} opacity-60`} />
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium text-sm text-zinc-900 truncate leading-tight">
+                      {description}
+                    </h4>
+                    <p className="text-[11px] text-gray-400 truncate">
+                      {[taskTitle, projectName, userName].filter(Boolean).join(" • ")}
+                    </p>
+                  </div>
+
+                  {/* Time Badge */}
+                  <div className="shrink-0">
+                    <div className="text-[10px] font-medium text-gray-400 whitespace-nowrap">
+                      {relativeTime(item.created_at)}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-
-          <div className="relative flex gap-4">
-            <Avatar className="h-10 w-10 border-2 border-white shadow-sm shrink-0 z-10">
-              <AvatarFallback>ДС</AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="text-sm font-medium leading-none mb-1.5 pt-1">
-                Дмитрий Соколов{" "}
-                <span className="text-gray-400 font-normal">
-                  загрузил новый рендер
-                </span>
-              </p>
-              <p className="text-sm text-gray-600 mb-2">
-                &quot;Кухня-гостиная V2&quot;
-              </p>
-              <div className="flex items-center gap-2 text-xs text-gray-400">
-                <span className="w-2 h-2 rounded-full bg-blue-400" />
-                АПАРТАМЕНТЫ ХАМОВНИКИ • 14:20
-              </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center flex-1 text-center py-8 bg-zinc-50/50 rounded-2xl border border-dashed border-zinc-200">
+            <div className="h-12 w-12 rounded-full bg-white shadow-sm flex items-center justify-center mb-3">
+              <Clock className="h-5 w-5 text-zinc-300" />
             </div>
+            <h4 className="text-sm font-medium text-zinc-700 mb-1">
+              Нет изменений
+            </h4>
+            <p className="text-xs text-zinc-400 max-w-[200px] leading-relaxed">
+              История изменений по проектам пока пуста
+            </p>
           </div>
-
-          <div className="relative flex gap-4">
-            <Avatar className="h-10 w-10 border-2 border-white shadow-sm shrink-0 z-10">
-              <AvatarFallback>АП</AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="text-sm font-medium leading-none mb-1.5 pt-1">
-                Алексей Петров{" "}
-                <span className="text-gray-400 font-normal">
-                  изменил статус задачи
-                </span>
-              </p>
-              <p className="text-sm text-gray-600 mb-2">
-                &quot;Замеры террасы&quot;
-              </p>
-              <div className="flex items-center gap-2 text-xs text-gray-400">
-                <span className="w-2 h-2 rounded-full bg-blue-400" />
-                ЗАГОРОДНЫЙ ДОМ РЕПИНО • 10:45
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-8 pt-4 border-t border-gray-50 text-center">
-          <Button variant="ghost" className="text-xs font-semibold text-gray-400 hover:text-gray-600 uppercase tracking-widest transition-colors cursor-pointer">
-            Показать всё
-          </Button>
-        </div>
+        )}
       </div>
+
+      {/* Footer */}
+      {totalCount > 0 && (
+        <div className="mt-4 pt-3 border-t border-zinc-100 text-center">
+          <HistorySheetClient items={historyItems || []} totalCount={totalCount} />
+        </div>
+      )}
     </div>
   );
 }

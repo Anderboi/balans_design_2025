@@ -40,10 +40,7 @@ import { toast } from 'sonner';
 
 const projectInfoSchema = z.object({
   address: z.string().min(1, "Адрес обязателен"),
-  area: z.preprocess(
-    (val) => (val === "" ? 0 : Number(val)),
-    z.number().min(0, "Площадь не может быть отрицательной")
-  ),
+  area: z.coerce.number().min(0, "Площадь не может быть отрицательной"),
   stage: z.nativeEnum(ProjectStage),
   residents: z.string().optional(),
 });
@@ -64,7 +61,7 @@ export function ProjectInfoEditDialog({ project }: ProjectInfoEditDialogProps) {
     defaultValues: {
       address: project.address || "",
       area: project.area || 0,
-      stage: (project.stage as ProjectStage) || ProjectStage.ONBOARDING,
+      stage: (project.stage as ProjectStage) || ProjectStage.NEW,
       residents: project.residents || "",
     },
   });

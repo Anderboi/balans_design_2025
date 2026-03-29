@@ -21,7 +21,7 @@ export async function getProjects() {
 export async function getMaterials() {
   try {
     const supabase = await createClient();
-    return await materialsService.getMaterials(supabase);
+    return await materialsService.getMaterials(undefined, supabase);
   } catch (error) {
     console.error("Ошибка при загрузке материалов:", error);
     throw error;
