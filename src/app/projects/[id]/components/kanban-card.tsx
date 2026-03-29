@@ -2,7 +2,7 @@
 
 import { Draggable } from "@hello-pangea/dnd";
 import { Card, CardContent } from "@/components/ui/card";
-import { Task } from "@/types";
+import { Task, TASK_PRIORITY_STYLES, DEFAULT_PRIORITY_STYLE } from "@/types";
 import { cn } from "@/lib/utils/utils";
 import { TaskDetailsDialog } from "@/components/task-details-dialog";
 
@@ -53,19 +53,15 @@ export const KanbanCard = ({
                 <div className="flex justify-between items-center text-xs text-muted-foreground">
                   <span>{new Date(task.due_date).toLocaleDateString()}</span>
                   {task.priority && (
-                    <span
+                    <div
                       className={cn(
-                        "px-2 py-0.5 rounded-full bg-secondary",
-                        task.priority === "Высокий" &&
-                          "bg-red-100 text-red-700",
-                        task.priority === "Средний" &&
-                          "bg-yellow-100 text-yellow-700",
-                        task.priority === "Низкий" &&
-                          "bg-green-100 text-green-700",
+                        "text-[10px] font-medium uppercase tracking-wide px-2 py-0.5 rounded-lg shrink-0",
+                        (TASK_PRIORITY_STYLES[task.priority as string] || DEFAULT_PRIORITY_STYLE).bg,
+                        (TASK_PRIORITY_STYLES[task.priority as string] || DEFAULT_PRIORITY_STYLE).text
                       )}
                     >
-                      {task.priority}
-                    </span>
+                      {(TASK_PRIORITY_STYLES[task.priority as string] || DEFAULT_PRIORITY_STYLE).label}
+                    </div>
                   )}
                 </div>
               </CardContent>

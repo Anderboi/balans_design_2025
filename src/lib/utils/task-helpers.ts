@@ -1,21 +1,14 @@
-import { TaskStatus, TaskPriority, TASK_STATUS_LABELS } from "@/types";
+import { TaskStatus, TASK_STATUS_LABELS, TASK_PRIORITY_STYLES, DEFAULT_PRIORITY_STYLE } from "@/types";
 
 export const getTaskPriorityColor = (priority?: string): string => {
-  const priorityMap: Record<string, string> = {
-    [TaskPriority.HIGH]: "bg-red-100 text-red-700 border-red-200",
-    high: "bg-red-100 text-red-700 border-red-200",
-    высокий: "bg-red-100 text-red-700 border-red-200",
-    [TaskPriority.MEDIUM]: "bg-amber-100 text-amber-700 border-amber-200",
-    medium: "bg-amber-100 text-amber-700 border-amber-200",
-    средний: "bg-amber-100 text-amber-700 border-amber-200",
-    [TaskPriority.LOW]: "bg-zinc-100 text-zinc-600 border-zinc-200",
-    low: "bg-zinc-100 text-zinc-600 border-zinc-200",
-    низкий: "bg-zinc-100 text-zinc-600 border-zinc-200",
-  };
+  if (!priority) return `${DEFAULT_PRIORITY_STYLE.bg} ${DEFAULT_PRIORITY_STYLE.text}`;
+  
+  // Normalize priority to match enum case/Russian labels
+  const style = TASK_PRIORITY_STYLES[priority] || 
+                TASK_PRIORITY_STYLES[priority.charAt(0).toUpperCase() + priority.slice(1).toLowerCase()] ||
+                DEFAULT_PRIORITY_STYLE;
 
-  return (
-    priorityMap[priority || ""] || "bg-zinc-100 text-zinc-600 border-zinc-200"
-  );
+  return `${style.bg} ${style.text}`;
 };
 export const getTaskStatusColor = (status: string): string => {
   const statusMap: Record<string, string> = {

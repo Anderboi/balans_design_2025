@@ -122,6 +122,37 @@ export enum TaskPriority {
   HIGH = "Высокий",
 }
 
+export const TASK_PRIORITY_STYLES: Record<
+  string,
+  { bg: string; text: string; light: string; label: string }
+> = {
+  [TaskPriority.HIGH]: {
+    bg: "bg-red-50",
+    text: "text-red-500",
+    light: "bg-red-100/50",
+    label: "Критично",
+  },
+  [TaskPriority.MEDIUM]: {
+    bg: "bg-amber-50",
+    text: "text-amber-600",
+    light: "bg-amber-100/50",
+    label: "Средний",
+  },
+  [TaskPriority.LOW]: {
+    bg: "bg-blue-50",
+    text: "text-blue-600",
+    light: "bg-blue-100/50",
+    label: "Низкий",
+  },
+};
+
+export const DEFAULT_PRIORITY_STYLE = {
+  bg: "bg-zinc-50",
+  text: "text-zinc-500",
+  light: "bg-zinc-100/50",
+  label: "Обычный",
+};
+
 export enum TaskStatus {
   TODO = "TODO",
   IN_PROGRESS = "IN_PROGRESS",

@@ -1,21 +1,21 @@
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, ListTodo } from "lucide-react";
 import Link from "next/link";
-import { TaskDetailsDialog } from '../task-details-dialog';
-import { Badge } from '../ui/badge';
-import { tasksService } from '@/lib/services/tasks';
-import { getUser } from '@/lib/supabase/getuser';
-import { TaskPriority } from '@/types';
-import { formatDate } from '@/lib/utils/utils';
+import { TaskDetailsDialog } from "../task-details-dialog";
+import { tasksService } from "@/lib/services/tasks";
+import { getUser } from "@/lib/supabase/getuser";
+import { TaskPriority, TASK_PRIORITY_STYLES, DEFAULT_PRIORITY_STYLE } from "@/types";
+import { formatDate } from "@/lib/utils/utils";
+
 
 export async function TasksWidget() {
   const user = await getUser();
   if (!user) return null;
 
   const allTasks = await tasksService.getTasks();
-  
+
   // Filter for active status (matches HeroCard logic)
-  const activeTasks = allTasks.filter(
-    (task) => ["TODO", "IN_PROGRESS", "REVIEW"].includes(task.status)
+  const activeTasks = allTasks.filter((task) =>
+    ["TODO", "IN_PROGRESS", "REVIEW"].includes(task.status)
   );
 
   // Sort by priority and due date
@@ -40,67 +40,59 @@ export async function TasksWidget() {
   });
 
   const topTasks = activeTasks.slice(0, 3);
-
-  const getPriorityInfo = (priority: string) => {
-    switch (priority) {
-      case TaskPriority.HIGH:
-        return { label: "Критично", className: "bg-red-50 text-red-500 hover:bg-red-50" };
-      case TaskPriority.MEDIUM:
-        return { label: "Средний", className: "bg-amber-50 text-amber-600 hover:bg-amber-50" };
-      case TaskPriority.LOW:
-        return { label: "Низкий", className: "bg-blue-50 text-blue-600 hover:bg-blue-50" };
-      default:
-        return { label: priority || "ОБЫЧНЫЙ", className: "bg-zinc-50 text-zinc-500 hover:bg-zinc-50" };
-    }
-  };
+  const activeCount = activeTasks.length;
 
   return (
     <div className="flex flex-col h-full bg-white shadow-lg shadow-zinc-200/40 rounded-4xl p-6 border border-zinc-100/50">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-zinc-900 tracking-tight">
-          Ваши текущие задачи
-        </h3>
-        <Link
-          href="/tasks"
-          className="text-sm font-medium text-blue-500 hover:text-blue-600 transition-colors flex items-center gap-1"
-        >
-          Все задачи <ArrowRight className="h-4 w-4" />
-        </Link>
+      {/* Header */}
+      <div className="flex items-start justify-between mb-2">
+        <div>
+          <h3 className="text-lg font-semibold text-zinc-900 tracking-tight mb-1">
+            Текущие задачи
+          </h3>
+          <p className="text-sm text-gray-400 mb-4">
+            {activeCount > 0
+              ? `${activeCount} задачи в работе`
+              : "Нет активных задач"}
+          </p>
+        </div>
+        <ListTodo className="size-5 text-gray-300" />
       </div>
 
-      <div className="flex flex-col flex-1">
+      {/* Task List */}
+      <div className="flex-1 flex flex-col">
         {topTasks.length > 0 ? (
-          <div className="grid grid-cols-1 gap-3">
+          <div className="space-y-2">
             {topTasks.map((task) => {
-              const priorityInfo = getPriorityInfo(task.priority as string || "");
-              // @ts-expect-error - project might be populated from the query update
-              const projectName = task.project?.name || "Организационная задача";
-              
+              const priority = (task.priority as string) || "";
+              const style = TASK_PRIORITY_STYLES[priority] || DEFAULT_PRIORITY_STYLE;
+              // @ts-expect-error - project might be populated
+              const projectName = task.project?.name || "Организационная";
+
               return (
                 <TaskDetailsDialog key={task.id} task={task}>
-                  <div className="bg-white border hover:border-blue-200 hover:shadow-md border-zinc-100 rounded-2xl p-4 cursor-pointer group text-left w-full relative transition-all duration-200">
-                    <div className="flex justify-between items-center mb-3">
-                      <Badge
-                        variant="outline"
-                        className={`border-0 text-[10px] sm:text-xs px-2.5 py-0.5 font-medium uppercase tracking-wider ${priorityInfo.className}`}
-                      >
-                        {priorityInfo.label}
-                      </Badge>
-                      <span className="text-xs font-medium text-zinc-400">
-                        {task.due_date ? formatDate(task.due_date) : "Без срока"}
-                      </span>
+                  <div className="flex items-center gap-3 p-3 rounded-2xl hover:bg-gray-50/80 transition-colors cursor-pointer group">
+                    {/* leading icon/placeholder */}
+                    <div className={`size-11 ${style.light} rounded-xl flex items-center justify-center shrink-0`}>
+                      <CheckCircle2 className={`size-5 ${style.text} opacity-60`} />
                     </div>
 
-                    <h4 className="text-[15px] sm:text-base font-medium text-zinc-900 mb-4 group-hover:text-blue-600 transition-colors line-clamp-2 leading-snug">
-                      {task.title}
-                    </h4>
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-sm text-zinc-900 truncate leading-tight group-hover:text-blue-600 transition-colors">
+                        {task.title}
+                      </h4>
+                      <p className="text-[11px] text-gray-400 truncate">
+                        {projectName} • {task.due_date ? formatDate(task.due_date) : "Без срока"}
+                      </p>
+                    </div>
 
-                    <div className="flex items-center justify-between mt-auto">
-                      <span className="text-xs font-medium text-zinc-400 uppercase tracking-wider line-clamp-1 max-w-[80%]">
-                        {projectName}
-                      </span>
-                      <div className="h-7 w-7 rounded-full bg-zinc-50 flex items-center justify-center group-hover:bg-blue-50 transition-colors shrink-0">
-                        <ArrowRight className="h-3.5 w-3.5 text-zinc-400 group-hover:text-blue-500 transition-colors" />
+                    {/* Priority Badge */}
+                    <div className="shrink-0">
+                      <div
+                        className={`text-[10px] font-medium uppercase tracking-wide px-2.5 py-1 rounded-lg ${style.bg} ${style.text}`}
+                      >
+                        {style.label}
                       </div>
                     </div>
                   </div>
@@ -109,15 +101,31 @@ export async function TasksWidget() {
             })}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center flex-1 text-center py-10 bg-zinc-50/50 rounded-2xl border border-dashed border-zinc-200">
-            <div className="h-12 w-12 rounded-full bg-white shadow-sm flex items-center justify-center mb-4">
-              <CheckCircle2 className="h-6 w-6 text-zinc-300" />
+          <div className="flex flex-col items-center justify-center flex-1 text-center py-8 bg-zinc-50/50 rounded-2xl border border-dashed border-zinc-200">
+            <div className="h-12 w-12 rounded-full bg-white shadow-sm flex items-center justify-center mb-3">
+              <CheckCircle2 className="h-5 w-5 text-zinc-300" />
             </div>
-            <h4 className="text-sm font-medium text-zinc-700 mb-1">Нет активных задач</h4>
-            <p className="text-xs text-zinc-500 max-w-[200px] leading-relaxed">У вас нет задач в работе. Отличный повод передохнуть!</p>
+            <h4 className="text-sm font-medium text-zinc-700 mb-1">
+              Все задачи выполнены
+            </h4>
+            <p className="text-xs text-zinc-400 max-w-[200px] leading-relaxed">
+              У вас нет активных задач в работе
+            </p>
           </div>
         )}
       </div>
+
+      {/* Footer */}
+      {activeCount > 0 && (
+        <div className="mt-4 pt-3 border-t border-zinc-100 text-center">
+          <Link
+            href="/tasks"
+            className="text-xs font-semibold text-gray-400 hover:text-gray-600 uppercase tracking-widest transition-colors inline-flex items-center gap-1"
+          >
+            Все задачи <ArrowRight className="size-3" />
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

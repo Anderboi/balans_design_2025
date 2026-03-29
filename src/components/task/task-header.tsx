@@ -1,6 +1,6 @@
 "use client";
 
-import { Task, TaskPriority } from "@/types";
+import { Task, TaskPriority, TASK_PRIORITY_STYLES } from "@/types";
 import { DialogTitle } from "@/components/ui/dialog";
 import {
   getTaskPriorityColor,
@@ -21,11 +21,10 @@ interface TaskHeaderProps {
 }
 
 export function TaskHeader({ task, onUpdateTask }: TaskHeaderProps) {
-  const priorities = [
-    { value: TaskPriority.HIGH, label: "Высокий" },
-    { value: TaskPriority.MEDIUM, label: "Средний" },
-    { value: TaskPriority.LOW, label: "Низкий" },
-  ];
+  const priorities = Object.entries(TASK_PRIORITY_STYLES).map(([value, style]) => ({
+    value: value as TaskPriority,
+    label: style.label,
+  }));
 
   const handlePriorityChange = (priority: TaskPriority) => {
     if (onUpdateTask) {
@@ -45,7 +44,7 @@ export function TaskHeader({ task, onUpdateTask }: TaskHeaderProps) {
                     task.priority,
                   )} hover:brightness-95`}
                 >
-                  {task.priority || "Без приоритета"}
+                  {task.priority ? (TASK_PRIORITY_STYLES[task.priority] || { label: task.priority }).label : "Без приоритета"}
                   <ChevronDown size={10} className="opacity-50" />
                 </button>
               </DropdownMenuTrigger>
