@@ -1,3 +1,5 @@
+"use client";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -6,13 +8,17 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
+import { MaterialStatus, MATERIAL_STATUS_LABELS } from "@/types";
 
-// Constants
+// Constants — Apple HIG system colors
 export const STATUS_OPTIONS = [
-  { label: "В работе", value: "in_progress", color: "#FF9F0A" },
-  { label: "Закуплено", value: "purchased", color: "#34C759" },
-  { label: "Отменено", value: "cancelled", color: "#FF3B30" },
-  { label: "Оплачено", value: "paid", color: "#007AFF" },
+  { label: MATERIAL_STATUS_LABELS[MaterialStatus.NOT_SELECTED], value: MaterialStatus.NOT_SELECTED, color: "#8E8E93" },
+  { label: MATERIAL_STATUS_LABELS[MaterialStatus.SELECTED], value: MaterialStatus.SELECTED, color: "#AF52DE" },
+  { label: MATERIAL_STATUS_LABELS[MaterialStatus.REJECTED], value: MaterialStatus.REJECTED, color: "#FF3B30" },
+  { label: MATERIAL_STATUS_LABELS[MaterialStatus.APPROVED], value: MaterialStatus.APPROVED, color: "#FF9F0A" },
+  { label: MATERIAL_STATUS_LABELS[MaterialStatus.ORDERED], value: MaterialStatus.ORDERED, color: "#007AFF" },
+  { label: MATERIAL_STATUS_LABELS[MaterialStatus.PAID], value: MaterialStatus.PAID, color: "#5856D6" },
+  { label: MATERIAL_STATUS_LABELS[MaterialStatus.DELIVERED], value: MaterialStatus.DELIVERED, color: "#34C759" },
 ] as const;
 
 const StatusDropdown = ({

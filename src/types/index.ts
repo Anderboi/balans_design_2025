@@ -222,6 +222,26 @@ export enum MaterialType {
   ELECTRIC = "Электрика",
 }
 
+export enum MaterialStatus {
+  NOT_SELECTED = "not_selected",
+  SELECTED = "selected",
+  REJECTED = "rejected",
+  APPROVED = "approved",
+  ORDERED = "ordered",
+  PAID = "paid",
+  DELIVERED = "delivered",
+}
+
+export const MATERIAL_STATUS_LABELS: Record<MaterialStatus, string> = {
+  [MaterialStatus.NOT_SELECTED]: "Не выбрано",
+  [MaterialStatus.SELECTED]: "Подобрано",
+  [MaterialStatus.REJECTED]: "Отклонено",
+  [MaterialStatus.APPROVED]: "Согласовано",
+  [MaterialStatus.ORDERED]: "Заказано",
+  [MaterialStatus.PAID]: "Оплачено",
+  [MaterialStatus.DELIVERED]: "Доставлено",
+};
+
 export interface SpecificationMaterial {
   id: string;
   project_id: string;
@@ -250,7 +270,9 @@ export interface SpecificationMaterial {
   image_url?: string;
   in_stock?: boolean;
   tags?: string[];
-  status?: string;
+  status?: MaterialStatus;
+  expected_delivery_date?: string;
+  order_date?: string;
 }
 
 // Типы для контактов

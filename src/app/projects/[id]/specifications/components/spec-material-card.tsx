@@ -1,21 +1,19 @@
 "use client";
 
 import MaterialData from "./material-data";
-import { SpecificationMaterial } from "@/types";
+import { SpecificationMaterial, MaterialStatus } from "@/types";
 import { useForm } from "react-hook-form";
 import { materialsService } from "@/lib/services/materials";
 import { toast } from "sonner";
 import { useCallback, useMemo } from "react";
 import { Separator } from "@/components/ui/separator";
 import Thumbnail from "./thumbnail";
-import StatusDropdown, {
-  STATUS_OPTIONS,
-} from "@/app/projects/[id]/specifications/components/status-dropdown";
+import StatusDropdown from "@/app/projects/[id]/specifications/components/status-dropdown";
 import ActionButtons from "./action-buttons";
 import { DebouncedInput } from "@/components/debounced-input";
 import { cn } from "@/lib/utils";
 
-type StatusValue = (typeof STATUS_OPTIONS)[number]["value"];
+
 
 interface SpecMaterialCardProps {
   material: SpecificationMaterial;
@@ -38,7 +36,7 @@ const SpecMaterialCard = ({ material, onUpdate }: SpecMaterialCardProps) => {
       price: Number(material.price) || 0,
       quantity: Number(material.quantity) || 1,
       project_article: material.project_article ?? "",
-      status: material.status ?? "in_progress",
+      status: material.status ?? MaterialStatus.NOT_SELECTED,
     },
     resetOptions: {
       keepDirtyValues: true,
@@ -95,13 +93,14 @@ const SpecMaterialCard = ({ material, onUpdate }: SpecMaterialCardProps) => {
 
   const handleStatusChange = useCallback(
     async (value: string) => {
+      const statusValue = value as MaterialStatus;
       try {
         await materialsService.updateSpecMaterial(material.id, {
-          status: value,
+          status: statusValue,
         });
-        onUpdate?.({ ...material, status: value });
+        onUpdate?.({ ...material, status: statusValue });
         // keepValues: true — don't reset other fields, only mark status as clean
-        reset({ ...getValues(), status: value as StatusValue });
+        reset({ ...getValues(), status: statusValue });
         toast.success("Статус обновлён", { duration: 1000 });
       } catch {
         toast.error("Ошибка обновления статуса");
