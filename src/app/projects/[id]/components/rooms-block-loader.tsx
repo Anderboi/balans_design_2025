@@ -1,9 +1,10 @@
 import { projectsService } from "@/lib/services/projects";
 import RoomsBlock from "./rooms-block";
 import { createClient } from "@/lib/supabase/server";
+import { Room } from "@/types";
 
 export default async function RoomsBlockLoader({ id }: { id: string }) {
   const supabase = await createClient();
   const rooms = await projectsService.getRooms(id, supabase);
-  return <RoomsBlock id={id} rooms={rooms} />;
+  return <RoomsBlock id={id} rooms={rooms as unknown as Room[]} />;
 }

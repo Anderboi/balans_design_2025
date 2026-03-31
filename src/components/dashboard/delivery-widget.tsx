@@ -101,7 +101,6 @@ export async function DeliveryWidget() {
               const status = item.status as MaterialStatus;
               const style = STATUS_STYLES[status] ?? STATUS_STYLES[MaterialStatus.NOT_SELECTED];
               const label = MATERIAL_STATUS_LABELS[status] ?? status;
-              // @ts-expect-error — projects may be populated from the join
               const projectName = item.projects?.name ?? "";
 
               return (

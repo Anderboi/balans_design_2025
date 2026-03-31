@@ -41,25 +41,14 @@ const ProfileSettingsPage = async () => {
     return <div>Profile not found</div>;
   }
 
-  // Transform data for form
-  // Assuming full_name is "First Last"
-  let firstName = "";
-  let lastName = "";
-  if (profile.full_name) {
-    const parts = profile.full_name.split(" ");
-    firstName = parts[0] || "";
-    lastName = parts.slice(1).join(" ") || "";
-  }
-
   // Use DB columns if they exist, otherwise fallback or parsing
   const initialData = {
-    first_name: profile.first_name || firstName,
-    last_name: profile.last_name || lastName,
+    full_name: profile.full_name || user.user_metadata?.full_name || "",
     email: profile.email || user.email || "",
     company: profile.company || "",
     avatar_url: profile.avatar_url || undefined,
     full_name_display: profile.full_name || user.email,
-    role: profile.role,
+    role: profile.role || "client",
   };
 
   return (

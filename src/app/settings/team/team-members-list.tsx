@@ -78,7 +78,7 @@ export function TeamMembersList({
               {isAdmin && !isCurrentUser ? (
                 <>
                   <Select
-                    value={member.role}
+                    value={member.role || undefined}
                     onValueChange={(value) =>
                       handleRoleChange(member.id, value as AppRole)
                     }

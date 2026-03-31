@@ -26,11 +26,11 @@ export default async function Home() {
       if (profile.full_name) {
         firstName = profile.full_name.split(" ")[0] || "";
       }
-      userName = 
-        profile.first_name || 
-        firstName || 
-        user.user_metadata?.full_name || 
-        user.email?.split("@")[0] || 
+      userName =
+        firstName ||
+        profile.full_name ||
+        user.user_metadata?.full_name ||
+        user.email?.split("@")[0] ||
         "Пользователь";
     } else {
       userName = 

@@ -1,16 +1,16 @@
 "use client";
 
-import { DrawingSet } from "@/types/drawings";
+import { DrawingFile } from "@/types/drawings";
 import { SharedVariantDetailDialog } from "@/app/projects/components/shared-variant-detail-dialog";
 import { drawingSetsService } from "@/lib/services/drawing-sets";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
 interface DrawingSetDetailDialogProps {
-  drawingSet: DrawingSet | null;
+  drawingSet: DrawingFile | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onUpdateDrawingSet?: (updated: DrawingSet) => void;
+  onUpdateDrawingSet?: (updated: DrawingFile) => void;
   onDeleteDrawingSet?: (id: string) => void;
 }
 
@@ -28,8 +28,8 @@ export function DrawingSetDetailDialog({
 
   // Build images array from the drawing set
   const images =
-    drawingSet.images && drawingSet.images.length > 0
-      ? drawingSet.images
+    Array.isArray(drawingSet.images) && drawingSet.images.length > 0
+      ? (drawingSet.images as any[])
       : [
           // Primary preview image
           ...(drawingSet.image_url
@@ -144,7 +144,7 @@ export function DrawingSetDetailDialog({
       }}
       onVariantUpdated={(updated) => {
         if (onUpdateDrawingSet) {
-          onUpdateDrawingSet(updated as DrawingSet);
+          onUpdateDrawingSet(updated as DrawingFile);
         }
       }}
       onVariantDeleted={(id) => {

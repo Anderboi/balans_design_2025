@@ -24,11 +24,8 @@ import { Database } from "@/types/supabase";
 
 // Schema for profile validation
 const profileFormSchema = z.object({
-  first_name: z.string().min(2, {
+  full_name: z.string().min(2, {
     message: "Имя должно содержать минимум 2 символа.",
-  }),
-  last_name: z.string().min(2, {
-    message: "Фамилия должна содержать минимум 2 символа.",
   }),
   email: z.string().email({
     message: "Введите корректный email.",
@@ -40,8 +37,7 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 interface ProfileFormProps {
   initialData: {
-    first_name: string;
-    last_name: string;
+    full_name: string;
     email: string;
     company: string;
     avatar_url?: string;
@@ -58,8 +54,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      first_name: initialData.first_name,
-      last_name: initialData.last_name,
+      full_name: initialData.full_name,
       email: initialData.email,
       company: initialData.company,
     },
@@ -68,8 +63,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
   async function onSubmit(data: ProfileFormValues) {
     startTransition(async () => {
       const formData = new FormData();
-      formData.append("first_name", data.first_name);
-      formData.append("last_name", data.last_name);
+      formData.append("full_name", data.full_name);
       formData.append("email", data.email);
       if (data.company) formData.append("company", data.company);
 
@@ -120,8 +114,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
         <Avatar className="h-24 w-24">
           <AvatarImage src={avatarUrl} alt={initialData.full_name_display} />
           <AvatarFallback>
-            {initialData.first_name?.[0]}
-            {initialData.last_name?.[0]}
+            {initialData.full_name?.[0]?.toUpperCase() || "U"}
           </AvatarFallback>
         </Avatar>
         <div className="space-y-2 flex flex-col">
@@ -152,29 +145,14 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField
               control={form.control}
-              name="first_name"
+              name="full_name"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="md:col-span-2">
                   <FormLabel className="uppercase text-xs font-bold text-zinc-500">
-                    Имя
+                    Имя и Фамилия
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="Имя" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="last_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="uppercase text-xs font-bold text-zinc-500">
-                    Фамилия
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="Фамилия" {...field} />
+                    <Input placeholder="Иван Иванов" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

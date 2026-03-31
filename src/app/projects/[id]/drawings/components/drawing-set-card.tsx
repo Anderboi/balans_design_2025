@@ -1,13 +1,13 @@
 "use client";
 
-import { DrawingSet, DRAWING_CATEGORIES } from "@/types/drawings";
+import { DrawingFile, DRAWING_CATEGORIES } from "@/types/drawings";
 import { FileText, FolderOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
 interface DrawingSetCardProps {
-  drawingSet: DrawingSet;
-  onView: (set: DrawingSet) => void;
+  drawingSet: DrawingFile;
+  onView: (set: DrawingFile) => void;
 }
 
 export function DrawingSetCard({ drawingSet, onView }: DrawingSetCardProps) {
@@ -25,7 +25,8 @@ export function DrawingSetCard({ drawingSet, onView }: DrawingSetCardProps) {
     "Общие чертежи";
 
   const totalFiles =
-    (drawingSet.images?.length || 0) + (drawingSet.file_url ? 1 : 0);
+    (Array.isArray(drawingSet.images) ? drawingSet.images.length : 0) +
+    (drawingSet.file_url ? 1 : 0);
 
   const fileSizeMB = drawingSet.file_size
     ? (drawingSet.file_size / (1024 * 1024)).toFixed(1)

@@ -35,7 +35,7 @@ export default function EditProjectPage() {
             name: project.name || "",
             address: project.address || "",
             area: project.area ? String(project.area) : "",
-            stage: project.stage || ProjectStage.PREPROJECT,
+            stage: (project.stage as ProjectStage) || ProjectStage.PREPROJECT,
             residents: project.residents || "",
             demolition_info: project.demolition_info || "",
             construction_info: project.construction_info || ""

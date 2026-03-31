@@ -138,7 +138,7 @@ export function RoomSection({
       >
         <div className="flex items-center gap-4">
           <h3 className="text-lg font-bold text-gray-900">{room.name}</h3>
-          {room.area > 0 && (
+          {(room.area ?? 0) > 0 && (
             <span className="text-sm text-gray-400">{room.area} м²</span>
           )}
           <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">

@@ -57,11 +57,11 @@ export function ProjectInfoEditDialog({ project }: ProjectInfoEditDialogProps) {
   // const { toast } = useToast();
 
   const form = useForm<z.infer<typeof projectInfoSchema>>({
-    resolver: zodResolver(projectInfoSchema),
+    resolver: zodResolver(projectInfoSchema) as any,
     defaultValues: {
       address: project.address || "",
       area: project.area || 0,
-      stage: (project.stage as ProjectStage) || ProjectStage.NEW,
+      stage: (project.stage as ProjectStage) || ProjectStage.PREPROJECT,
       residents: project.residents || "",
     },
   });

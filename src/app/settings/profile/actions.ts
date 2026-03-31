@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { profilesService } from "@/lib/services/profiles";
-import { storageService } from "@/lib/services/storage";
+
 
 export async function updateProfile(formData: FormData) {
   const supabase = await createClient();
@@ -17,22 +17,16 @@ export async function updateProfile(formData: FormData) {
 
   const id = user.id;
   // We need to map form data to profile fields.
-  // Assuming the user fills: first_name, last_name, company, email.
-  // We'll combine first_name + last_name to full_name if needed or just store them if schema allows.
-
-  const firstName = formData.get("first_name") as string;
-  const lastName = formData.get("last_name") as string;
+  // Assuming the user fills: full_name, company, email.
+  const fullName = formData.get("full_name") as string;
   const company = formData.get("company") as string;
-  const email = formData.get("email") as string; // Note: changing email here might not change auth email without extra steps.
 
   const updates: any = {
     updated_at: new Date().toISOString(),
   };
 
-  if (firstName || lastName) {
-    updates.full_name = `${firstName} ${lastName}`.trim();
-    // updates.first_name = firstName; // Uncomment if columns exist
-    // updates.last_name = lastName; // Uncomment if columns exist
+  if (fullName) {
+    updates.full_name = fullName.trim();
   }
 
   if (company) updates.company = company; // Uncomment if column exists

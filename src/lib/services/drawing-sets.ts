@@ -79,7 +79,7 @@ export const drawingSetsService = {
 
   async updateDrawingSet(
     drawingId: string,
-    updates: Partial<Pick<DrawingFile, "title" | "description" | "category">>,
+    updates: Partial<Pick<DrawingFile, "title" | "description" | "category" | "images">>,
     client: SupabaseClient,
   ): Promise<DrawingFile> {
     const { data, error } = await client

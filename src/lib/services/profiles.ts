@@ -57,8 +57,8 @@ export const profilesService = {
       avatar_url?: string;
       email?: string;
       company?: string;
-      first_name?: string;
-      last_name?: string;
+      first_name?: never;
+      last_name?: never;
       notifications_new_tasks?: boolean;
       notifications_comments?: boolean;
       notifications_project_statuses?: boolean;
