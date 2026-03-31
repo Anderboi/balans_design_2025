@@ -2,6 +2,7 @@ import { Clock } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { ACTION_STYLES, DEFAULT_ACTION_STYLE, describeAction, relativeTime } from "./history-utils";
 import { HistorySheetClient } from "./history-sheet-client";
+import { TaskDetailsDialog } from "../task-details-dialog";
 
 export async function HistoryWidget() {
   const supabase = await createClient();
@@ -9,7 +10,7 @@ export async function HistoryWidget() {
   // Fetch recent history entries across ALL projects, joining task + project + user
   const { data: historyItems } = await supabase
     .from("task_history" as any)
-    .select("id, action, details, created_at, task:tasks(id, title, project:projects(name)), user:profiles(full_name)")
+    .select("id, action, details, created_at, task:tasks(*, project:projects(*)), user:profiles(full_name)")
     .order("created_at", { ascending: false })
     .limit(20)
     .returns<any[]>();
@@ -46,11 +47,8 @@ export async function HistoryWidget() {
               const userName = item.user?.full_name || "";
               const description = describeAction(item.action, item.details);
 
-              return (
-                <div
-                  key={item.id}
-                  className="flex items-center gap-3 p-3 rounded-2xl hover:bg-gray-50/80 transition-colors cursor-default"
-                >
+              const content = (
+                <>
                   {/* Leading Icon */}
                   <div className={`size-11 ${actionStyle.bg} rounded-xl flex items-center justify-center shrink-0`}>
                     <Icon className={`size-5 ${actionStyle.text} opacity-60`} />
@@ -72,7 +70,28 @@ export async function HistoryWidget() {
                       {relativeTime(item.created_at)}
                     </div>
                   </div>
-                </div>
+                </>
+              );
+
+              if (item.action === "deleted" || !item.task?.id) {
+                return (
+                  <div
+                    key={item.id}
+                    className="flex items-center gap-3 p-3 rounded-2xl transition-colors cursor-default opacity-80"
+                  >
+                    {content}
+                  </div>
+                );
+              }
+
+              return (
+                <TaskDetailsDialog key={item.id} task={item.task}>
+                  <div
+                    className="flex items-center gap-3 p-3 rounded-2xl hover:bg-gray-50/80 transition-colors cursor-pointer group"
+                  >
+                    {content}
+                  </div>
+                </TaskDetailsDialog>
               );
             })}
           </div>

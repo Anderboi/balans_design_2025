@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ACTION_STYLES, DEFAULT_ACTION_STYLE, describeAction, relativeTime } from "./history-utils";
+import { TaskDetailsDialog } from "../task-details-dialog";
 
 interface HistorySheetClientProps {
   items: any[];
@@ -50,11 +51,8 @@ export function HistorySheetClient({ items, totalCount }: HistorySheetClientProp
               const userName = item.user?.full_name || "Пользователь";
               const description = describeAction(item.action, item.details);
 
-              return (
-                <div
-                  key={item.id}
-                  className="flex items-start gap-4 p-4 rounded-2xl bg-zinc-50/50 hover:bg-zinc-50 border border-zinc-100/50 transition-colors"
-                >
+              const content = (
+                <>
                   {/* Leading Icon */}
                   <div className={`mt-0.5 size-10 ${actionStyle.bg} rounded-xl flex items-center justify-center shrink-0`}>
                     <Icon className={`size-5 ${actionStyle.text} opacity-60`} />
@@ -62,7 +60,7 @@ export function HistorySheetClient({ items, totalCount }: HistorySheetClientProp
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-sm text-zinc-900 leading-snug mb-1">
+                    <h4 className="font-medium text-sm text-zinc-900 leading-snug mb-1 group-hover:text-blue-600 transition-colors">
                       {description}
                     </h4>
                     <p className="text-xs text-gray-500 mb-2 truncate">
@@ -80,7 +78,28 @@ export function HistorySheetClient({ items, totalCount }: HistorySheetClientProp
                       </span>
                     </div>
                   </div>
-                </div>
+                </>
+              );
+
+              if (item.action === "deleted" || !item.task?.id) {
+                return (
+                  <div
+                    key={item.id}
+                    className="flex items-start gap-4 p-4 rounded-2xl bg-zinc-50/50 border border-zinc-100/50 transition-colors cursor-default opacity-80"
+                  >
+                    {content}
+                  </div>
+                );
+              }
+
+              return (
+                <TaskDetailsDialog key={item.id} task={item.task}>
+                  <div
+                    className="flex items-start gap-4 p-4 rounded-2xl bg-zinc-50/50 hover:bg-zinc-50 border border-zinc-100/50 transition-colors cursor-pointer group hover:shadow-sm"
+                  >
+                    {content}
+                  </div>
+                </TaskDetailsDialog>
               );
             })}
             
