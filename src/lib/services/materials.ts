@@ -27,7 +27,7 @@ export const materialsService = {
       throw error;
     }
 
-    return data || [];
+    return (data as unknown as Material[]) || [];
   },
 
   // Получить материалы по типу
@@ -47,7 +47,7 @@ export const materialsService = {
       throw error;
     }
 
-    return data || [];
+    return (data as unknown as Material[]) || [];
   },
 
   // Поиск материалов
@@ -80,7 +80,7 @@ export const materialsService = {
       throw error;
     }
 
-    return data || [];
+    return (data as unknown as Material[]) || [];
   },
 
   // Получить материал по ID
@@ -100,7 +100,7 @@ export const materialsService = {
       throw error;
     }
 
-    return data;
+    return data as unknown as Material;
   },
 
   // Создать новый материал
@@ -117,10 +117,9 @@ export const materialsService = {
       data: { user },
     } = await supabaseClient.auth.getUser();
 
-    // Удаляем attachments, так как такой колонки нет в таблице materials
-    // Также гарантируем наличие user_id
-    const { attachments: _attachments, ...insertData } = material as Record<string, unknown>;
-    void _attachments;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { attachments, ...insertData } = material as any;
+    void attachments;
 
     const { data, error } = await supabaseClient
       .from("materials")
@@ -138,7 +137,7 @@ export const materialsService = {
       throw error;
     }
 
-    return data;
+    return data as unknown as Material;
   },
 
   // Обновить материал
@@ -148,9 +147,11 @@ export const materialsService = {
     client?: SupabaseClient,
   ): Promise<Material> {
     const supabaseClient = client || supabase;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { attachments, ...updateData } = updates as any;
     const { data, error } = await supabaseClient
       .from("materials")
-      .update({ ...updates, updated_at: new Date().toISOString() })
+      .update({ ...updateData, updated_at: new Date().toISOString() })
       .eq("id", id)
       .select()
       .single();
@@ -160,7 +161,7 @@ export const materialsService = {
       throw error;
     }
 
-    return data;
+    return data as unknown as Material;
   },
 
   // Удалить материал
@@ -191,7 +192,7 @@ export const materialsService = {
     }
 
     const categories = [...new Set(data?.map((item) => item.category) || [])];
-    return categories.filter(Boolean);
+    return categories.filter(Boolean) as string[];
   },
 
   // Получение спецификаций для проекта
@@ -213,7 +214,7 @@ export const materialsService = {
       throw error;
     }
 
-    return data || [];
+    return (data as unknown as SpecificationMaterial[]) || [];
   },
 
   // Получить материалы спецификации по типу
@@ -233,7 +234,7 @@ export const materialsService = {
       throw error;
     }
 
-    return data || [];
+    return (data as unknown as SpecificationMaterial[]) || [];
   },
 
   async getNextProjectArticle(
@@ -254,16 +255,16 @@ export const materialsService = {
     }
 
     const prefixes: Record<string, string> = {
-      "Отделка": "От-",
-      "Мебель": "М-",
-      "Оборудование": "Об-",
-      "Сантехника": "С-",
-      "Освещение": "Ос-",
-      "Текстиль": "Т-",
+      Отделка: "От-",
+      Мебель: "М-",
+      Оборудование: "Об-",
+      Сантехника: "С-",
+      Освещение: "Ос-",
+      Текстиль: "Т-",
       "Инженерное оборудование": "И-",
-      "Декор": "Д-",
-      "Двери": "Дв-",
-      "Электрика": "Э-",
+      Декор: "Д-",
+      Двери: "Дв-",
+      Электрика: "Э-",
     };
 
     const prefix = prefixes[type] || "Мат";
@@ -273,14 +274,20 @@ export const materialsService = {
 
   // Добавление спецификации
   async addSpecification(
-    spec: Omit<SpecificationMaterial, "id" | "created_at" | "updated_at"> & { project_article?: string },
+    spec: Omit<SpecificationMaterial, "id" | "created_at" | "updated_at"> & {
+      project_article?: string;
+    },
     client?: SupabaseClient,
   ): Promise<SpecificationMaterial> {
     const supabaseClient = client || supabase;
-    
+
     let project_article = spec.project_article;
     if (!project_article) {
-      project_article = await this.getNextProjectArticle(spec.project_id, spec.type, supabaseClient);
+      project_article = await this.getNextProjectArticle(
+        spec.project_id,
+        spec.type,
+        supabaseClient,
+      );
     }
 
     const { data, error } = await supabaseClient
@@ -294,7 +301,7 @@ export const materialsService = {
       throw error;
     }
 
-    return data;
+    return data as unknown as SpecificationMaterial;
   },
 
   // Обновление спецификации
@@ -318,7 +325,7 @@ export const materialsService = {
       throw error;
     }
 
-    return data;
+    return data as unknown as SpecificationMaterial;
   },
 
   async updateSpecMaterial(
@@ -341,7 +348,7 @@ export const materialsService = {
       .single();
 
     if (error) throw error;
-    return result;
+    return result as unknown as SpecificationMaterial;
   },
 
   // Удаление спецификации
@@ -382,6 +389,6 @@ export const materialsService = {
       throw error;
     }
 
-    return data || [];
+    return (data as unknown as SpecificationMaterial[]) || [];
   },
 };

@@ -16,7 +16,7 @@ export const companiesService = {
       throw error;
     }
 
-    return data || [];
+    return (data as Company[]) || [];
   },
 
   // Получение компаний по типу
@@ -36,7 +36,7 @@ export const companiesService = {
       throw error;
     }
 
-    return data || [];
+    return (data as Company[]) || [];
   },
 
   // Получение компании по ID
@@ -61,7 +61,7 @@ export const companiesService = {
       return null;
     }
 
-    return data;
+    return data as Company;
   },
 
   // Получение контактов компании
@@ -86,7 +86,7 @@ export const companiesService = {
       return [];
     }
 
-    return data || [];
+    return (data as Contact[]) || [];
   },
 
   // Создание новой компании
@@ -114,7 +114,7 @@ export const companiesService = {
       throw error;
     }
 
-    return data;
+    return data as Company;
   },
 
   // Обновление компании
@@ -139,7 +139,7 @@ export const companiesService = {
       throw error;
     }
 
-    return data;
+    return data as Company;
   },
 
   // Удаление компании

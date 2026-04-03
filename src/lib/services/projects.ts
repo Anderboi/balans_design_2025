@@ -1,6 +1,6 @@
 import { BRIEF_SECTION_IDS } from "@/config/brief-sections";
 import { supabase } from "@/lib/supabase";
-import { Project, ProjectStageItem } from "@/types";
+import { Project, ProjectStageItem, Room, ObjectInfo } from "@/types";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 export const projectsService = {
@@ -17,7 +17,7 @@ export const projectsService = {
       throw error;
     }
 
-    return (data as any) || [];
+    return (data as Project[]) || [];
   },
 
   // Получение проекта по ID
@@ -43,7 +43,7 @@ export const projectsService = {
       throw error;
     }
 
-    return data as any;
+    return data as Project;
   },
 
   // Создание нового проекта
@@ -64,7 +64,7 @@ export const projectsService = {
         p_name: project.name,
         p_address: project.address || "",
         p_area: project.area || 0,
-        p_client_id: project.client_id || null,
+        p_client_id: project.client_id as string,
         p_stage: project.stage,
         p_residents: project.residents || "",
         p_demolition_info: project.demolition_info || "",
@@ -87,7 +87,7 @@ export const projectsService = {
 
     // Проверим, что вернуло data.
     // Если id есть в data, используем его.
-    const newProjectId = typeof data === "string" ? data : data?.id;
+    const newProjectId = typeof data === "string" ? data : (data as { id?: string })?.id;
 
     if (!newProjectId) {
       throw new Error("Не удалось получить ID созданного проекта");
@@ -103,7 +103,7 @@ export const projectsService = {
       throw new Error("Проект создан, но не удалось получить его данные");
     }
 
-    return newProject as any;
+    return newProject as Project;
   },
 
   // Обновление проекта
@@ -131,7 +131,7 @@ export const projectsService = {
       throw error;
     }
 
-    return data as any;
+    return data as Project;
   },
 
   // Удаление проекта
@@ -177,7 +177,7 @@ export const projectsService = {
       throw error;
     }
 
-    return data || [];
+    return (data as Room[]) || [];
   },
 
   // Получение проектов по ID клиента
@@ -204,7 +204,7 @@ export const projectsService = {
       throw error;
     }
 
-    return (data as any) || [];
+    return (data as Project[]) || [];
   },
 
   // Получение статусов этапов проекта
@@ -226,7 +226,7 @@ export const projectsService = {
       return [];
     }
 
-    return data || [];
+    return (data as ProjectStageItem[]) || [];
   },
 
   // Обновление/создание статуса этапа
@@ -262,7 +262,7 @@ export const projectsService = {
       throw error;
     }
 
-    return data;
+    return data as ProjectStageItem;
   },
 
   // Получение брифа проекта
@@ -337,7 +337,7 @@ export const projectsService = {
       return;
     }
 
-    const objectInfo = (brief?.object_info as Record<string, any>) || {};
+    const objectInfo = (brief?.object_info as Record<string, unknown>) || {};
 
     // Считаем информацию по объекту заполненной, если загружены документы
     // или заполнены основные разделы (локация, тех. условия, ответственное лицо)
@@ -349,7 +349,7 @@ export const projectsService = {
       !!objectInfo.technicalConditions &&
       Object.keys(objectInfo.technicalConditions).length > 0;
     const hasResponsible =
-      !!objectInfo.responsiblePerson && !!objectInfo.responsiblePerson.fullName;
+      !!(objectInfo as unknown as ObjectInfo).responsiblePerson?.fullName;
 
     const isCompleted =
       hasDocuments || (hasLocation && hasTechnical && hasResponsible);

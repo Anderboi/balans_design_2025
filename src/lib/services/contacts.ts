@@ -16,7 +16,7 @@ export const contactsService = {
       throw error;
     }
 
-    return data || [];
+    return (data as Contact[]) || [];
   },
 
   // Получение контактов по типу
@@ -36,7 +36,7 @@ export const contactsService = {
       throw error;
     }
 
-    return data || [];
+    return (data as Contact[]) || [];
   },
 
   // Получение контактов компании
@@ -56,7 +56,7 @@ export const contactsService = {
       throw error;
     }
 
-    return data || [];
+    return (data as Contact[]) || [];
   },
 
   // Получение контакта по ID
@@ -81,7 +81,7 @@ export const contactsService = {
       return null;
     }
 
-    return data;
+    return data as Contact;
   },
 
   // Создание нового контакта
@@ -109,7 +109,7 @@ export const contactsService = {
       throw error;
     }
 
-    return data;
+    return data as Contact;
   },
 
   // Обновление контакта
@@ -134,7 +134,7 @@ export const contactsService = {
       throw error;
     }
 
-    return data;
+    return data as Contact;
   },
 
   // Удаление контакта

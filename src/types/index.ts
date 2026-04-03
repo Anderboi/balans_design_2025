@@ -278,7 +278,7 @@ export interface SpecificationMaterial {
   project_id: string;
   material_id: string;
   quantity: number;
-  room_id?: string[];
+  room_id?: string;
   notes: string;
   created_at: string;
   updated_at: string;

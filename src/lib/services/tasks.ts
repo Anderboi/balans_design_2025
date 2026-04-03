@@ -510,8 +510,8 @@ export const tasksService = {
         .select("task_id, title")
         .eq("id", id)
         .single();
-      taskId = data?.task_id;
-      checklistTitle = data?.title;
+      taskId = data?.task_id || null;
+      checklistTitle = data?.title || null;
     } catch (e) { console.error(e); }
 
     const { error } = await supabaseClient
@@ -649,7 +649,7 @@ export const tasksService = {
           .select("task_id")
           .eq("id", itemData.checklist_id)
           .single();
-        taskId = checklistData?.task_id;
+        taskId = checklistData?.task_id || null;
       }
     } catch (e) { console.error(e); }
 
