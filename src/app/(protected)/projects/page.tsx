@@ -1,5 +1,5 @@
 import PageErrorBoundary from "@/components/page-error-boundary";
-import ProjectsListClient from "@/app/projects/components/projects-list";
+import ProjectsListClient from "@/app/(protected)/projects/components/projects-list";
 import { getProjects } from './actions';
 
 export const revalidate = 0; // Отключаем кэширование для этой страницы

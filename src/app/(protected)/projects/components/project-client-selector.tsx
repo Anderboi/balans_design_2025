@@ -2,9 +2,9 @@
 
 import { useState, useTransition } from "react";
 import { Contact, ContactType } from "@/types";
-import { createContact } from "@/app/contacts/actions";
+import { createContact } from "@/app/(protected)/contacts/actions";
 import { updateProjectAction } from "@/lib/actions/projects";
-import AddContactDialog from "@/app/contacts/components/add-contact-dialog";
+import AddContactDialog from "@/app/(protected)/contacts/components/add-contact-dialog";
 import { toast } from "sonner";
 import { UserPlus } from "lucide-react";
 

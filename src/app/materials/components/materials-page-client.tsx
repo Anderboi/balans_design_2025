@@ -20,6 +20,7 @@ interface MaterialsPageClientProps {
   initialProjects: Project[];
   initialSuppliers: Contact[];
   initialSupplierCompanies: Company[];
+  isGuest?: boolean;
 }
 
 export function MaterialsPageClient({
@@ -27,6 +28,7 @@ export function MaterialsPageClient({
   initialProjects,
   initialSuppliers,
   initialSupplierCompanies,
+  isGuest = false,
 }: MaterialsPageClientProps) {
   const [materials, setMaterials] = useState<Material[]>(initialMaterials);
   const [projects] = useState<Project[]>(initialProjects);
@@ -244,21 +246,25 @@ export function MaterialsPageClient({
           title="Библиотека"
           description="Каталог материалов, оборудования и мебели."
         />
-        <Button
-          size="lg"
-          className="rounded-full hidden sm:flex"
-          onClick={() => setIsAddDialogOpen(true)}
-        >
-          <Plus className="size-5 mr-2" />
-          Добавить материал
-        </Button>
-        <Button
-          size="icon-lg"
-          className="rounded-full flex sm:hidden size-12"
-          onClick={() => setIsAddDialogOpen(true)}
-        >
-          <Plus className="size-5" />
-        </Button>
+        {!isGuest && (
+          <>
+            <Button
+              size="lg"
+              className="rounded-full hidden sm:flex"
+              onClick={() => setIsAddDialogOpen(true)}
+            >
+              <Plus className="size-5 mr-2" />
+              Добавить материал
+            </Button>
+            <Button
+              size="icon-lg"
+              className="rounded-full flex sm:hidden size-12"
+              onClick={() => setIsAddDialogOpen(true)}
+            >
+              <Plus className="size-5" />
+            </Button>
+          </>
+        )}
       </div>
 
       {/* Фильтры и поиск */}
@@ -287,7 +293,7 @@ export function MaterialsPageClient({
           <div className="text-muted-foreground mb-4">
             {materials.length === 0 ? "Нет материалов" : "Материалы не найдены"}
           </div>
-          {materials.length === 0 && (
+          {materials.length === 0 && !isGuest && (
             <Button onClick={() => setIsAddDialogOpen(true)}>
               <Plus className="size-4 mr-2" />
               Добавить первый материал

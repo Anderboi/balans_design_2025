@@ -19,7 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { materialsService } from "@/lib/services/materials";
 import { MaterialType, Contact, ContactType, Company } from "@/types";
-import AddContactDialog from "@/app/contacts/components/add-contact-dialog";
+import AddContactDialog from "@/app/(protected)/contacts/components/add-contact-dialog";
 
 // Custom hooks
 import { useImageUpload } from "@/app/materials/hooks/use-image-upload";
@@ -145,7 +145,10 @@ export function AddMaterialDialog({
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full min-h-0">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col h-full min-h-0"
+          >
             <ScrollArea className="flex-1 px-1">
               <div className="p-6 pt-0 space-y-8 pb-6">
                 {/* Обложка материала */}
@@ -168,10 +171,14 @@ export function AddMaterialDialog({
                   <SupplierSection
                     control={control}
                     filteredSuppliers={supplierSelection.filteredSuppliers}
-                    supplierCompaniesMap={supplierSelection.supplierCompaniesMap}
+                    supplierCompaniesMap={
+                      supplierSelection.supplierCompaniesMap
+                    }
                     supplierQuery={supplierSelection.supplierQuery}
                     setSupplierQuery={supplierSelection.setSupplierQuery}
-                    setIsAddSupplierOpen={supplierSelection.setIsAddSupplierOpen}
+                    setIsAddSupplierOpen={
+                      supplierSelection.setIsAddSupplierOpen
+                    }
                   />
 
                   {/* Доставка и наличие */}
@@ -212,7 +219,11 @@ export function AddMaterialDialog({
               >
                 Отмена
               </Button>
-              <Button type="submit" disabled={isLoading} className="bg-[#0071E3] hover:bg-[#0077ED] rounded-xl px-6">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="bg-[#0071E3] hover:bg-[#0077ED] rounded-xl px-6"
+              >
                 {isLoading ? "Создание..." : "Создать материал"}
               </Button>
             </DialogFooter>

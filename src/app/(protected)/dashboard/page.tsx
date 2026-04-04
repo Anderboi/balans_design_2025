@@ -6,7 +6,7 @@ import { getUser } from '@/lib/supabase/getuser';
 import { createClient } from '@/lib/supabase/server';
 import PageContainer from '@/components/ui/page-container';
 
-export default async function Home() {
+export default async function DashboardPage() {
   const user = await getUser()
   let userName = "Пользователь";
   let activeTasksCount = 0;

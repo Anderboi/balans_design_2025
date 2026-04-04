@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { materialsService } from "@/lib/services/materials";
 import { Material, MaterialType, Contact, ContactType, Company } from "@/types";
-import AddContactDialog from "@/app/contacts/components/add-contact-dialog";
+import AddContactDialog from "@/app/(protected)/contacts/components/add-contact-dialog";
 
 // Custom hooks
 import { useImageUpload } from "@/app/materials/hooks/use-image-upload";
@@ -37,7 +37,7 @@ import { SpecificationsSection } from "./add-material-dialog/specifications-sect
 import { AdditionalInfoSection } from "./add-material-dialog/additional-info-section";
 import { CustomSpecificationsSection } from "./add-material-dialog/custom-specifications-section";
 import SubBlockCard from "@/components/ui/sub-block-card";
-import { MaterialFilesSection } from './add-material-dialog/material-files-section';
+import { MaterialFilesSection } from "./add-material-dialog/material-files-section";
 
 // ... existing imports
 
