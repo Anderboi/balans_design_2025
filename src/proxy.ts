@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { user, response } = await updateSession(request);
 
   const isAuthPage = request.nextUrl.pathname.startsWith("/login");
