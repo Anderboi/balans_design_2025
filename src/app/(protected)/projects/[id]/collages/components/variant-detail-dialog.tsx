@@ -1,7 +1,7 @@
 "use client";
 
 import { CollageVariant } from "@/types/collages";
-import { SharedVariantDetailDialog } from "@/app/projects/components/shared-variant-detail-dialog";
+import { SharedVariantDetailDialog } from "@/app/(protected)/projects/components/shared-variant-detail-dialog";
 import { collageVariantsService } from "@/lib/services/collage-variants";
 import { createClient } from "@/lib/supabase/client";
 

@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { useCallback, useMemo } from "react";
 import { Separator } from "@/components/ui/separator";
 import Thumbnail from "./thumbnail";
-import StatusDropdown from "@/app/projects/[id]/specifications/components/status-dropdown";
+import StatusDropdown from "@/app/(protected)/projects/[id]/specifications/components/status-dropdown";
 import ActionButtons from "./action-buttons";
 import { DebouncedInput } from "@/components/debounced-input";
 import { cn } from "@/lib/utils";

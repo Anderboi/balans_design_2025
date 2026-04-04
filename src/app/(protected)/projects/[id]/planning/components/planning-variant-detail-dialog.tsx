@@ -1,7 +1,7 @@
 "use client";
 
 import { PlanningVariant } from "@/types/planning";
-import { SharedVariantDetailDialog } from "@/app/projects/components/shared-variant-detail-dialog";
+import { SharedVariantDetailDialog } from "@/app/(protected)/projects/components/shared-variant-detail-dialog";
 import { planningVariantsService } from "@/lib/services/planning-variants";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";

@@ -51,7 +51,7 @@ export const KanbanCard = ({
                   )}
                 </div>
                 <div className="flex justify-between items-center text-xs text-muted-foreground">
-                  <span>{new Date(task.due_date).toLocaleDateString()}</span>
+                  <span suppressHydrationWarning>{new Date(task.due_date).toLocaleDateString()}</span>
                   {task.priority && (
                     <div
                       className={cn(

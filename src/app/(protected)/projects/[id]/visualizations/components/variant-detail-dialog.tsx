@@ -1,7 +1,7 @@
 "use client";
 
 import { VisualizationVariant } from "@/types/visualizations";
-import { SharedVariantDetailDialog } from "@/app/projects/components/shared-variant-detail-dialog";
+import { SharedVariantDetailDialog } from "@/app/(protected)/projects/components/shared-variant-detail-dialog";
 import { visualizationVariantsService } from "@/lib/services/visualization-variants";
 import { createClient } from "@/lib/supabase/client";
 

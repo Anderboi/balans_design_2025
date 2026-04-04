@@ -8,7 +8,7 @@ import {
 import PageErrorBoundary from "@/components/page-error-boundary";
 import { MaterialsPageClient } from "./components/materials-page-client";
 import { getUser } from "@/lib/supabase/getuser";
-import { Material } from "@/types";
+import { Material, MaterialType } from "@/types";
 
 export const revalidate = 0;
 
@@ -17,14 +17,13 @@ const DEMO_MATERIALS: Material[] = [
   {
     id: "demo-1",
     name: "Итальянский керамогранит",
-    category_id: "demo-cat",
-    supplier_id: null,
-    cost: 4500,
+    type: MaterialType.FINISH,
+    supplier: undefined,
     price: 5200,
     unit: "кв.м.",
     article: "IT-KER-01",
-    url: "https://example.com/material-1",
-    notes: "Отличный выбор для ванной комнаты.",
+    product_url: "https://example.com/material-1",
+    description: "Отличный выбор для ванной комнаты.",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     user_id: "demo"
@@ -32,14 +31,13 @@ const DEMO_MATERIALS: Material[] = [
   {
     id: "demo-2",
     name: "Краска Benjamin Moore",
-    category_id: "demo-cat",
-    supplier_id: null,
-    cost: 15000,
+    type: MaterialType.FINISH,
+    supplier: undefined,
     price: 18000,
     unit: "шт",
     article: "BM-Aura-Matte",
-    url: "https://example.com/material-2",
-    notes: "Цвет: Сashmere 27, матовая.",
+    product_url: "https://example.com/material-2",
+    description: "Цвет: Сashmere 27, матовая.",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     user_id: "demo"
@@ -47,14 +45,13 @@ const DEMO_MATERIALS: Material[] = [
   {
     id: "demo-3",
     name: "Светильник подвесной Flos",
-    category_id: "demo-cat",
-    supplier_id: null,
-    cost: 32000,
+    type: MaterialType.LIGHTING,
+    supplier: undefined,
     price: 45000,
     unit: "шт",
     article: "FLOS-IC-S1",
-    url: "https://example.com/material-3",
-    notes: "Латунь. Идеально над обеденным столом.",
+    product_url: "https://example.com/material-3",
+    description: "Латунь. Идеально над обеденным столом.",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     user_id: "demo"
@@ -62,14 +59,13 @@ const DEMO_MATERIALS: Material[] = [
   {
     id: "demo-4",
     name: "Инженерная доска Finex",
-    category_id: "demo-cat",
-    supplier_id: null,
-    cost: 7500,
+    type: MaterialType.FINISH,
+    supplier: undefined,
     price: 9000,
     unit: "кв.м.",
     article: "FX-OAK-NAT",
-    url: "https://example.com/material-4",
-    notes: "Дуб натуральный, селект.",
+    product_url: "https://example.com/material-4",
+    description: "Дуб натуральный, селект.",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     user_id: "demo"
@@ -88,7 +84,7 @@ async function MaterialsPageContent() {
         </div>
         <MaterialsPageClient
           initialMaterials={DEMO_MATERIALS}
-          initialCategories={[{ id: "demo-cat", name: "Демо Категория", user_id: "demo", created_at: "", updated_at: "" }]}
+          initialCategories={["Отделка", "Освещение", "Оборудование", "Мебель"]}
           initialProjects={[]}
           initialSuppliers={[]}
           initialSupplierCompanies={[]}

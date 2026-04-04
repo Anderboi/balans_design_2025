@@ -1,7 +1,7 @@
 import { projectsService } from "@/lib/services/projects";
 import { notFound } from "next/navigation";
 import PageContainer from "@/components/ui/page-container";
-import { CommonInfoForm } from "@/app/projects/[id]/brief/components/forms/common-info-form";
+import { CommonInfoForm } from "@/app/(protected)/projects/[id]/brief/components/forms/common-info-form";
 import MainBlockCard from "@/components/ui/main-block-card";
 import { CommonFormValues } from "@/lib/schemas/brief-schema";
 import { createClient } from "@/lib/supabase/server";

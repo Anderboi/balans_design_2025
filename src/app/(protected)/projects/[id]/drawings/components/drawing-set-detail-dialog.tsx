@@ -1,7 +1,7 @@
 "use client";
 
 import { DrawingFile } from "@/types/drawings";
-import { SharedVariantDetailDialog } from "@/app/projects/components/shared-variant-detail-dialog";
+import { SharedVariantDetailDialog } from "@/app/(protected)/projects/components/shared-variant-detail-dialog";
 import { drawingSetsService } from "@/lib/services/drawing-sets";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
