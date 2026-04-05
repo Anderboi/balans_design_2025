@@ -62,6 +62,7 @@ export interface Task {
   start_date?: string | null;
   tags?: string[];
   assigned_to: string | null;
+  created_by?: string;
   created_at: string;
   updated_at: string;
   // UI helper fields
