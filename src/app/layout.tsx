@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Geist } from "next/font/google";
 import "./globals.css";
 import GlobalErrorBoundary from "@/components/global-error-boundary";
 import { Toaster } from "@/components/ui/sonner";
 
-const inter = Inter({ subsets: ["cyrillic"] });
+const geist = Geist({ subsets: ["cyrillic"] });
 
 export const metadata: Metadata = {
   title: "Balans Design",
@@ -18,7 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru">
-      <body className={inter.className}>
+      <body className={geist.className}>
         <GlobalErrorBoundary>
           {children}
           <Toaster position="bottom-right" richColors closeButton />
