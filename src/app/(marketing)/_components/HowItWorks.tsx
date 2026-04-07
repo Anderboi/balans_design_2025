@@ -149,7 +149,7 @@ export default function HowItWorks() {
   useProgressBars();
 
   return (
-    <section className="py-24 bg-white overflow-hidden">
+    <section id='how-it-works' className="py-24 bg-white overflow-hidden">
       <div className="max-w-5xl mx-auto px-6">
         <LandingBlockHeader title="Как это работает">
           Три шага до

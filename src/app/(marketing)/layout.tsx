@@ -19,6 +19,22 @@ export const metadata: Metadata = {
   title: "Balans — Управление дизайн-проектами",
   description:
     "Управляйте проектами, бюджетами и материалами в одном месте. Создано специально для дизайнеров интерьера.",
+    openGraph: {
+      title: "Balans — Управление дизайн-проектами",
+      description:
+        "Управляйте проектами, бюджетами и материалами в одном месте. Создано специально для дизайнеров интерьера.",
+        url: "https://balans.design",
+        siteName: "Balans",
+        locale: "ru_RU",
+        type: "website",
+        
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "Balans — Управление дизайн-проектами",
+      description:
+        "Управляйте проектами, бюджетами и материалами в одном месте. Создано специально для дизайнеров интерьера.",
+    },
 };
 
 export default function MarketingLayout({

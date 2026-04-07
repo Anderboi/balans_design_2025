@@ -21,7 +21,7 @@ export default function Pricing() {
   useReveal();
 
   return (
-    <section className="py-24 px-6 bg-[#fafafa]">
+    <section id='pricing' className="py-24 px-6 bg-[#fafafa]">
       <div className="max-w-4xl mx-auto">
         <LandingBlockHeader title="Тарифы">
           Просто и<br />
