@@ -9,6 +9,25 @@ export interface Testimonial {
   delay?: string;
 }
 
+export interface PricingFeature {
+  text: string;
+  included: boolean;
+}
+
+export interface PricingPlan {
+  id: string;
+  name: string;
+  price: string;
+  period: string;
+  features: PricingFeature[];
+  isFeatured?: boolean;
+  badge?: string;
+  buttonText: string;
+  buttonHref: string;
+  buttonVariant: 'outline' | 'secondary';
+  delay?: string;
+}
+
 /**
  * Marketing site configuration
  * Stores testimonials, feature lists, and other static marketing content.
@@ -32,5 +51,43 @@ export const TESTIMONIALS: Testimonial[] = [
     initials: 'МЛ',
     color: 'bg-pink-500',
     delay: 'd1',
+  },
+];
+
+export const PRICING_PLANS: PricingPlan[] = [
+  {
+    id: 'free',
+    name: 'Бесплатно',
+    price: '0 ₽',
+    period: 'навсегда',
+    buttonText: 'Начать бесплатно',
+    buttonHref: '/login',
+    buttonVariant: 'outline',
+    features: [
+      { text: 'До 3 проектов', included: true },
+      { text: 'Канбан-доска', included: true },
+      { text: 'До 50 материалов', included: true },
+      { text: 'База контактов', included: true },
+      { text: 'AI-ассистент', included: false },
+    ],
+  },
+  {
+    id: 'pro',
+    name: 'Pro',
+    price: '990 ₽',
+    period: 'в месяц',
+    isFeatured: true,
+    badge: 'Популярный',
+    buttonText: 'Попробовать Pro →',
+    buttonHref: '/login',
+    buttonVariant: 'secondary',
+    delay: 'd1',
+    features: [
+      { text: 'Неограниченно проектов', included: true },
+      { text: 'Неограниченно материалов', included: true },
+      { text: 'AI-ассистент', included: true },
+      { text: 'Экспорт смет в PDF', included: true },
+      { text: 'Приоритетная поддержка', included: true },
+    ],
   },
 ];
