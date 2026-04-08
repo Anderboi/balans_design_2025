@@ -115,7 +115,7 @@ export default function BentoFeatures() {
   useProgressBars();
 
   return (
-    <section className="py-24 px-6 bg-[#fafafa]">
+    <section id="features" className="py-24 px-6 bg-[#fafafa]">
       <div className="max-w-5xl mx-auto">
         <LandingBlockHeader title="Возможности">
           Всё, что нужно<br/><em className="text-[#d64218]">дизайнеру</em>
