@@ -9,7 +9,7 @@ export default function Testimonials() {
   useReveal();
 
   return (
-    <section className="py-24 px-6 bg-white">
+    <section id="testimonials" className="py-24 px-6 bg-white">
       <div className="max-w-4xl mx-auto">
         <LandingBlockHeader title="Отзывы">
           Говорят

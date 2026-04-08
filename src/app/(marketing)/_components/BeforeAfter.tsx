@@ -25,7 +25,10 @@ export default function BeforeAfter() {
   useChipAnimation(chipRowRef);
 
   return (
-    <section className="py-24 px-6 noise hero-dark overflow-hidden relative">
+    <section
+      id="before-after"
+      className="py-24 px-6 noise hero-dark overflow-hidden relative"
+    >
       <div className="max-w-5xl mx-auto relative z-10">
         <LandingBlockHeader title="До и после" background="dark">
           Прощайте,

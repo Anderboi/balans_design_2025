@@ -16,7 +16,9 @@ import {
 const NAV_LINKS = [
   { href: '#features', label: 'Возможности' },
   { href: '#how-it-works', label: 'Как это работает' },
+  { href: '#before-after', label: 'До и после' },
   { href: '#pricing', label: 'Тарифы' },
+  { href: '#testimonials', label: 'Отзывы' },
 ];
 
 export default function Header() {
