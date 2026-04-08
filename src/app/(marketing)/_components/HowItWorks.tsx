@@ -4,86 +4,17 @@ import { useReveal, useProgressBars } from "./animations";
 import LandingBlockHeader from "./LandingBlockHeader";
 import { cn } from "@/lib/utils";
 import React from "react";
-
-/* -------------------------------------------------------------------------- */
-/*                                    Types                                   */
-/* -------------------------------------------------------------------------- */
-
-interface StepData {
-  id: string;
-  num: string;
-  title: React.ReactNode;
-  description: string;
-  revealDelay?: string;
-}
-
-/* -------------------------------------------------------------------------- */
-/*                                  Constants                                 */
-/* -------------------------------------------------------------------------- */
-
-const STEPS_DATA: StepData[] = [
-  {
-    id: "step1",
-    num: "I",
-    title: (
-      <>
-        Создайте <br />
-        проект
-      </>
-    ),
-    description: "Добавьте название, клиента и бюджет. Разбейте на этапы.",
-  },
-  {
-    id: "step2",
-    num: "II",
-    title: "Наполните содержимым",
-    description: "Задачи, материалы, контакты подрядчиков и документы.",
-    revealDelay: "d1",
-  },
-  {
-    id: "step3",
-    num: "III",
-    title: "Контролируйте результат",
-    description: "Прогресс, бюджет и дедлайны — всё в одном месте.",
-    revealDelay: "d2",
-  },
-];
+import { HOW_IT_WORKS_STEPS } from "@/config/marketing";
+import StepCard from "./step-card";
 
 /* -------------------------------------------------------------------------- */
 /*                               Sub-components                               */
 /* -------------------------------------------------------------------------- */
 
-interface StepCardProps extends StepData {
-  children: React.ReactNode;
-}
-
-const StepCard = ({
-  num,
-  title,
-  description,
-  revealDelay,
-  children,
-}: StepCardProps) => (
-  <div className={cn("step-card reveal bento", revealDelay)}>
-    <div className="p-6">
-      <div className="w-12 h-12 rounded-full border-2 border-[#0a0a0a] flex items-center justify-center font-display text-3xl mb-5">
-        {num}
-      </div>
-      <h3 className="text-xl font-semibold text-[#0a0a0a] mb-3">{title}</h3>
-      <p className="text-base text-[#71717a] font-light leading-relaxed mb-6">
-        {description}
-      </p>
-    </div>
-    <div className="bg-[#fafafa] border-t border-[#e4e4e7] px-6 py-4">
-      {children}
-    </div>
-  </div>
-);
-
 const Step1Preview = () => (
   <>
     <div className="flex items-center gap-2 mb-3">
-      <div className="w-2 h-2 rounded-full bg-[#f59e0b]" />
+      <div className="size-2 rounded-full bg-[#f59e0b]" />
       <span className="text-sm font-medium text-[#0a0a0a]">Новый проект</span>
     </div>
     <div className="space-y-2">
@@ -108,7 +39,7 @@ const Step2Preview = () => (
           item.opacity && "opacity-40",
         )}
       >
-        <div className={cn("w-1.5 h-1.5 rounded-full", item.color)} />
+        <div className={cn("size-1.5 rounded-full", item.color)} />
         <div className={cn("h-2 bg-[#e4e4e7] rounded", item.w)} />
       </div>
     ))}
@@ -160,8 +91,8 @@ export default function HowItWorks() {
 
       <div className="pl-6 md:pl-[calc((100vw-1024px)/2+24px)]">
         <div className="steps-scroll pb-4">
-          {STEPS_DATA.map((step) => (
-            <StepCard key={step.id} {...step}>
+          {HOW_IT_WORKS_STEPS.map((step) => (
+            <StepCard key={step.id} step={step}>
               {STEP_PREVIEWS[step.id]}
             </StepCard>
           ))}

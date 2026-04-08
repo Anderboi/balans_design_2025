@@ -9,6 +9,14 @@ export interface Testimonial {
   delay?: string;
 }
 
+export interface HowItWorksStep {
+  id: string;
+  num: string;
+  title: string;
+  description: string;
+  delay?: string;
+}
+
 export interface PricingFeature {
   text: string;
   included: boolean;
@@ -89,5 +97,28 @@ export const PRICING_PLANS: PricingPlan[] = [
       { text: 'Экспорт смет в PDF', included: true },
       { text: 'Приоритетная поддержка', included: true },
     ],
+  },
+];
+
+export const HOW_IT_WORKS_STEPS: HowItWorksStep[] = [
+  {
+    id: "step1",
+    num: "I",
+    title: "Создайте\nпроект",
+    description: "Добавьте название, клиента и бюджет. Разбейте на этапы.",
+  },
+  {
+    id: "step2",
+    num: "II",
+    title: "Наполните содержимым",
+    description: "Задачи, материалы, контакты подрядчиков и документы.",
+    delay: "d1",
+  },
+  {
+    id: "step3",
+    num: "III",
+    title: "Контролируйте результат",
+    description: "Прогресс, бюджет и дедлайны — всё в одном месте.",
+    delay: "d2",
   },
 ];
