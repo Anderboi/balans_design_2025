@@ -44,11 +44,11 @@ const menuItems = [
   },
 ];
 
-export function SettingsNav() {
+export function SettingsNav({ className }: { className?: string }) {
   const pathname = usePathname();
 
   return (
-    <nav className="gap-1 flex flex-col items-start w-full">
+    <nav className={`gap-1 flex flex-col items-start w-full ${className}`}>
       {menuItems.map((menuItem, index) => {
         const Icon = menuItem.icon;
         const isActive = pathname === menuItem.href;
@@ -57,7 +57,7 @@ export function SettingsNav() {
             <Button
               size="lg"
               variant={isActive ? "outline" : "ghost"}
-              className="cursor-pointer text-base  hover:text-black w-full items-center justify-start hover:bg-zinc-200"
+              className="cursor-pointer text-base  hover:text-black w-full items-center justify-start hover:bg-zinc-200 active:bg-zinc-200"
             >
               <Icon className="size-5!" />
               {menuItem.label}

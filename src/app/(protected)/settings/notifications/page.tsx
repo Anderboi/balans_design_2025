@@ -3,8 +3,27 @@ import PageHeader from "@/components/ui/page-header";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { NotificationSettingsForm } from "./notification-settings-form";
+import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import BackLink from '@/components/back-link';
 
-const NotificationsSettingsPage = async () => {
+// Скелетон для настроек уведомлений
+const NotificationsSkeleton = () => (
+  <div className="space-y-6">
+    {[1, 2, 3, 4].map((i) => (
+      <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-zinc-50/50">
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-48 rounded-lg" />
+          <Skeleton className="h-3 w-64 rounded-lg opacity-50" />
+        </div>
+        <Skeleton className="h-6 w-10 rounded-full" />
+      </div>
+    ))}
+  </div>
+);
+
+// Компонент загрузки данных уведомлений
+const NotificationsContent = async () => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -35,13 +54,22 @@ const NotificationsSettingsPage = async () => {
     notifications_marketing: profile.notifications_marketing ?? false,
   };
 
+  return <NotificationSettingsForm initialSettings={initialSettings} />;
+};
+
+const NotificationsSettingsPage = () => {
   return (
+    <article className="space-y-4">
+      <BackLink href="/settings" className="sm:hidden"/>
     <MainBlockCard className="space-y-6 p-8 md:p-12">
       <PageHeader title="Настройки уведомлений" />
       <div className="w-full">
-        <NotificationSettingsForm initialSettings={initialSettings} />
+        <Suspense fallback={<NotificationsSkeleton />}>
+          <NotificationsContent />
+        </Suspense>
       </div>
     </MainBlockCard>
+    </article>
   );
 };
 

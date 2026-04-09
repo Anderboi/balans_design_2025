@@ -5,8 +5,31 @@ import { TeamMembersList } from "./team-members-list";
 import { Button } from "@/components/ui/button";
 import { UserPlus } from "lucide-react";
 import PageHeader from "@/components/ui/page-header";
+import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import BackLink from "@/components/back-link";
 
-const TeamSettingsPage = async () => {
+// Скелетон для списка команды
+const TeamSkeleton = () => (
+  <div className="space-y-4">
+    {[1, 2, 3].map((i) => (
+      <div
+        key={i}
+        className="flex items-center gap-4 p-4 rounded-2xl bg-zinc-50/50"
+      >
+        <Skeleton className="size-10 rounded-full" />
+        <div className="flex-1 space-y-2">
+          <Skeleton className="h-4 w-1/3 rounded-lg" />
+          <Skeleton className="h-3 w-1/4 rounded-lg opacity-50" />
+        </div>
+        <Skeleton className="h-8 w-24 rounded-xl" />
+      </div>
+    ))}
+  </div>
+);
+
+// Компонент для загрузки данных команды
+const TeamContent = async () => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -16,39 +39,44 @@ const TeamSettingsPage = async () => {
     redirect("/login");
   }
 
-  // Get current user's profile to check role
-  const { data: currentUserProfile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
+  // Параллельная загрузка профиля и списка членов (ускоряем!)
+  const [profileRes, membersRes] = await Promise.all([
+    supabase.from("profiles").select("role").eq("id", user.id).single(),
+    supabase.from("profiles").select("*").order("full_name"),
+  ]);
 
-  // Fetch all team members
-  const { data: teamMembers, error } = await supabase
-    .from("profiles")
-    .select("*")
-    .order("full_name");
-
-  if (error) {
-    console.error("Error fetching team members:", error);
-  }
-
-  const isAdmin = currentUserProfile?.role === "admin";
+  const isAdmin = profileRes.data?.role === "admin";
+  const teamMembers = membersRes.data || [];
 
   return (
-    <MainBlockCard className="space-y-8 p-8 md:p-12">
-      <PageHeader title="Управление командой">
-        <Button variant="secondary" size="lg" className="gap-2 cursor-pointer">
-          <UserPlus className="size-4" />
-          Пригласить
-        </Button>
-      </PageHeader>
-      <TeamMembersList
-        members={teamMembers || []}
-        currentUserId={user.id}
-        isAdmin={isAdmin}
-      />
-    </MainBlockCard>
+    <TeamMembersList
+      members={teamMembers}
+      currentUserId={user.id}
+      isAdmin={isAdmin}
+    />
+  );
+};
+
+const TeamSettingsPage = () => {
+  return (
+    <article className="space-y-4">
+      <BackLink href="/settings" className="sm:hidden"/>
+      <MainBlockCard className="space-y-8 p-8 md:p-12">
+        <PageHeader title="Управление командой">
+          <Button
+            variant="secondary"
+            size="lg"
+            className="gap-2 cursor-pointer"
+          >
+            <UserPlus className="size-4" />
+            Пригласить
+          </Button>
+        </PageHeader>
+        <Suspense fallback={<TeamSkeleton />}>
+          <TeamContent />
+        </Suspense>
+      </MainBlockCard>
+    </article>
   );
 };
 

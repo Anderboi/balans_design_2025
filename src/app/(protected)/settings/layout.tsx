@@ -6,8 +6,8 @@ import { SettingsNav } from "./_components/settings-nav";
 const SettingsLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <PageContainer>
-      <article className="flex flex-col sm:flex-row gap-4">
-        <section>
+      <article className="flex flex-col sm:flex-row sm:gap-4">
+        <section className="hidden sm:flex flex-col">
           <PageHeader title="Настройки" />
           <p className="text-zinc-500 text-sm mb-6">
             Управление аккаунтом и параметрами системы.
