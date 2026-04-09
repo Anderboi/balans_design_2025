@@ -66,7 +66,7 @@ export function TeamMembersList({
                   {initials}
                 </AvatarFallback>
               </Avatar>
-              <div>
+              <div className='w-full text-ellipsis'>
                 <p className="font-medium text-base">
                   {member.full_name || "Без имени"}
                 </p>
@@ -94,7 +94,7 @@ export function TeamMembersList({
                       ))}
                     </SelectContent>
                   </Select>
-                  <ArrowRight className="size-4 text-muted-foreground" />
+                  {/* <ArrowRight className="size-4 text-muted-foreground" /> */}
                 </>
               ) : (
                 <span className="text-sm text-muted-foreground bg-zinc-50 px-2 py-1 rounded-lg">

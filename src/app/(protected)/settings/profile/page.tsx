@@ -60,7 +60,7 @@ const ProfileSettingsPage = () => {
   return (
     <article className="space-y-4">
       <BackLink href="/settings" className="sm:hidden"/>
-      <MainBlockCard className="space-y-6 p-8 md:p-12">
+      <MainBlockCard className="space-y-6 p-6 md:p-8">
         <PageHeader title="Профиль" />
         <Suspense fallback={<ProfileSkeleton />}>
           <ProfileContent />
