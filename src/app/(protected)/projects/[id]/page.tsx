@@ -20,6 +20,7 @@ import { ProjectNavCards } from "../components/project-nav-cards";
 export const revalidate = 0;
 
 import { createClient } from "@/lib/supabase/server";
+import BackLink from '@/components/back-link';
 
 async function getProjectData(id: string) {
   const supabase = await createClient();
@@ -46,13 +47,7 @@ export default async function ProjectDetailPage({
       {/* Header Section */}
       <div className="space-y-6">
         {/* Breadcrumb / Back Link */}
-        <Link
-          href="/projects"
-          className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-black transition-colors"
-        >
-          <ChevronLeft className="size-4 mr-1" />
-          Назад к списку
-        </Link>
+        <BackLink href="/projects" />
 
         {/* Title Area */}
         <div className="flex items-start justify-between">
