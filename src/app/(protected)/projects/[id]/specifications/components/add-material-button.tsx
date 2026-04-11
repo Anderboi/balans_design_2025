@@ -26,11 +26,12 @@ export function AddMaterialButton({
   return (
     <>
       <Button
+      size={'lg'}
         onClick={() => setIsOpen(true)}
-        className="rounded-full bg-[#1D1D1F] hover:bg-black text-white px-6 h-11 transition-all duration-300 shadow-sm flex items-center gap-2"
+        className="rounded-full bg-[#1D1D1F]  hover:bg-black text-white //px-6  transition-all duration-300 //shadow-sm flex items-center gap-2"
       >
         <Plus className="size-4" />
-        Добавить материал
+        <span className="hidden sm:block">Добавить материал</span>
       </Button>
 
       <AddSpecMaterialDialog

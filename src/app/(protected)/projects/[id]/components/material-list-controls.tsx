@@ -22,7 +22,7 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/ui/form";
-import { SortAsc, SortDesc, ChevronRight, ChevronDown } from "lucide-react"; // Иконки для сортировки
+import { SortAsc, SortDesc, ChevronRight, ChevronDown, Funnel } from "lucide-react"; // Иконки для сортировки
 import { Badge } from "@/components/ui/badge";
 
 // Получаем значения Enum для фильтра
@@ -157,13 +157,13 @@ export default function MaterialListControls({ materials }: Props) {
     <div className="flex flex-col gap-4 relative">
       {/* --- Панель управления--- */}
       <Form {...form}>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 /p-4 //bg-muted/40 rounded-lg //border">
+        <div className="grid grid-cols-5 gap-4 rounded-lg">
           {/* Поиск */}
           <FormField
             control={form.control}
             name="searchTerm"
             render={({ field }) => (
-              <FormItem className="col-span-2">
+              <FormItem className="col-span-3">
                 <FormLabel>Поиск</FormLabel>
                 <FormControl>
                   <Input
@@ -186,13 +186,16 @@ export default function MaterialListControls({ materials }: Props) {
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                 >
-                  <FormControl className="w-full text-xs">
+                  <FormControl className="w-full text-sm">
                     <SelectTrigger>
                       <SelectValue placeholder="Выберите тип" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="all">Все типы</SelectItem>
+                    <SelectItem value="all">
+                      <span className='hidden sm:flex'>Все типы</span>
+                      <Funnel className="size-4 sm:hidden"/>
+                    </SelectItem>
                     {materialTypes.map((type) => (
                       <SelectItem key={type} value={type}>
                         {type}
@@ -210,17 +213,17 @@ export default function MaterialListControls({ materials }: Props) {
             <Button
               variant="outline"
               onClick={toggleSortOrder}
-              className="w-full justify-between text-xs text-ellipsis overflow-hidden"
+              className="w-full justify-between text-sm h-11 text-ellipsis overflow-hidden"
             >
-              <span>
+              <span className='hidden sm:flex'>
                 {sortOrder === "asc"
                   ? "По возрастанию (А-Я)"
                   : "По убыванию (Я-А)"}
               </span>
               {sortOrder === "asc" ? (
-                <SortAsc className="h-4 w-4" />
+                <SortAsc className="size-4" />
               ) : (
-                <SortDesc className="h-4 w-4" />
+                <SortDesc className="size-4" />
               )}
             </Button>
           </FormItem>
@@ -243,16 +246,16 @@ export default function MaterialListControls({ materials }: Props) {
               return (
                 materialsInGroup.length > 0 && (
                   <div key={type} className="flex flex-col gap-2">
-                    <div 
+                    <div
                       className="flex items-center gap-3 py-2 cursor-pointer group"
                       onClick={() => toggleCategory(type)}
                     >
                       <div className="flex items-center gap-2">
-                         {isCollapsed ? (
-                           <ChevronRight className="h-3 w-3 text-muted-foreground/40 group-hover:text-muted-foreground" />
-                         ) : (
-                           <ChevronDown className="h-3 w-3 text-muted-foreground/40 group-hover:text-muted-foreground" />
-                         )}
+                        {isCollapsed ? (
+                          <ChevronRight className="h-3 w-3 text-muted-foreground/40 group-hover:text-muted-foreground" />
+                        ) : (
+                          <ChevronDown className="h-3 w-3 text-muted-foreground/40 group-hover:text-muted-foreground" />
+                        )}
                         <h2 className="text-[11px] text-muted-foreground/50 font-bold uppercase tracking-widest whitespace-nowrap group-hover:text-muted-foreground/70 transition-colors">
                           {type}
                         </h2>
@@ -294,17 +297,17 @@ export default function MaterialListControls({ materials }: Props) {
 
       {/* Sticky Footer Summary */}
       <div className="sticky bottom-0 left-0 right-0 z-10 bg-white/40 backdrop-blur-md border-t border-muted/30 shadow-lg animate-in fade-in slide-in-from-bottom-5 duration-500 rounded-3xl">
-        <div className="max-w-7xl mx-auto px-4 py-4 md:px-8 md:py-8 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-8 sm:py-8 flex items-center justify-between">
           <div className="flex flex-col">
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-medium">
+            <span className="text-xs uppercase tracking-wider text-muted-foreground/60 font-medium">
               Всего позиций
             </span>
-            <span className="text-lg font-semibold text-[#1D1D1F]">
+            <span className="text-xl font-bold text-[#1D1D1F]">
               {totalCount}
             </span>
           </div>
           <div className="flex flex-col items-end">
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-medium">
+            <span className="text-xs uppercase tracking-wider text-muted-foreground/60 font-medium">
               Общая сумма бюджета
             </span>
             <span className="text-xl font-bold text-[#1D1D1F]">

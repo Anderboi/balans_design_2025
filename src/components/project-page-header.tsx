@@ -35,7 +35,7 @@ export function ProjectPageHeader({
   children,
 }: ProjectPageHeaderProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <ProjectBreadcrumbs
         projectId={projectId}
         projectName={projectName}
@@ -43,7 +43,7 @@ export function ProjectPageHeader({
         middleLink={middleLink}
       />
 
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-row md:items-center justify-between gap-4">
         <div className="flex flex-col space-y-2">
           <h1 className="text-3xl md:text-5xl font-semibold text-[#1D1D1F] tracking-tight animate-in fade-in slide-in-from-left-2 duration-700">
             {title}
@@ -83,7 +83,7 @@ export function ProjectPageHeader({
 
           {showAiButton && (
             <Button className="rounded-full h-11 px-6 bg-[#D81A24] hover:bg-[#B5151D] text-white shadow-lg shadow-red-200/50 transition-all duration-300 font-medium flex items-center gap-2">
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="size-4" />
               Спросить Balans AI
             </Button>
           )}

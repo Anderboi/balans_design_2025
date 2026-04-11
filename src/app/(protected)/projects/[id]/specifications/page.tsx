@@ -7,6 +7,7 @@ import { notFound } from "next/navigation";
 import { ProjectPageHeader } from "@/components/project-page-header";
 import { AddMaterialButton } from "./components/add-material-button";
 import { getSuppliers, getSupplierCompanies } from "@/app/materials/actions";
+import { Label } from 'radix-ui';
 
 const ScheduleCategoryPage = async ({
   params,
@@ -48,7 +49,7 @@ const ScheduleCategoryPage = async ({
         />
       </ProjectPageHeader>
 
-      <div className="mt-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+      <div className="mt-8  animate-in fade-in slide-in-from-bottom-2 duration-300">
         <MaterialListControls materials={specifications} />
       </div>
     </PageContainer>
