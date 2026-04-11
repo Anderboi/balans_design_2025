@@ -122,7 +122,7 @@
     @apply border-border outline-ring/50;
   }
   html {
-    font-size: 15px;
+    font-size: 16px;
     scroll-behavior: smooth;
   }
   body {

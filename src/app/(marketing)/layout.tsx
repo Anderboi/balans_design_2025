@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+// import { Geist } from "next/font/google";
 import { Cormorant_Garamond} from "next/font/google";
 import "./landing.css";
 
-const geist = Geist({
-  subsets: ["latin", "cyrillic"],
-  variable: "--font-geist",
-});
+// const geist = Geist({
+//   subsets: ["latin", "cyrillic"],
+//   variable: "--font-geist",
+// });
 
-const instrumentSerif = Cormorant_Garamond({
+const cormorantGaramond = Cormorant_Garamond({
   weight: ["400", "500", "600", "700"],
   subsets: ["latin", "cyrillic"],
   style: ["normal", "italic"],
@@ -44,7 +44,7 @@ export default function MarketingLayout({
 }) {
   return (
     <div
-      className={`${geist.variable} ${instrumentSerif.variable} font-sans antialiased`}
+      className={`${cormorantGaramond.variable} font-sans antialiased`}
       style={{
         fontFamily: "var(--font-geist), sans-serif",
       }}

@@ -4,7 +4,11 @@ import "./globals.css";
 import GlobalErrorBoundary from "@/components/global-error-boundary";
 import { Toaster } from "@/components/ui/sonner";
 
-const geist = Geist({ subsets: ["cyrillic"] });
+const geist = Geist({ 
+  subsets: ["latin", "cyrillic"],
+  display: 'swap',
+  variable: '--font-geist'
+});
 
 export const metadata: Metadata = {
   title: "Balans Design",

@@ -2,13 +2,12 @@
 import { Button } from "@/components/ui/button";
 
 // Импорты иконок (lucide-react)
-import { Sparkles, ChevronLeft, CircleUser } from "lucide-react";
+import { Sparkles, CircleUser } from "lucide-react";
 
 // Импорты внутренней логики и компонентов
 import { projectsService } from "@/lib/services/projects";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import {
   ProjectStagesLoader,
   ProjectStagesSkeleton,
