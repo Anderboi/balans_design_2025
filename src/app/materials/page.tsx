@@ -1,6 +1,5 @@
 import {
   getMaterials,
-  getCategories,
   getProjects,
   getSuppliers,
   getSupplierCompanies,
@@ -84,7 +83,6 @@ async function MaterialsPageContent() {
         </div>
         <MaterialsPageClient
           initialMaterials={DEMO_MATERIALS}
-          initialCategories={["Отделка", "Освещение", "Оборудование", "Мебель"]}
           initialProjects={[]}
           initialSuppliers={[]}
           initialSupplierCompanies={[]}
@@ -95,10 +93,9 @@ async function MaterialsPageContent() {
   }
 
   // Параллельная загрузка данных на сервере
-  const [materials, categories, projects, suppliers, supplierCompanies] =
+  const [materials, projects, suppliers, supplierCompanies] =
     await Promise.all([
       getMaterials(),
-      getCategories(),
       getProjects(),
       getSuppliers(),
       getSupplierCompanies(),
@@ -107,7 +104,6 @@ async function MaterialsPageContent() {
   return (
     <MaterialsPageClient
       initialMaterials={materials}
-      initialCategories={categories}
       initialProjects={projects}
       initialSuppliers={suppliers}
       initialSupplierCompanies={supplierCompanies}

@@ -12,7 +12,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { Check, RefreshCcw } from "lucide-react";
+import { Check, RefreshCcw, ArrowUp, ArrowDown } from "lucide-react";
+import { SortField, GroupField, SortConfig } from "./materials-toolbar";
 
 export const filterSchema = z.object({
   priceMin: z.string().optional(),
@@ -34,6 +35,10 @@ interface FilterMaterialDrawerProps {
     types: Record<string, number>;
     suppliers: Record<string, number>;
   };
+  groupBy: GroupField;
+  onGroupByChange: (value: GroupField) => void;
+  sortConfig: SortConfig;
+  onSortChange: (field: SortField) => void;
 }
 
 const FilterMaterialDrawer = ({
@@ -44,6 +49,10 @@ const FilterMaterialDrawer = ({
   availableTypes,
   availableSuppliers,
   counts,
+  groupBy,
+  onGroupByChange,
+  sortConfig,
+  onSortChange,
 }: FilterMaterialDrawerProps) => {
   const {
     register,
@@ -93,7 +102,7 @@ const FilterMaterialDrawer = ({
   };
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange} direction="right">
+    <Drawer open={open} onOpenChange={onOpenChange} direction="bottom">
       <DrawerContent className="right-0 left-auto h-screen rounded-l-2xl rounded-r-none">
         <DrawerHeader>
           <DrawerTitle>Фильтры</DrawerTitle>
@@ -105,6 +114,83 @@ const FilterMaterialDrawer = ({
         >
           <ScrollArea className="flex-1 px-4 overflow-auto">
             <div className="space-y-8 pb-6 pt-4">
+              {/* === MOBILE ONLY: Группировка и Сортировка === */}
+              <div className="sm:hidden space-y-8 pb-4">
+                {/* Группировка */}
+                <section>
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-zinc-500 mb-4">
+                    Группировка
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { label: "Нет", value: null },
+                      { label: "Производитель", value: "manufacturer" },
+                      { label: "Тип", value: "type" },
+                      { label: "Поставщик", value: "supplier" },
+                    ].map((option) => {
+                      const isActive = groupBy === option.value;
+                      return (
+                        <button
+                          type="button"
+                          key={option.value || "none"}
+                          onClick={() =>
+                            onGroupByChange(option.value as GroupField)
+                          }
+                          className={cn(
+                            "px-3 py-1.5 rounded-full text-sm font-medium transition-colors border",
+                            isActive
+                              ? "bg-black text-white border-black"
+                              : "bg-white text-zinc-600 border-zinc-200",
+                          )}
+                        >
+                          {option.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+
+                {/* Сортировка */}
+                <section>
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-zinc-500 mb-4">
+                    Сортировка
+                  </h4>
+                  <div className="flex flex-col gap-2">
+                    {[
+                      { label: "По умолчанию", value: null },
+                      { label: "Название", value: "name" },
+                      { label: "Цена", value: "price" },
+                      { label: "Производитель", value: "manufacturer" },
+                      { label: "Тип", value: "type" },
+                    ].map((option) => {
+                      const isActive = sortConfig.field === option.value;
+                      return (
+                        <button
+                          type="button"
+                          key={option.value || "none"}
+                          onClick={() => onSortChange(option.value as SortField)}
+                          className={cn(
+                            "flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors border",
+                            isActive
+                              ? "bg-zinc-100 text-black border-zinc-300"
+                              : "bg-white text-zinc-600 border-zinc-200",
+                          )}
+                        >
+                          {option.label}
+                          {isActive && sortConfig.direction === "asc" && (
+                            <ArrowUp className="size-4 text-zinc-500" />
+                          )}
+                          {isActive && sortConfig.direction === "desc" && (
+                            <ArrowDown className="size-4 text-zinc-500" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+                <div className="h-px bg-zinc-200 w-full my-4" />
+              </div>
+
               {/* Price Range */}
               <section>
                 <h4 className="text-sm font-bold uppercase tracking-wider text-zinc-500 mb-4">

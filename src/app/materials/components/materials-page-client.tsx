@@ -16,7 +16,7 @@ import PageHeader from "@/components/ui/page-header";
 
 interface MaterialsPageClientProps {
   initialMaterials: Material[];
-  initialCategories: string[];
+  // initialCategories: string[];
   initialProjects: Project[];
   initialSuppliers: Contact[];
   initialSupplierCompanies: Company[];
@@ -282,7 +282,7 @@ export function MaterialsPageClient({
       />
 
       {/* Статистика */}
-      <div className="flex gap-4 mb-6">
+      <div className="flex gap-4 mb-2 sm:mb-6">
         <Badge variant="secondary">Всего материалов: {materials.length}</Badge>
         <Badge variant="outline">Найдено: {filteredMaterials.length}</Badge>
       </div>
@@ -320,7 +320,7 @@ export function MaterialsPageClient({
               <div
                 className={
                   viewMode === "grid"
-                    ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                    ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-6"
                     : "space-y-2"
                 }
               >
@@ -358,6 +358,10 @@ export function MaterialsPageClient({
         availableTypes={availableTypes}
         availableSuppliers={availableSuppliers}
         counts={filterCounts}
+        groupBy={groupBy}
+        onGroupByChange={setGroupBy}
+        sortConfig={sortConfig}
+        onSortChange={handleSort}
       />
     </PageContainer>
   );

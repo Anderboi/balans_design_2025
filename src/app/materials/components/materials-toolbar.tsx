@@ -1,25 +1,10 @@
-import {
-  List,
-  LayoutGrid,
-  Funnel,
-  SlidersHorizontal,
-  ArrowUp,
-  ArrowDown,
-  Layers,
-  Search,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { ButtonGroup } from "@/components/ui/button-group";
-import { cn } from "@/lib/utils";
 import { FilterValues } from "./filter-material-drawer";
+import ViewToggle from "../../../components/view-toggle";
+import SortIndicator from "../../../components/sort-indicator";
+import FilterButton from "../../../components/filter-button";
 
 export type SortField =
   | "name"
@@ -54,6 +39,20 @@ interface MaterialsToolbarProps {
   onSortChange: (field: SortField) => void;
 }
 
+function countActiveFilters(
+  activeFilters: FilterValues,
+  groupBy: GroupField,
+  sortConfig: SortConfig,
+) {
+  return [
+    activeFilters.types.length,
+    activeFilters.suppliers.length,
+    activeFilters.priceMin || activeFilters.priceMax ? 1 : 0,
+    groupBy ? 1 : 0,
+    sortConfig.field ? 1 : 0,
+  ].reduce((a, b) => a + b, 0);
+}
+
 export function MaterialsToolbar({
   searchQuery,
   onSearchChange,
@@ -67,50 +66,34 @@ export function MaterialsToolbar({
   onSortChange,
 }: MaterialsToolbarProps) {
   return (
-    <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-background p-2 rounded-2xl shadow-lg shadow-zinc-300/50">
-      <div className="relative w-full md:w-96 group">
+    <div className="flex flex-row gap-2 sm:gap-4 items-center justify-between bg-background p-2 rounded-full sm:rounded-2xl shadow-lg shadow-zinc-300/50">
+      <div className="relative grow sm:w-96 group">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground size-4" />
         <Input
           placeholder="Поиск материалов..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-10 w-full"
+          className="pl-10 w-full max-sm:rounded-full"
         />
       </div>
-      <div className="flex items-center //gap-2 sm:w-full md:w-auto overflow-x-auto mr-1 no-scrollbar">
-        
+
+      <div className="flex items-center sm:w-full md:w-auto overflow-x-auto mr-1 no-scrollbar">
         {/* Режим отображения */}
-        <div className="flex items-center gap-1 bg-zinc-100 p-1 rounded-lg ">
-          <Button
-            variant={viewMode === "grid" ? "default" : "ghost"}
-            size="icon"
-            onClick={() => onViewModeChange("grid")}
-            className={cn(
-              viewMode === "grid" && "bg-background ",
-              "cursor-pointer hover:bg-zinc-50 hover:text-zinc-800 text-zinc-600",
-            )}
-          >
-            <LayoutGrid className="size-4" />
-          </Button>
-          <Button
-            variant={viewMode === "list" ? "default" : "ghost"}
-            size="icon"
-            onClick={() => onViewModeChange("list")}
-            className={cn(
-              viewMode === "list" && "bg-background",
-              "cursor-pointer hover:bg-zinc-50 hover:text-zinc-800 text-zinc-600",
-            )}
-          >
-            <List className="size-4" />
-          </Button>
-        </div>
+        <ViewToggle viewMode={viewMode} onViewModeChange={onViewModeChange} />
+
         <div className="h-6 w-px bg-zinc-200 mx-2 hidden md:block" />
 
         <ButtonGroup>
+          <FilterButton
+            count={countActiveFilters(activeFilters, groupBy, sortConfig)}
+            onClick={onFilterClick}
+          />
 
+          <SortIndicator sortConfig={sortConfig} />
           {/* Фильтры */}
-          <Button
+          {/* <Button
             variant={"ghost"}
+            size="icon-lg"
             className="cursor-pointer"
             onClick={onFilterClick}
           >
@@ -128,10 +111,10 @@ export function MaterialsToolbar({
                 ].reduce((a, b) => a + b, 0)}
               </Badge>
             )}
-          </Button>
+          </Button> */}
 
           {/* Группировка */}
-          <DropdownMenu>
+          {/* <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant={"ghost"} className="cursor-pointer">
                 <Layers className="size-4 mr-2" />
@@ -168,10 +151,10 @@ export function MaterialsToolbar({
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu> */}
 
           {/* Сортировка */}
-          <DropdownMenu>
+          {/* <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant={"ghost"} className="cursor-pointer">
                 <SlidersHorizontal className="size-4 mr-2" />
@@ -207,7 +190,7 @@ export function MaterialsToolbar({
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu> */}
         </ButtonGroup>
       </div>
     </div>
