@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, Suspense, useState, useEffect, useRef } from "react";
+import { useMemo, Suspense, useState, useEffect } from "react";
 import { SpecificationMaterial, MaterialType } from "@/types";
 import SpecMaterialCard from "../specifications/components/spec-material-card";
 import { Badge } from "@/components/ui/badge";
@@ -10,17 +10,12 @@ import {
   ChevronRight,
   ChevronDown,
   Search,
-  X,
-  List,
-  LayoutGrid,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from '@/components/ui/input';
-import { ExpandableSearch } from '@/components/expandable-search';
+import TypeFilterChips from '@/components/type-filter-chips';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
-
-const MATERIAL_TYPES = Object.values(MaterialType);
 
 const FORMAT_PRICE = new Intl.NumberFormat("ru-RU", {
   minimumFractionDigits: 0,
@@ -110,112 +105,6 @@ function useLocalMaterials(initial: SpecificationMaterial[]) {
 
 // ─── Toolbar sub-components ──────────────────────────────────────────────────
 
-// function ExpandableSearch({
-//   value,
-//   onChange,
-// }: {
-//   value: string;
-//   onChange: (v: string) => void;
-// }) {
-//   const [open, setOpen] = useState(false);
-//   const inputRef = useRef<HTMLInputElement>(null);
-
-//   useEffect(() => {
-//     if (open) inputRef.current?.focus();
-//   }, [open]);
-
-//   return (
-//     <>
-//       {/* Mobile */}
-//       <div className="flex sm:hidden">
-//         {open ? (
-//           <div className="flex items-center gap-2 bg-zinc-100 rounded-xl px-3 py-2 w-44 transition-all">
-//             <Search className="size-4 text-zinc-400 shrink-0" />
-//             <input
-//               ref={inputRef}
-//               value={value}
-//               onChange={(e) => onChange(e.target.value)}
-//               placeholder="Поиск..."
-//               className="bg-transparent outline-none w-full  placeholder:text-zinc-400"
-//             />
-//             <button
-//               onClick={() => {
-//                 onChange("");
-//                 setOpen(false);
-//               }}
-//               className="text-zinc-400 hover:text-zinc-600"
-//             >
-//               <X className="size-3" />
-//             </button>
-//           </div>
-//         ) : (
-//           <button
-//             onClick={() => setOpen(true)}
-//             className="size-9 flex items-center justify-center rounded-xl hover:bg-zinc-100 text-zinc-500 transition-colors"
-//           >
-//             <Search className="size-4" />
-//           </button>
-//         )}
-//       </div>
-//       {/* Desktop */}
-//       <div className="hidden sm:flex items-center gap-2 bg-zinc-100 rounded-xl px-3 py-2 min-w-52">
-//         <Search className="size-4 text-zinc-400 shrink-0" />
-//         <input
-//           value={value}
-//           onChange={(e) => onChange(e.target.value)}
-//           placeholder="Поиск по названию или марке..."
-//           className="bg-transparent text-sm outline-none w-full placeholder:text-zinc-400"
-//         />
-//         {value && (
-//           <button
-//             onClick={() => onChange("")}
-//             className="text-zinc-400 hover:text-zinc-600"
-//           >
-//             <X className="size-3.5" />
-//           </button>
-//         )}
-//       </div>
-//     </>
-//   );
-// }
-
-function TypeFilterChips({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-      <button
-        onClick={() => onChange("all")}
-        className={cn(
-          "whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-colors border",
-          value === "all"
-            ? "bg-black text-white border-black"
-            : "bg-background text-zinc-600 border-zinc-200 hover:bg-zinc-50"
-        )}
-      >
-        Все типы
-      </button>
-      {MATERIAL_TYPES.map((t) => (
-        <button
-          key={t}
-          onClick={() => onChange(t)}
-          className={cn(
-            "whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-colors border",
-            value === t
-              ? "bg-black text-white border-black"
-              : "bg-background text-zinc-600 border-zinc-200 hover:bg-zinc-50"
-          )}
-        >
-          {t}
-        </button>
-      ))}
-    </div>
-  );
-}
 
 function SortButton({
   order,
@@ -439,7 +328,12 @@ export default function MaterialListControls({ materials }: Props) {
       />
       <TypeFilterChips
         value={filters.filterType}
-        onChange={(v) => setFilters({ ...filters, filterType: v })}
+        onChange={(v) =>
+          setFilters({
+            ...filters,
+            filterType: filters.filterType === v ? "all" : v,
+          })
+        }
       />
       <div className="flex flex-col gap-6">
         <Suspense

@@ -8,6 +8,7 @@ import { MaterialsToolbar, SortField, GroupField } from "./materials-toolbar";
 import { MaterialCard } from "@/app/materials/components/card/material-card";
 import { AddMaterialDialog } from "@/app/materials/components/add-material-dialog";
 import FilterMaterialDrawer, { FilterValues } from "./filter-material-drawer";
+import TypeFilterChips from "@/components/type-filter-chips";
 import { Material, Project, Contact, Company } from "@/types";
 import { getMaterials } from "../actions";
 import { toast } from "sonner";
@@ -280,6 +281,30 @@ export function MaterialsPageClient({
         sortConfig={sortConfig}
         onSortChange={handleSort}
       />
+ 
+      {/* Быстрые фильтры по типу (Chips) */}
+      <div className="mt-2 sm:mt-4">
+        <TypeFilterChips
+          value={activeFilters.types}
+          types={availableTypes}
+          onChange={(t) => {
+            if (t === "all") {
+              setActiveFilters((prev) => ({ ...prev, types: [] }));
+            } else {
+              setActiveFilters((prev) => {
+                const currentTypes = prev.types || [];
+                const isSelected = currentTypes.includes(t);
+                return {
+                  ...prev,
+                  types: isSelected
+                    ? currentTypes.filter((type) => type !== t)
+                    : [...currentTypes, t],
+                };
+              });
+            }
+          }}
+        />
+      </div>
 
       {/* Статистика */}
       <div className="flex gap-4 mb-2 sm:mb-6">
