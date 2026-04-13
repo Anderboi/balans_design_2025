@@ -42,14 +42,17 @@ export function SupplierSection({
                 <Button
                   id="supplier-trigger"
                   variant="outline"
+                  size="lg"
                   className="w-full justify-between font-normal"
                 >
-                  <span>{field.value || "Выберите поставщика"}</span>
-                  <ChevronDownIcon className="h-4 w-4 opacity-50" />
+                  <span className="truncate text-base text-muted-foreground">
+                    {field.value || "Выберите поставщика"}
+                  </span>
+                  <ChevronDownIcon className="size-4 opacity-50" />
                 </Button>
               </FormControl>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-[300px]">
+            <DropdownMenuContent className="w-full sm:w-[300px]">
               <div className="p-2">
                 <Input
                   placeholder="Поиск или создание..."

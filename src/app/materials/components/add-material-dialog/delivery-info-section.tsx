@@ -10,8 +10,8 @@ interface DeliveryInfoSectionProps {
 
 export function DeliveryInfoSection({ control }: DeliveryInfoSectionProps) {
   return (
-    <>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-0">
+   
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <FormField
           control={control}
           name="article"
@@ -47,19 +47,6 @@ export function DeliveryInfoSection({ control }: DeliveryInfoSectionProps) {
           )}
         />
       </div>
-
-      {/* <FormField
-        control={control}
-        name="in_stock"
-        render={({ field }) => (
-          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-            <FormControl>
-              <Switch checked={field.value} onCheckedChange={field.onChange} />
-            </FormControl>
-            <FormLabel className="font-normal">В наличии</FormLabel>
-          </FormItem>
-        )}
-      /> */}
-    </>
+    
   );
 }

@@ -22,7 +22,7 @@ export function BasicInfoSection({
   materialTypes,
 }: BasicInfoSectionProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-0">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <FormField
         control={control}
         name="name"
@@ -50,7 +50,7 @@ export function BasicInfoSection({
               value={field.value}
             >
               <FormControl>
-                <SelectTrigger id="type">
+                <SelectTrigger id="type" className="w-full">
                   <SelectValue placeholder="Выберите категорию" />
                 </SelectTrigger>
               </FormControl>

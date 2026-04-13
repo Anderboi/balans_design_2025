@@ -17,12 +17,12 @@ export function FormRow({
   required,
 }: FormRowProps) {
   return (
-    <div className={cn("grid grid-cols-4 items-center gap-4", className)}>
-      <Label htmlFor={htmlFor} className="text-right">
+    <div className={cn("flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4", className)}>
+      <Label htmlFor={htmlFor} className="text-left sm:text-right w-full sm:w-50">
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
       </Label>
-      <div className="col-span-3">{children}</div>
+      <div className="w-full">{children}</div>
     </div>
   );
 }

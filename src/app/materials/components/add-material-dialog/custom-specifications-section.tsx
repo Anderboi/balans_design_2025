@@ -54,7 +54,7 @@ export function CustomSpecificationsSection({
               control={control}
               name={`custom_specifications.${index}.value`}
               render={({ field }) => (
-                <FormItem className="flex-[2]">
+                <FormItem className="flex-2">
                   <FormControl>
                     <Input placeholder="Значение (например: LED)" {...field} />
                   </FormControl>
@@ -70,7 +70,7 @@ export function CustomSpecificationsSection({
               className="mt-0 opacity-50 hover:opacity-100 text-destructive hover:text-destructive hover:bg-destructive/10"
               onClick={() => remove(index)}
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="size-4" />
             </Button>
           </div>
         ))}
@@ -79,11 +79,11 @@ export function CustomSpecificationsSection({
       <Button
         type="button"
         variant="outline"
-        size="sm"
+        size="lg"
         className="w-full border-dashed"
         onClick={() => append({ label: "", value: "" })}
       >
-        <Plus className="h-4 w-4 mr-2" />
+        <Plus className="size-4 mr-2" />
         Добавить характеристику
       </Button>
     </div>

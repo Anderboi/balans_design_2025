@@ -16,19 +16,29 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { materialsService } from "@/lib/services/materials";
+import { storageService } from "@/lib/services/storage";
 import { Material, MaterialType, Contact, ContactType, Company } from "@/types";
 import AddContactDialog from "@/app/(protected)/contacts/components/add-contact-dialog";
 
 // Custom hooks
-import { useImageUpload } from "@/app/materials/hooks/use-image-upload";
 import { useTagManagement } from "@/app/materials/hooks/use-tag-management";
 import { useSupplierSelection } from "@/app/materials/hooks/use-supplier-selection";
 
 // Sub-components
-import { ImageUploadSection } from "./add-material-dialog/image-upload-section";
+import { ImageUploadSection } from "@/components/image-upload-section";
 import { BasicInfoSection } from "./add-material-dialog/basic-info-section";
 import { SupplierSection } from "./add-material-dialog/supplier-section";
 import { DeliveryInfoSection } from "./add-material-dialog/delivery-info-section";
@@ -38,6 +48,7 @@ import { AdditionalInfoSection } from "./add-material-dialog/additional-info-sec
 import { CustomSpecificationsSection } from "./add-material-dialog/custom-specifications-section";
 import SubBlockCard from "@/components/ui/sub-block-card";
 import { MaterialFilesSection } from "./add-material-dialog/material-files-section";
+import { useImageUpload } from '@/hooks/use-image-upload';
 
 // ... existing imports
 
@@ -59,6 +70,7 @@ export function EditMaterialDrawer({
   initialSupplierCompanies,
 }: EditMaterialDrawerProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [showExitConfirmation, setShowExitConfirmation] = useState(false);
 
   const form = useForm<AddMaterialFormValues>({
     resolver: zodResolver(AddMaterialSchema) as Resolver<AddMaterialFormValues>,
@@ -85,7 +97,12 @@ export function EditMaterialDrawer({
     },
   });
 
-  const { setValue, watch, control } = form;
+  const {
+    formState: { isDirty },
+    setValue,
+    watch,
+    control,
+  } = form;
 
   // Custom hooks
   const imageUpload = useImageUpload();
@@ -103,7 +120,7 @@ export function EditMaterialDrawer({
       let finalImageUrl = values.image_url;
       // Если выбрано изображение, загружаем в Storage
       if (imageUpload.imageFile) {
-        const uploadedUrl = await imageUpload.uploadImage();
+        const uploadedUrl = await storageService.uploadMaterialImage(imageUpload.imageFile);
         if (uploadedUrl) finalImageUrl = uploadedUrl;
       }
 
@@ -123,10 +140,22 @@ export function EditMaterialDrawer({
 
   const handleOpenChangeWrapper = (newOpen: boolean) => {
     if (!newOpen) {
+      if (isDirty || imageUpload.imageFile) {
+        setShowExitConfirmation(true);
+        return;
+      }
+      
       imageUpload.resetImage();
       tagManagement.resetTags();
     }
     onOpenChange(newOpen);
+  };
+
+  const confirmClose = () => {
+    setShowExitConfirmation(false);
+    imageUpload.resetImage();
+    tagManagement.resetTags();
+    onOpenChange(false);
   };
 
   const materialTypes = Object.values(MaterialType);
@@ -136,10 +165,10 @@ export function EditMaterialDrawer({
     <>
       <Drawer
         open={open}
-        direction="right"
+        direction="bottom"
         onOpenChange={handleOpenChangeWrapper}
       >
-        <DrawerContent className="//max-h-[95vh] min-w-[640px]">
+        <DrawerContent className="//max-h-[95vh] sm:min-w-[640px]">
           <DrawerHeader>
             <DrawerTitle>Редактировать материал</DrawerTitle>
             <DrawerDescription>
@@ -156,7 +185,6 @@ export function EditMaterialDrawer({
                 <div className="space-y-8 pb-6">
                   {/* Обложка материала */}
                   <ImageUploadSection
-                    control={control}
                     imagePreview={
                       imageUpload.imagePreview || material.image_url || null
                     }
@@ -220,16 +248,22 @@ export function EditMaterialDrawer({
               </ScrollArea>
 
               <DrawerFooter>
-                <div className="flex gap-2">
+                <div className="flex flex-col-reverse sm:flex-row gap-2">
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="ghost"
+                    size="lg"
                     onClick={() => handleOpenChangeWrapper(false)}
-                    className="flex-1"
+                    className="sm:flex-1"
                   >
                     Отмена
                   </Button>
-                  <Button type="submit" disabled={isLoading} className="flex-1">
+                  <Button
+                    type="submit"
+                    size="lg"
+                    disabled={isLoading}
+                    className="sm:flex-1 rounded-full"
+                  >
                     {isLoading ? "Сохранение..." : "Сохранить изменения"}
                   </Button>
                 </div>
@@ -245,6 +279,32 @@ export function EditMaterialDrawer({
         defaultCompanyName={supplierSelection.supplierQuery}
         defaultType={ContactType.SUPPLIER}
       />
+
+      <AlertDialog
+        open={showExitConfirmation}
+        onOpenChange={setShowExitConfirmation}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Отменить редактирование?</AlertDialogTitle>
+            <AlertDialogDescription>
+              У вас есть несохраненные изменения. Все внесенные изменения будут
+              потеряны.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="text-base border-none shadow-none h-12">
+              Продолжить редактирование
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmClose}
+              className="bg-destructive text-white text-base h-12 rounded-full hover:bg-destructive/90"
+            >
+              Да, отменить
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

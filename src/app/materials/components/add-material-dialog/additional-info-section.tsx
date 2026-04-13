@@ -46,7 +46,7 @@ export function AdditionalInfoSection({
       />
 
       <FormRow label="Теги" htmlFor="tag-input">
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
           <Input
             id="tag-input"
             value={tagInput}
@@ -58,7 +58,7 @@ export function AdditionalInfoSection({
           <Button
             type="button"
             onClick={handleAddTag}
-            size="icon"
+            size="icon-lg"
             variant="outline"
           >
             <Plus className="size-4" />

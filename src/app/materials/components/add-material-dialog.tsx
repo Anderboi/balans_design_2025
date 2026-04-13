@@ -16,18 +16,28 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { materialsService } from "@/lib/services/materials";
+import { storageService } from "@/lib/services/storage";
 import { MaterialType, Contact, ContactType, Company } from "@/types";
 import AddContactDialog from "@/app/(protected)/contacts/components/add-contact-dialog";
 
 // Custom hooks
-import { useImageUpload } from "@/app/materials/hooks/use-image-upload";
+import { useImageUpload } from "@/hooks/use-image-upload";
 import { useTagManagement } from "@/app/materials/hooks/use-tag-management";
 import { useSupplierSelection } from "@/app/materials/hooks/use-supplier-selection";
 
 // Sub-components
-import { ImageUploadSection } from "./add-material-dialog/image-upload-section";
 import { BasicInfoSection } from "./add-material-dialog/basic-info-section";
 import { SupplierSection } from "./add-material-dialog/supplier-section";
 import { DeliveryInfoSection } from "./add-material-dialog/delivery-info-section";
@@ -38,6 +48,7 @@ import { AdditionalInfoSection } from "./add-material-dialog/additional-info-sec
 import SubBlockCard from "@/components/ui/sub-block-card";
 import { MaterialFilesSection } from "./add-material-dialog/material-files-section";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ImageUploadSection } from '@/components/image-upload-section';
 
 // ... existing imports
 
@@ -57,6 +68,7 @@ export function AddMaterialDialog({
   initialSupplierCompanies,
 }: AddMaterialDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [showExitConfirmation, setShowExitConfirmation] = useState(false);
 
   const form = useForm<AddMaterialFormValues>({
     resolver: zodResolver(AddMaterialSchema) as Resolver<AddMaterialFormValues>,
@@ -83,7 +95,12 @@ export function AddMaterialDialog({
     },
   });
 
-  const { setValue, watch, control } = form;
+  const {
+    formState: { isDirty },
+    setValue,
+    watch,
+    control,
+  } = form;
 
   // Custom hooks
   const imageUpload = useImageUpload();
@@ -101,7 +118,7 @@ export function AddMaterialDialog({
       let finalImageUrl = values.image_url;
       // Если выбрано изображение, загружаем в Storage
       if (imageUpload.imageFile) {
-        const uploadedUrl = await imageUpload.uploadImage();
+        const uploadedUrl = await storageService.uploadMaterialImage(imageUpload.imageFile);
         if (uploadedUrl) finalImageUrl = uploadedUrl;
       }
 
@@ -124,11 +141,25 @@ export function AddMaterialDialog({
 
   const handleOpenChangeWrapper = (newOpen: boolean) => {
     if (!newOpen) {
+      // Если есть изменения или выбрано изображение — показываем предупреждение
+      if (isDirty || imageUpload.imageFile) {
+        setShowExitConfirmation(true);
+        return;
+      }
+      
       form.reset();
       imageUpload.resetImage();
       tagManagement.resetTags();
     }
     onOpenChange(newOpen);
+  };
+
+  const confirmClose = () => {
+    setShowExitConfirmation(false);
+    form.reset();
+    imageUpload.resetImage();
+    tagManagement.resetTags();
+    onOpenChange(false);
   };
 
   const materialTypes = Object.values(MaterialType);
@@ -149,15 +180,15 @@ export function AddMaterialDialog({
             onSubmit={form.handleSubmit(onSubmit)}
             className="flex flex-col h-full min-h-0"
           >
-            <ScrollArea className="flex-1 px-1">
-              <div className="p-6 pt-0 space-y-8 pb-6">
+            <ScrollArea className="flex-1">
+              <div className="space-y-4 pb-4">
                 {/* Обложка материала */}
                 <ImageUploadSection
-                  control={control}
                   imagePreview={imageUpload.imagePreview}
                   onImageSelect={imageUpload.handleImageSelect}
                   onImageRemove={imageUpload.handleImageRemove}
                   fileInputRef={imageUpload.fileInputRef}
+                  error={form.formState.errors.image_url?.message}
                 />
 
                 <SubBlockCard title="Основная информация">
@@ -211,18 +242,20 @@ export function AddMaterialDialog({
               </div>
             </ScrollArea>
 
-            <DialogFooter className="p-6 pt-2 border-t shrink-0">
+            <DialogFooter className="//p-6 pt-6 border-t shrink-0">
               <Button
                 type="button"
-                variant="outline"
+                size="lg"
+                variant="ghost"
                 onClick={() => handleOpenChangeWrapper(false)}
               >
                 Отмена
               </Button>
               <Button
                 type="submit"
+                size="lg"
                 disabled={isLoading}
-                className="bg-[#0071E3] hover:bg-[#0077ED] rounded-xl px-6"
+                className="rounded-full px-6"
               >
                 {isLoading ? "Создание..." : "Создать материал"}
               </Button>
@@ -236,6 +269,26 @@ export function AddMaterialDialog({
           defaultCompanyName={supplierSelection.supplierQuery}
           defaultType={ContactType.SUPPLIER}
         />
+
+        <AlertDialog open={showExitConfirmation} onOpenChange={setShowExitConfirmation}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Отменить создание?</AlertDialogTitle>
+              <AlertDialogDescription>
+                У вас есть несохраненные изменения. Все заполненные данные будут потеряны.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className='text-base border-none shadow-none h-12'>Продолжить заполнение</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={confirmClose}
+                className="bg-destructive h-12 rounded-full text-base text-white hover:bg-destructive/90"
+              >
+                Да, отменить
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </DialogContent>
     </Dialog>
   );
