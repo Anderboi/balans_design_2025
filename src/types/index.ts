@@ -3,6 +3,7 @@ export interface Project {
   id: string;
   name: string;
   address: string | null;
+  cover?: string | null;
   area?: number;
   client_id: string | null;
   residents?: string; // Optional/missing in DB main table

@@ -1,5 +1,4 @@
 import { useState, useRef } from "react";
-import { storageService } from "@/lib/services/storage";
 
 export function useImageUpload() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -17,11 +16,6 @@ export function useImageUpload() {
     setImagePreview(null);
   };
 
-  const uploadImage = async (): Promise<string | null> => {
-    if (!imageFile) return null;
-    return await storageService.uploadMaterialImage(imageFile);
-  };
-
   const resetImage = () => {
     setImageFile(null);
     setImagePreview(null);
@@ -33,7 +27,6 @@ export function useImageUpload() {
     imagePreview,
     handleImageSelect,
     handleImageRemove,
-    uploadImage,
     resetImage,
   };
 }

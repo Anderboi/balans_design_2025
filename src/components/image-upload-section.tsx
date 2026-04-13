@@ -1,30 +1,25 @@
+import Image from "next/image";
 import { RefObject } from "react";
-import { Control } from "react-hook-form";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { FileDropzone } from "@/components/ui/dropzone";
-import { AddMaterialFormValues } from "@/lib/schemas/materials";
 
 interface ImageUploadSectionProps {
-  control: Control<AddMaterialFormValues>;
+  label?: string;
   imagePreview: string | null;
   onImageSelect: (file: File) => void;
   onImageRemove: () => void;
   fileInputRef: RefObject<HTMLInputElement | null>;
+  error?: string;
 }
 
 export function ImageUploadSection({
-  control,
+  label = "Обложка (изображение)",
   imagePreview,
   onImageSelect,
   onImageRemove,
   fileInputRef,
+  error,
 }: ImageUploadSectionProps) {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -41,25 +36,26 @@ export function ImageUploadSection({
   };
 
   return (
-    <FormField
-      control={control}
-      name="image_url"
-      render={() => (
-        <FormItem className="space-y-3">
-          <FormLabel>Обложка (изображение)</FormLabel>
-          <FormControl>
-            {imagePreview ? (
-              <div className="relative">
-                <img
-                  src={imagePreview}
-                  alt="Предпросмотр"
-                  className="w-full h-48 object-contain rounded-md"
-                />
+    <div className="space-y-3">
+      <Label className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold pl-1">
+        {label}
+      </Label>
+      <div className="relative">
+        {imagePreview ? (
+          <div className="relative group">
+            <div className="relative w-full h-48 rounded-2xl overflow-hidden border border-zinc-100 shadow-sm">
+              <Image
+                src={imagePreview}
+                alt="Предпросмотр"
+                fill
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+            </div>
                 <Button
                   type="button"
-                  variant="outline"
-                  size="sm"
-                  className="mt-2"
+                  variant="destructive"
+                  size="lg"
+                  className="w-full mt-2 rounded-full"
                   onClick={onImageRemove}
                 >
                   Удалить изображение
@@ -74,10 +70,8 @@ export function ImageUploadSection({
                 handleFileSelect={handleFileSelect}
               />
             )}
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
+      </div>
+      {error && <p className="text-[0.8rem] font-medium text-destructive">{error}</p>}
+    </div>
   );
 }

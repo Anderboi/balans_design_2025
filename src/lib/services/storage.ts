@@ -112,4 +112,33 @@ export const storageService = {
       type: file.type,
     };
   },
+
+  async uploadProjectCover(
+    file: File,
+    client?: SupabaseClient,
+  ): Promise<string> {
+    const supabaseClient = client || supabase;
+    const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+    if (file.size > MAX_SIZE) {
+      throw new Error("Файл превышает максимальный размер 5MB");
+    }
+
+    const bucket = "project_files"; // Используем существующий или созданный бакет
+    const ext = file.name.split(".").pop() || "jpg";
+    const fileName = `covers/${Date.now()}-${Math.random()
+      .toString(36)
+      .slice(2)}.${ext}`;
+
+    const { error: uploadError } = await supabaseClient.storage
+      .from(bucket)
+      .upload(fileName, file, { contentType: file.type, upsert: false });
+
+    if (uploadError) {
+      console.error("Ошибка при загрузке обложки проекта:", uploadError);
+      throw uploadError;
+    }
+
+    const { data } = supabaseClient.storage.from(bucket).getPublicUrl(fileName);
+    return data.publicUrl;
+  },
 };

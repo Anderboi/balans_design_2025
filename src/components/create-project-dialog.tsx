@@ -11,8 +11,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Layout, User, MapPin, Image as ImageIcon, Square } from "lucide-react";
+import { Layout, User, MapPin, Square } from "lucide-react";
 import { createProjectAction } from "@/lib/actions/projects";
+import { ImageUploadSection } from './image-upload-section';
+import { useImageUpload } from "@/hooks/use-image-upload";
+import { storageService } from "@/lib/services/storage";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { createProjectFormSchema, type CreateProjectFormValues } from "@/lib/schemas/projects";
 
 interface CreateProjectDialogProps {
   children?: React.ReactNode;
@@ -29,39 +35,53 @@ export function CreateProjectDialog({
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const [formData, setFormData] = useState({
-    name: "",
-    client_name: "", // Will be part of data even if not in DB yet (for mock)
-    area: "",
-    address: "",
-    cover_url: "",
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<CreateProjectFormValues>({
+    resolver: zodResolver(createProjectFormSchema),
+    defaultValues: {
+      name: "",
+      client_name: "",
+      area: "",
+      address: "",
+    },
   });
+
+  const imageUpload = useImageUpload();
 
   const handleOpenChange = (newOpen: boolean) => {
     setIsOpen(newOpen);
     if (onOpenChange) onOpenChange(newOpen);
     if (!newOpen) {
-      // Reset form on close if needed, for now keep state
+      reset();
+      imageUpload.handleImageRemove();
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onFormSubmit = async (data: CreateProjectFormValues) => {
     setIsLoading(true);
 
     try {
-      // Convert area to number
-      const areaNumber = parseFloat(formData.area) || 0;
+      const areaNumber = parseFloat(data.area || "0") || 0;
+
+      let finalCoverUrl = "";
+      if (imageUpload.imageFile) {
+        finalCoverUrl = await storageService.uploadProjectCover(imageUpload.imageFile);
+      }
 
       const result = await createProjectAction({
-        name: formData.name,
-        address: formData.address || "", // Fix undefined vs null mismatch
+        name: data.name,
+        address: data.address || "",
         area: areaNumber,
         client_id: null,
         stage: "Предпроектная",
         residents: "",
         demolition_info: "",
         construction_info: "",
+        cover: finalCoverUrl || null,
       });
 
       if (result.success) {
@@ -70,7 +90,6 @@ export function CreateProjectDialog({
         router.push(`/projects/${result.projectId}`);
       } else {
         console.error("Failed to create project:", result.error);
-        // Show toast error here
       }
     } catch (error) {
       console.error("Error creating project:", error);
@@ -82,7 +101,7 @@ export function CreateProjectDialog({
   return (
     <Dialog open={open ?? isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] p-0 gap-0 overflow-hidden bg-white/95 backdrop-blur-xl border-gray-100 shadow-2xl rounded-3xl">
+      <DialogContent className="sm:max-w-[600px] p-0 gap-0 overflow-hidden //bg-white/95 backdrop-blur-xl border-gray-100 shadow-2xl rounded-4xl">
         <div className="p-6 pb-0">
           <div className="flex items-center justify-between mb-6">
             <DialogTitle className="text-xl font-semibold tracking-tight">
@@ -91,7 +110,7 @@ export function CreateProjectDialog({
             {/* Close button is automatic in DialogContent usually, but we can customize or let it be */}
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label
@@ -104,14 +123,13 @@ export function CreateProjectDialog({
                   <Layout className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-black transition-colors" />
                   <Input
                     id="name"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    placeholder="Апартаменты на набережной" // Placeholder from screenshot
-                    required
-                    className="pl-9 h-12 bg-gray-50 border-gray-100 rounded-xl focus-visible:ring-1 focus-visible:ring-gray-300 focus-visible:border-gray-300 transition-all font-medium"
+                    {...register("name")}
+                    placeholder="Апартаменты на набережной"
+                    className="pl-9 transition-all font-medium"
                   />
+                  {errors.name && (
+                    <p className="text-[10px] text-red-500 mt-1 pl-1">{errors.name.message}</p>
+                  )}
                 </div>
               </div>
 
@@ -121,21 +139,15 @@ export function CreateProjectDialog({
                     htmlFor="client"
                     className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold pl-1"
                   >
-                    Заказчик
+                    Клиент
                   </Label>
                   <div className="relative group">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-black transition-colors" />
                     <Input
                       id="client"
-                      value={formData.client_name}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          client_name: e.target.value,
-                        })
-                      }
+                      {...register("client_name")}
                       placeholder="Имя Фамилия"
-                      className="pl-9 h-12 bg-gray-50 border-gray-100 rounded-xl focus-visible:ring-1 focus-visible:ring-gray-300 focus-visible:border-gray-300 transition-all font-medium"
+                      className="pl-9 transition-all font-medium"
                     />
                   </div>
                 </div>
@@ -152,13 +164,9 @@ export function CreateProjectDialog({
                     <Input
                       id="area"
                       type="number"
-                      value={formData.area}
-                      onChange={(e) =>
-                        setFormData({ ...formData, area: e.target.value })
-                      }
+                      {...register("area")}
                       placeholder="100"
-                      required // Assuming area is required
-                      className="pl-9 h-12 bg-gray-50 border-gray-100 rounded-xl focus-visible:ring-1 focus-visible:ring-gray-300 focus-visible:border-gray-300 transition-all font-medium"
+                      className="pl-9 transition-all font-medium"
                     />
                   </div>
                 </div>
@@ -175,53 +183,39 @@ export function CreateProjectDialog({
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-black transition-colors" />
                   <Input
                     id="address"
-                    value={formData.address}
-                    onChange={(e) =>
-                      setFormData({ ...formData, address: e.target.value })
-                    }
+                    {...register("address")}
                     placeholder="Москва, Пресненская наб."
-                    className="pl-9 h-12 bg-gray-50 border-gray-100 rounded-xl focus-visible:ring-1 focus-visible:ring-gray-300 focus-visible:border-gray-300 transition-all font-medium"
+                    className="pl-9 transition-all font-medium"
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label
-                  htmlFor="cover"
-                  className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold pl-1"
-                >
-                  Обложка (URL)
-                </Label>
-                <div className="relative group">
-                  <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-black transition-colors" />
-                  <Input
-                    id="cover"
-                    value={formData.cover_url}
-                    onChange={(e) =>
-                      setFormData({ ...formData, cover_url: e.target.value })
-                    }
-                    placeholder="https://..."
-                    className="pl-9 h-12 bg-gray-50 border-gray-100 rounded-xl focus-visible:ring-1 focus-visible:ring-gray-300 focus-visible:border-gray-300 transition-all font-medium"
-                  />
-                </div>
-              </div>
+              <ImageUploadSection
+                imagePreview={imageUpload.imagePreview}
+                onImageSelect={imageUpload.handleImageSelect}
+                onImageRemove={imageUpload.handleImageRemove}
+                fileInputRef={imageUpload.fileInputRef}
+                label="Обложка проекта"
+              />
             </div>
 
             <div className="flex items-center justify-between pt-4 pb-6 mt-8">
               <Button
                 type="button"
                 variant="ghost"
+                size="lg"
                 onClick={() => handleOpenChange(false)}
-                className="h-12 w-32 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium"
+                className="grow rounded-full hover:bg-gray-200"
               >
                 Отмена
               </Button>
               <Button
                 type="submit"
+                size="lg"
                 disabled={isLoading}
-                className="h-12 w-40 rounded-xl bg-black hover:bg-gray-800 text-white font-medium shadow-lg hover:shadow-xl transition-all"
+                className="grow rounded-full //bg-black hover:bg-gray-800 //text-white //font-medium shadow-lg hover:shadow-xl transition-all"
               >
-                {isLoading ? "Создание..." : "+ Создать"}
+                {isLoading ? "Создание..." : "Создать"}
               </Button>
             </div>
           </form>

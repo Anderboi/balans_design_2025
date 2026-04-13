@@ -69,6 +69,7 @@ export const projectsService = {
         p_residents: project.residents || "",
         p_demolition_info: project.demolition_info || "",
         p_construction_info: project.construction_info || "",
+        p_cover: project.cover || null,
       },
     );
 

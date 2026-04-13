@@ -14,6 +14,7 @@ interface CreateProjectFormData {
   residents?: string;
   demolition_info?: string;
   construction_info?: string;
+  cover?: string | null;
 }
 
 export async function createProjectAction(formData: CreateProjectFormData) {
@@ -40,6 +41,7 @@ export async function createProjectAction(formData: CreateProjectFormData) {
         residents: formData.residents,
         demolition_info: formData.demolition_info,
         construction_info: formData.construction_info,
+        cover: formData.cover,
       },
       supabase,
     );

@@ -1,4 +1,5 @@
 import { Project } from "@/types";
+import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { getStageBadgeClass } from "@/lib/utils/utils";
@@ -22,21 +23,24 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
   const clientName = project.contacts?.name || "Не указан";
 
-  // Random image placeholder from Unsplash based on project ID to keep it consistent
-  // Using architecture/interior keywords
-  const imageUrl = `https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?q=80&w=800&auto=format&fit=crop`;
+  const imageUrl = project.cover || project.object_info?.photos?.[0]?.url;
 
   return (
     <Link href={`/projects/${project.id}`} className="group block">
       <div className=" relative h-[360px] rounded-4xl overflow-hidden cursor-pointer shadow-md hover:shadow-2xl transition-all duration-500 border border-zinc-100/50">
-        {/* Make the card clicking generic for the whole card */}
-        {/* Background Image */}
+        {/* Background */}
         <div className="absolute inset-0">
-          <img
-            src={imageUrl}
-            alt={project.name}
-            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-          />
+          {imageUrl ? (
+            <Image
+              src={imageUrl}
+              width={800}
+              height={800}
+              alt={project.name}
+              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+            />
+          ) : (
+            <div className="h-full w-full transition-transform duration-700 group-hover:scale-105 bg-linear-to-tr from-gray-900 to-gray-600" />
+          )}
           {/* Gradient Overlay */}
           <div className="absolute inset-0 bg-linear-to-t from-black via-black/50 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
         </div>
