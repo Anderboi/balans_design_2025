@@ -11,6 +11,7 @@ const ViewToggle = ({
 }) => {
   return (
     <article>
+      {/* Web */}
       <div className="hidden sm:flex items-center gap-1 bg-zinc-100 p-1 rounded-lg ">
         <Button
           variant={viewMode === "grid" ? "default" : "ghost"}
@@ -35,11 +36,12 @@ const ViewToggle = ({
           <List className="size-4" />
         </Button>
       </div>
+      {/* Mobile */}
       <div className="sm:hidden">
         {viewMode === "list" ? (
           <Button
             variant={viewMode === "list" ? "default" : "ghost"}
-            size="icon"
+            size="icon-lg"
             onClick={() => onViewModeChange("grid")}
             className={cn(
               viewMode === "list" && "bg-background ",
@@ -51,7 +53,7 @@ const ViewToggle = ({
         ) : (
           <Button
             variant={viewMode === "grid" ? "default" : "ghost"}
-            size="icon"
+            size="icon-lg"
             onClick={() => onViewModeChange("list")}
             className={cn(
               viewMode === "grid" && "bg-background",

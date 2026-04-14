@@ -283,7 +283,6 @@ export function MaterialsPageClient({
       />
  
       {/* Быстрые фильтры по типу (Chips) */}
-      <div className="mt-2 sm:mt-4">
         <TypeFilterChips
           value={activeFilters.types}
           types={availableTypes}
@@ -304,10 +303,9 @@ export function MaterialsPageClient({
             }
           }}
         />
-      </div>
 
       {/* Статистика */}
-      <div className="flex gap-4 mb-2 sm:mb-6">
+      <div className="flex gap-4  mb-2 sm:mb-6">
         <Badge variant="secondary">Всего материалов: {materials.length}</Badge>
         <Badge variant="outline">Найдено: {filteredMaterials.length}</Badge>
       </div>
@@ -345,7 +343,7 @@ export function MaterialsPageClient({
               <div
                 className={
                   viewMode === "grid"
-                    ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-6"
+                    ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-1 sm:gap-4"
                     : "space-y-2"
                 }
               >

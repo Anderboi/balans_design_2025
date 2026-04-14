@@ -26,6 +26,7 @@ import { EditMaterialDrawer } from "../edit-material-drawer";
 import { AssignMaterialDialog } from "../assign-material-dialog";
 import { materialsService } from "@/lib/services/materials";
 import { Material, Project, Contact, Company } from "@/types";
+import Image from "next/image";
 
 interface MaterialCardProps {
   material: Material;
@@ -68,92 +69,94 @@ export function MaterialCard({
     setShowAssignDialog(true);
   };
 
+  //? LIST view
   if (viewMode === "list") {
     return (
       <>
-        <div className="glass-card w-full rounded-4xl overflow-clip p-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-end space-x-4 flex-1 ">
-              <div className="rounded-md overflow-clip">
-                {material.image_url ? (
-                  <img
-                    src={material.image_url}
-                    alt={material.name}
-                    className="size-24 object-cover rounded-3xl"
-                  />
-                ) : (
-                  <div className="size-24 bg-muted flex items-center justify-center rounded-3xl">
-                    <Package className="size-8 text-muted-foreground" />
-                  </div>
-                )}
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <p className="text-sm text-muted-foreground">
-                  {material.description?.toUpperCase()}
-                </p>
-                <h3 className="font-semibold text-xl truncate ">
+        <div className="glass-card flex items-center justify-between w-full rounded-2xl sm:rounded-4xl overflow-clip sm:p-2 gap-2 sm:gap-4">
+          <div className="flex items-end space-x-2 sm:space-x-4 flex-1 ">
+            {/*//? Image */}
+            <div className="h-26 sm:rounded-3xl border border-muted overflow-clip">
+              {material.image_url ? (
+                <Image
+                  src={material.image_url}
+                  alt={material.name}
+                  width={96}
+                  height={96}
+                  className="size-26 object-cover "
+                />
+              ) : (
+                <div className="size-26 bg-muted flex items-center justify-center">
+                  <Package className="size-8 text-muted-foreground" />
+                </div>
+              )}
+            </div>
+            {/*//? Info */}
+            <div className="flex-1 h-26 flex flex-col justify-between min-w-0 py-2 sm:py-0">
+              <p className="text-xs sm:text-sm text-muted-foreground h-lh">
+                {material.description?.toUpperCase()}
+              </p>
+              <div>
+                <h3 className="font-semibold sm:text-xl truncate ">
                   {material.name}
                 </h3>
                 <p className="text-xs text-muted-foreground/80 capitalize">
                   {material.manufacturer?.toUpperCase()}
                 </p>
-                <div className="flex items-center space-x-2 mt-2">
-                  <Badge variant="secondary">{material.type}</Badge>
+              </div>
+            </div>
+            {/*//? Price */}
+            <div className="text-right h-26 pb-2 flex items-end flex-col justify-between font-semibold sm:text-lg">
+              <div className="flex items-center space-x-2 mt-2">
+                <Badge variant="secondary">{material.type}</Badge>
 
-                  {/* {!material.in_stock && (
+                {/* {!material.in_stock && (
                     <Badge variant="destructive">Нет в наличии</Badge>
                   )} */}
-                </div>
               </div>
-
-              <div className="text-right flex flex-col justify-between h-full">
-                {material.price && (
-                  <p className="font-semibold text-lg">
-                    {material.price} ₽{material.unit ? `/${material.unit}` : ""}
-                  </p>
-                )}
-                {/* {material.article && (
-                  <p className="text-sm text-muted-foreground">
-                    Арт: {material.article}
-                  </p>
-                )} */}
-              </div>
+              {material.price && (
+                <p>
+                  {material.price} ₽{material.unit ? `/${material.unit}` : ""}
+                </p>
+              )}
             </div>
+          </div>
 
-            <div className="flex items-center space-x-2 ml-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleAssignMaterial}
-                className="flex items-center space-x-1"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Присвоить</span>
-              </Button>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm">
-                    <MoreHorizontal className="w-4 h-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => setShowEditDrawer(true)}>
-                    <Edit className="w-4 h-4 mr-2" />
-                    Редактировать
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => setShowDeleteDialog(true)}
-                    className="text-destructive"
-                  >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Удалить
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+          {/*//? Action buttons */}
+          <div className="flex flex-col h-26 p-2 justify-between //hidden items-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon-lg"
+                  className="cursor-pointer rounded-full"
+                >
+                  <MoreHorizontal className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setShowEditDrawer(true)}>
+                  <Edit className="size-4 mr-2" />
+                  Редактировать
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="text-destructive"
+                >
+                  <Trash2 className="size-4 mr-2" />
+                  Удалить
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Button
+              variant="outline"
+              onClick={handleAssignMaterial}
+              className="flex max-sm:size-10 items-center rounded-full cursor-pointer"
+            >
+              <Plus className="size-4" />
+              <span className="hidden sm:flex">Присвоить</span>
+            </Button>
           </div>
         </div>
 
@@ -195,34 +198,74 @@ export function MaterialCard({
     );
   }
 
+  //? GRID view
   return (
     <>
-      <Card className="w-full h-full flex flex-col rounded-4xl border-0 shadow-lg shadow-zinc-300/50">
-        <CardContent className="flex-1">
+      <Card className=" glass-card w-full h-full flex relative max-sm:p-0 flex-col sm:rounded-4xl border-0 shadow-lg shadow-zinc-300/50 overflow-clip">
+        <CardContent className="flex-1 max-sm:p-0">
+          <div className="flex sm:hidden justify-between absolute w-full sm:w-[calc(100%-32px)] p-2 sm:p-0 opacity-80">
+            <Button
+              variant="outline"
+              size="icon-lg"
+              onClick={handleAssignMaterial}
+              className="cursor-pointer rounded-full"
+            >
+              <Plus className="size-4" />
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon-lg"
+                  className="cursor-pointer rounded-full"
+                >
+                  <MoreHorizontal className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setShowEditDrawer(true)}>
+                  <Edit className="size-4 mr-2" />
+                  Редактировать
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="text-destructive"
+                >
+                  <Trash2 className="size-4 mr-2" />
+                  Удалить
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
           {material.image_url ? (
-            <img
+            <Image
               src={material.image_url}
               alt={material.name}
-              className="w-full h-48 object-cover rounded-xl mb-4"
+              width={196}
+              height={196}
+              loading="eager"
+              className="w-full h-49 sm:w-full object-cover sm:rounded-xl mb-2 sm:mb-4"
             />
           ) : (
-            <div className="w-full h-48 bg-muted rounded-xl flex items-center justify-center mb-4">
+            <div className="w-full h-49 sm:w-full bg-muted sm:rounded-xl flex items-center justify-center mb-2 sm:mb-4">
               <Package className="size-16 text-muted-foreground" />
             </div>
           )}
 
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground/80">
+          <div className="sm:space-y-2 px-2 sm:px-0">
+            <p className="text-xs sm:text-sm text-muted-foreground/80">
               {material.description ? material.description : "-"}
             </p>
-            <h3 className="font-semibold text-xl line-clamp-2">
+            <h3 className="font-semibold sm:text-xl h-[2lh] leading-5 line-clamp-2">
               {material.name}
             </h3>
             <p className="text-xs text-muted-foreground/80">
               {material.manufacturer?.toUpperCase()}
             </p>
 
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-1 mt-2 sm:mt-0">
               <Badge variant="secondary">{material.type}</Badge>
 
               {/* {!material.in_stock && (
@@ -246,7 +289,7 @@ export function MaterialCard({
           </div>
         </CardContent>
 
-        <CardFooter className="pt-0 flex flex-col space-y-2">
+        <CardFooter className="pt-0 sm:pb-0 flex flex-col space-y-2">
           <div className="flex justify-end items-center w-full">
             {material.price ? (
               <span className="font-semibold">
@@ -263,20 +306,24 @@ export function MaterialCard({
             )}
           </div>
 
-          <div className="flex space-x-2 w-full">
+          <div className="hidden sm:flex sm:space-x-4 items-center sm:w-full">
             <Button
               variant="outline"
-              // size="sm"
+              size="lg"
               onClick={handleAssignMaterial}
-              className="flex-1 rounded-full cursor-pointer"
+              className="left-2 sm:flex-1 rounded-full cursor-pointer"
             >
-              <Plus className="size-4 mr-1" />
-              Присвоить
+              <Plus className="size-4 hidden sm:flex mr-1" />
+              <span>Присвоить</span>
             </Button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="cursor-pointer rounded-full">
+                <Button
+                  variant="ghost"
+                  size="icon-lg"
+                  className="cursor-pointer rounded-full"
+                >
                   <MoreHorizontal className="size-4" />
                 </Button>
               </DropdownMenuTrigger>

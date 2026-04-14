@@ -275,7 +275,7 @@ const FilterMaterialDrawer = ({
                       >
                         <div
                           className={cn(
-                            "w-5 h-5 rounded border flex items-center justify-center transition-colors",
+                            "size-5 rounded border flex items-center justify-center transition-colors",
                             isChecked
                               ? "bg-black border-black text-white"
                               : "bg-white border-zinc-300 text-transparent group-hover:border-zinc-400",
@@ -301,11 +301,11 @@ const FilterMaterialDrawer = ({
             </div>
           </ScrollArea>
           <DrawerFooter>
-            <div className="flex gap-2">
-              <Button type="reset" size="icon" variant="outline" onClick={handleReset}>
+            <div className="flex gap-4">
+              <Button type="reset" size="icon-lg" variant="ghost" className='rounded-full' onClick={handleReset}>
                 <RefreshCcw size={16} />
               </Button>
-              <Button type="submit" disabled={isSubmitting} className="flex-1">
+              <Button size='lg' type="submit" disabled={isSubmitting} className="flex-1 rounded-full">
                 Показать результаты
               </Button>
             </div>
