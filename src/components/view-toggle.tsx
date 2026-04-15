@@ -12,7 +12,7 @@ const ViewToggle = ({
   return (
     <article>
       {/* Web */}
-      <div className="hidden sm:flex items-center gap-1 bg-zinc-100 p-1 rounded-lg ">
+      <div className="hidden sm:flex items-center gap-1 bg-zinc-100 p-1 rounded-full">
         <Button
           variant={viewMode === "grid" ? "default" : "ghost"}
           size="icon"

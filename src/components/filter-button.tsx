@@ -1,4 +1,5 @@
 import { SlidersHorizontal } from 'lucide-react';
+import { Button } from './ui/button';
 
 const FilterButton = ({
   count,
@@ -8,9 +9,11 @@ const FilterButton = ({
   onClick: () => void;
 }) => {
   return (
-    <button
+    <Button
       onClick={onClick}
-      className="relative flex items-center gap-2 h-9 px-3 rounded-xl hover:bg-zinc-100 text-zinc-500 hover:text-zinc-800 transition-colors"
+      variant={'ghost'}
+      size='lg'
+      
     >
       <SlidersHorizontal className="size-4" />
       <span className="hidden sm:block text-sm font-medium">Фильтры</span>
@@ -25,7 +28,7 @@ const FilterButton = ({
           </span>
         </>
       )}
-    </button>
+    </Button>
   );
 }
 

@@ -14,6 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Input } from '@/components/ui/input';
 import TypeFilterChips from '@/components/type-filter-chips';
+import { Button } from '@/components/ui/button';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -114,11 +115,13 @@ function SortButton({
   onToggle: () => void;
 }) {
   return (
-    <button
+    <Button
       onClick={onToggle}
-      className="flex items-center justify-center gap-2 size-10 px-3 rounded-full hover:bg-zinc-100 text-zinc-600 outline-none transition-colors"
+      size={'lg'}
+      variant={'ghost'}
+      className="flex items-center justify-center gap-2 px-3 cursor-pointer rounded-full hover:bg-zinc-100 text-zinc-600 outline-none transition-colors"
     >
-      <span className="hidden sm:block text-sm">
+      <span className="hidden sm:block text-xs">
         {order === "asc" ? "А → Я" : "Я → А"}
       </span>
       {order === "asc" ? (
@@ -126,7 +129,7 @@ function SortButton({
       ) : (
         <SortDesc className="size-4" />
       )}
-    </button>
+    </Button>
   );
 }
 
@@ -146,14 +149,14 @@ function MaterialListToolbar({
   onViewModeChange,
 }: ToolbarProps) {
   return (
-    <div className="flex items-center justify-between gap-2 bg-background px-2 py-2 rounded-full sm:rounded-2xl shadow-lg shadow-zinc-300/50">
+    <div className="flex items-center justify-between gap-2 bg-background px-2 py-2 rounded-full shadow-lg shadow-zinc-300/50">
       <div className="relative grow sm:w-96 group">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground size-4" />
         <Input
           placeholder="Поиск..."
           value={filters.searchTerm}
           onChange={(e) => onFiltersChange({ searchTerm: e.target.value })}
-          className="pl-10 w-full rounded-2xl max-sm:rounded-full bg-zinc-50/50 border-zinc-200"
+          className="pl-10 w-full //rounded-2xl //max-sm:rounded-full //bg-zinc-50/50 //border-zinc-200"
         />
       </div>
       <div className="flex items-center">
