@@ -3,9 +3,8 @@
 import { useState, useMemo } from "react";
 import { Company, Contact } from "@/types";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PlusCircle, Search, X } from "lucide-react";
+import { Plus } from "lucide-react";
 import { CompanyCard } from "./company-card";
 import { toast } from "sonner";
 import { AddCompanyDialog } from "./add-company-dialog";
@@ -20,6 +19,10 @@ import {
 } from "../actions";
 import PageContainer from "@/components/ui/page-container";
 import PageHeader from "@/components/ui/page-header";
+import { PageToolbar } from "@/components/ui/page-toolbar";
+import { SortButton } from "@/components/sort-button";
+import { SortConfig } from "@/types/ui";
+import { ButtonGroup } from "@/components/ui/button-group";
 
 interface ContactsPageClientProps {
   initialCompanies: Company[];
@@ -33,37 +36,80 @@ export function ContactsPageClient({
   const [companies, setCompanies] = useState<Company[]>(initialCompanies);
   const [clients, setClients] = useState<Contact[]>(initialClients);
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortConfig, setSortConfig] = useState<
+    SortConfig<"name" | "created_at">
+  >({
+    field: "name",
+    direction: "asc",
+  });
   const filteredCompanies = useMemo(() => {
     const query = searchQuery.toLowerCase();
-    return companies.filter(
+    let result = companies.filter(
       (company) =>
         company.name.toLowerCase().includes(query) ||
         (company.email && company.email.toLowerCase().includes(query)) ||
         (company.phone && company.phone.toLowerCase().includes(query)),
     );
-  }, [companies, searchQuery]);
+
+    if (sortConfig.field) {
+      result = [...result].sort((a, b) => {
+        const aValue = a[sortConfig.field!];
+        const bValue = b[sortConfig.field!];
+
+        if (!aValue) return 1;
+        if (!bValue) return -1;
+
+        const comparison = String(aValue).localeCompare(
+          String(bValue),
+          undefined,
+          { numeric: true },
+        );
+        return sortConfig.direction === "asc" ? comparison : -comparison;
+      });
+    }
+
+    return result;
+  }, [companies, searchQuery, sortConfig]);
 
   const filteredClients = useMemo(() => {
     const query = searchQuery.toLowerCase();
-    return clients.filter(
+    let result = clients.filter(
       (client) =>
         client.name.toLowerCase().includes(query) ||
         (client.email && client.email.toLowerCase().includes(query)) ||
         (client.phone && client.phone.toLowerCase().includes(query)),
     );
-  }, [clients, searchQuery]);
+
+    if (sortConfig.field) {
+      result = [...result].sort((a, b) => {
+        const aValue = a[sortConfig.field!];
+        const bValue = b[sortConfig.field!];
+
+        if (!aValue) return 1;
+        if (!bValue) return -1;
+
+        const comparison = String(aValue).localeCompare(
+          String(bValue),
+          undefined,
+          { numeric: true },
+        );
+        return sortConfig.direction === "asc" ? comparison : -comparison;
+      });
+    }
+
+    return result;
+  }, [clients, searchQuery, sortConfig]);
 
   const filteredAll = useMemo(() => {
     return [...filteredCompanies, ...filteredClients];
   }, [filteredCompanies, filteredClients]);
 
   const groupedClientsByLetter = useMemo(() => {
-    const sorted = [...filteredClients].sort((a, b) =>
-      a.name.localeCompare(b.name),
-    );
+    if (sortConfig.field !== "name") return null;
+
     const groups: Record<string, Contact[]> = {};
 
-    sorted.forEach((client) => {
+    filteredClients.forEach((client) => {
       const firstLetter = client.name.charAt(0).toUpperCase();
       if (!groups[firstLetter]) {
         groups[firstLetter] = [];
@@ -71,8 +117,11 @@ export function ContactsPageClient({
       groups[firstLetter].push(client);
     });
 
-    return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
-  }, [filteredClients]);
+    const entries = Object.entries(groups).sort(([a], [b]) =>
+      a.localeCompare(b),
+    );
+    return sortConfig.direction === "asc" ? entries : entries.reverse();
+  }, [filteredClients, sortConfig]);
 
   const [activeTab, setActiveTab] = useState("all");
   const [isAddCompanyOpen, setIsAddCompanyOpen] = useState(false);
@@ -152,42 +201,34 @@ export function ContactsPageClient({
           title="Адресная книга"
           description="Управление контактами"
         />
-        <div className="flex gap-2">
-          {/* <Button variant="outline" onClick={() => setIsAddCompanyOpen(true)}>
-            <PlusCircle className="mr-2 size-4" />
-            Добавить компанию
-          </Button> */}
-          <Button onClick={() => setIsAddContactOpen(true)}>
-            <PlusCircle className="mr-2 size-4" />
-            Добавить контакт
-          </Button>
-        </div>
+        <Button
+          size="lg"
+          className="max-sm:size-12"
+          onClick={() => setIsAddContactOpen(true)}
+        >
+          <Plus className="size-5" />
+          <span className="hidden sm:inline">Добавить контакт</span>
+        </Button>
       </div>
 
-      <div className="flex items-center space-x-2">
-        <div className="w-full flex flex-col md:flex-row gap-4 items-center justify-between bg-background p-2 rounded-2xl shadow-lg shadow-zinc-300/50">
-          <div className="relative w-full //md:w-96 group">
-            <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Поиск..."
-              className="pl-8 w-full"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            {searchQuery && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute right-0 top-0 h-full px-3 py-2"
-                onClick={() => setSearchQuery("")}
-              >
-                <X className="size-4" />
-              </Button>
-            )}
-          </div>
-        </div>
-      </div>
+      <PageToolbar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchPlaceholder="Поиск по контактам и компаниям..."
+      >
+        <ButtonGroup>
+          <SortButton
+            sortConfig={sortConfig}
+            onSortChange={(field, direction) =>
+              setSortConfig({ field, direction })
+            }
+            options={[
+              { label: "По имени", value: "name" },
+              { label: "По дате создания", value: "created_at" },
+            ]}
+          />
+        </ButtonGroup>
+      </PageToolbar>
 
       <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
@@ -211,22 +252,34 @@ export function ContactsPageClient({
             <div className="flex flex-col gap-4">
               <h3 className="text-lg font-bold px-1">Люди</h3>
               <div className="flex flex-col gap-6">
-                {groupedClientsByLetter.map(([letter, groupClients]) => (
-                  <div key={letter} className="flex flex-col gap-2">
-                    <div className="text-xs font-bold text-muted-foreground px-4">
-                      {letter}
+                {groupedClientsByLetter ? (
+                  groupedClientsByLetter.map(([letter, groupClients]) => (
+                    <div key={letter} className="flex flex-col gap-2">
+                      <div className="text-xs font-bold text-muted-foreground px-4">
+                        {letter}
+                      </div>
+                      <div className="flex flex-col bg-white rounded-2xl border border-zinc-100 shadow-sm overflow-hidden">
+                        {groupClients.map((client) => (
+                          <ContactListItem
+                            key={client.id}
+                            contact={client}
+                            onClick={() => handleContactClick(client)}
+                          />
+                        ))}
+                      </div>
                     </div>
-                    <div className="flex flex-col bg-white rounded-2xl border border-zinc-100 shadow-sm overflow-hidden">
-                      {groupClients.map((client) => (
-                        <ContactListItem
-                          key={client.id}
-                          contact={client}
-                          onClick={() => handleContactClick(client)}
-                        />
-                      ))}
-                    </div>
+                  ))
+                ) : (
+                  <div className="flex flex-col bg-white rounded-2xl border border-zinc-100 shadow-sm overflow-hidden">
+                    {filteredClients.map((client) => (
+                      <ContactListItem
+                        key={client.id}
+                        contact={client}
+                        onClick={() => handleContactClick(client)}
+                      />
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
             </div>
           )}
@@ -251,22 +304,34 @@ export function ContactsPageClient({
         </TabsContent>
         <TabsContent value="clients" className="mt-6">
           <div className="flex flex-col gap-8">
-            {groupedClientsByLetter.map(([letter, groupClients]) => (
-              <div key={letter} className="flex flex-col gap-2">
-                <div className="text-xs font-bold text-muted-foreground px-4">
-                  {letter}
+            {groupedClientsByLetter ? (
+              groupedClientsByLetter.map(([letter, groupClients]) => (
+                <div key={letter} className="flex flex-col gap-2">
+                  <div className="text-xs font-bold text-muted-foreground px-4">
+                    {letter}
+                  </div>
+                  <div className="flex flex-col bg-white rounded-2xl border border-zinc-100 shadow-sm overflow-hidden">
+                    {groupClients.map((client) => (
+                      <ContactListItem
+                        key={client.id}
+                        contact={client}
+                        onClick={() => handleContactClick(client)}
+                      />
+                    ))}
+                  </div>
                 </div>
-                <div className="flex flex-col bg-white rounded-2xl border border-zinc-100 shadow-sm overflow-hidden">
-                  {groupClients.map((client) => (
-                    <ContactListItem
-                      key={client.id}
-                      contact={client}
-                      onClick={() => handleContactClick(client)}
-                    />
-                  ))}
-                </div>
+              ))
+            ) : (
+              <div className="flex flex-col bg-white rounded-2xl border border-zinc-100 shadow-sm overflow-hidden">
+                {filteredClients.map((client) => (
+                  <ContactListItem
+                    key={client.id}
+                    contact={client}
+                    onClick={() => handleContactClick(client)}
+                  />
+                ))}
               </div>
-            ))}
+            )}
             {filteredClients.length === 0 && (
               <div className="col-span-full text-center py-10">
                 <p className="text-muted-foreground">Клиенты не найдены.</p>

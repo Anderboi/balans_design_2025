@@ -251,18 +251,11 @@ export function MaterialsPageClient({
           <>
             <Button
               size="lg"
-              className="rounded-full hidden sm:flex"
-              onClick={() => setIsAddDialogOpen(true)}
-            >
-              <Plus className="size-5 mr-2" />
-              Добавить материал
-            </Button>
-            <Button
-              size="icon-lg"
-              className="rounded-full flex sm:hidden size-12"
+              className="max-sm:size-12"
               onClick={() => setIsAddDialogOpen(true)}
             >
               <Plus className="size-5" />
+              <span className="hidden sm:inline">Добавить материал</span>
             </Button>
           </>
         )}
