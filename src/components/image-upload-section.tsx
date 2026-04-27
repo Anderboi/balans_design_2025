@@ -48,30 +48,33 @@ export function ImageUploadSection({
                 src={imagePreview}
                 alt="Предпросмотр"
                 fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
               />
             </div>
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="lg"
-                  className="w-full mt-2 rounded-full"
-                  onClick={onImageRemove}
-                >
-                  Удалить изображение
-                </Button>
-              </div>
-            ) : (
-              <FileDropzone
-                fileInputRef={fileInputRef}
-                handleBoxClick={() => fileInputRef.current?.click()}
-                handleDragOver={(e) => e.preventDefault()}
-                handleDrop={handleDrop}
-                handleFileSelect={handleFileSelect}
-              />
-            )}
+            <Button
+              type="button"
+              variant="destructive"
+              size="lg"
+              className="w-full mt-2 rounded-full"
+              onClick={onImageRemove}
+            >
+              Удалить изображение
+            </Button>
+          </div>
+        ) : (
+          <FileDropzone
+            fileInputRef={fileInputRef}
+            handleBoxClick={() => fileInputRef.current?.click()}
+            handleDragOver={(e) => e.preventDefault()}
+            handleDrop={handleDrop}
+            handleFileSelect={handleFileSelect}
+          />
+        )}
       </div>
-      {error && <p className="text-[0.8rem] font-medium text-destructive">{error}</p>}
+      {error && (
+        <p className="text-[0.8rem] font-medium text-destructive">{error}</p>
+      )}
     </div>
   );
 }

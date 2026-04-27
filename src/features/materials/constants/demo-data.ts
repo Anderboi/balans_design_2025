@@ -1,0 +1,63 @@
+import { Material, MaterialType } from '@/types';
+
+// Demo Materials for unauthenticated users
+const DEMO_MATERIALS: Material[] = [
+  {
+    id: "demo-1",
+    name: "Итальянский керамогранит",
+    type: MaterialType.FINISH,
+    supplier: undefined,
+    price: 5200,
+    unit: "кв.м.",
+    article: "IT-KER-01",
+    product_url: "https://example.com/material-1",
+    description: "Отличный выбор для ванной комнаты.",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    user_id: "demo",
+  },
+  {
+    id: "demo-2",
+    name: "Краска Benjamin Moore",
+    type: MaterialType.FINISH,
+    supplier: undefined,
+    price: 18000,
+    unit: "шт",
+    article: "BM-Aura-Matte",
+    product_url: "https://example.com/material-2",
+    description: "Цвет: Сashmere 27, матовая.",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    user_id: "demo",
+  },
+  {
+    id: "demo-3",
+    name: "Светильник подвесной Flos",
+    type: MaterialType.LIGHTING,
+    supplier: undefined,
+    price: 45000,
+    unit: "шт",
+    article: "FLOS-IC-S1",
+    product_url: "https://example.com/material-3",
+    description: "Латунь. Идеально над обеденным столом.",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    user_id: "demo",
+  },
+  {
+    id: "demo-4",
+    name: "Инженерная доска Finex",
+    type: MaterialType.FINISH,
+    supplier: undefined,
+    price: 9000,
+    unit: "кв.м.",
+    article: "FX-OAK-NAT",
+    product_url: "https://example.com/material-4",
+    description: "Дуб натуральный, селект.",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    user_id: "demo",
+  },
+];
+
+export default DEMO_MATERIALS;

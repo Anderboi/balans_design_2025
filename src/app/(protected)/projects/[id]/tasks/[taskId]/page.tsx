@@ -1,5 +1,5 @@
 import { tasksService } from "@/lib/services/tasks";
-import { TaskDetails } from "../../components/task-details";
+import { TaskDetails } from "../../../../../../features/projects/components/task-details";
 import { notFound } from "next/navigation";
 import PageContainer from "@/components/ui/page-container";
 import { Card, CardContent } from "@/components/ui/card";

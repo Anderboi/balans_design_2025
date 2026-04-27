@@ -1,13 +1,12 @@
 import PageContainer from "@/components/ui/page-container";
 import { projectsService } from "@/lib/services/projects";
 import { materialsService } from "@/lib/services/materials";
-import MaterialListControls from "../components/material-list-controls";
+import MaterialListControls from "../../../../../features/projects/components/material-list-controls";
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { ProjectPageHeader } from "@/components/project-page-header";
-import { AddMaterialButton } from "./components/add-material-button";
-import { getSuppliers, getSupplierCompanies } from "@/app/materials/actions";
-import { Label } from 'radix-ui';
+import { AddMaterialButton } from '@/features/projects/components/specification/components/add-material-button';
+import { getSupplierCompanies, getSuppliers } from '@/features/materials/actions';
 
 const ScheduleCategoryPage = async ({
   params,
@@ -22,12 +21,13 @@ const ScheduleCategoryPage = async ({
 
   const supabase = await createClient();
 
-  const [projectInfo, specifications, suppliers, supplierCompanies] = await Promise.all([
-    projectsService.getProjectById(id, supabase),
-    materialsService.getSpecifications(id, supabase),
-    getSuppliers(),
-    getSupplierCompanies(),
-  ]);
+  const [projectInfo, specifications, suppliers, supplierCompanies] =
+    await Promise.all([
+      projectsService.getProjectById(id, supabase),
+      materialsService.getSpecifications(id, supabase),
+      getSuppliers(),
+      getSupplierCompanies(),
+    ]);
 
   if (!projectInfo) {
     notFound();

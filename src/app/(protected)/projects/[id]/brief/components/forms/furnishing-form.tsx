@@ -194,222 +194,214 @@ export function FurnishingForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex h-full w-full flex-col"
+        className="space-y-4 sm:space-y-6"
       >
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold">Наполнение помещений</h2>
+        {roomList.map((room) => {
+          const isExpanded = expandedRooms.has(room.id);
+          const equipment = roomsEquipment[room.id] || [];
+          const suggestions = allRoomSuggestions[room.id] || [];
 
-          {roomList.map((room) => {
-            const isExpanded = expandedRooms.has(room.id);
-            const equipment = roomsEquipment[room.id] || [];
-            const suggestions = allRoomSuggestions[room.id] || [];
-
-            return (
-              <SubBlockCard key={room.id}>
-                <div className="space-y-3">
-                  {/* Room Header */}
-                  <button
-                    type="button"
-                    onClick={() => toggleRoom(room.id)}
-                    className="flex items-center justify-between w-full text-left"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-lg">
-                        {room.order}. {room.name}
+          return (
+            <SubBlockCard key={room.id}>
+              <div className="space-y-3">
+                {/* Room Header */}
+                <button
+                  type="button"
+                  onClick={() => toggleRoom(room.id)}
+                  className="flex items-center justify-between w-full text-left"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-lg">
+                      {room.order}. {room.name}
+                    </span>
+                    {equipment.length > 0 && (
+                      <span className="text-sm text-gray-500">
+                        ({equipment.length})
                       </span>
-                      {equipment.length > 0 && (
-                        <span className="text-sm text-gray-500">
-                          ({equipment.length})
-                        </span>
-                      )}
-                    </div>
-                    {isExpanded ? (
-                      <ChevronUp size={20} />
-                    ) : (
-                      <ChevronDown size={20} />
                     )}
-                  </button>
+                  </div>
+                  {isExpanded ? (
+                    <ChevronUp size={20} />
+                  ) : (
+                    <ChevronDown size={20} />
+                  )}
+                </button>
 
-                  {/* Room Content */}
-                  {isExpanded && (
-                    <div className="space-y-4">
-                      {/* Suggestions */}
-                      {suggestions.length > 0 && (
-                        <div>
-                          <p className="text-sm font-medium mb-2">
-                            Предлагаемое оборудование:
-                          </p>
-                          <div className="flex flex-wrap gap-2">
-                            {suggestions.map(
-                              (
-                                suggestion: { name: string; category: string },
-                                idx: number,
-                              ) => (
+                {/* Room Content */}
+                {isExpanded && (
+                  <div className="space-y-4">
+                    {/* Suggestions */}
+                    {suggestions.length > 0 && (
+                      <div>
+                        <p className="text-sm font-medium mb-2">
+                          Предлагаемое оборудование:
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {suggestions.map(
+                            (
+                              suggestion: { name: string; category: string },
+                              idx: number,
+                            ) => (
+                              <Button
+                                key={idx}
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  addEquipmentFromSuggestion(
+                                    room.id,
+                                    suggestion.name,
+                                    suggestion.category,
+                                  );
+                                }}
+                                className="cursor-pointer"
+                              >
+                                {suggestion.name}
+                              </Button>
+                            ),
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Custom Equipment Input */}
+                    <Input
+                      placeholder="Добавьте предмет ..."
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && e.currentTarget.value.trim()) {
+                          e.preventDefault();
+                          addEquipmentFromSuggestion(
+                            room.id,
+                            e.currentTarget.value.trim(),
+                            "Другое",
+                          );
+                          e.currentTarget.value = "";
+                        }
+                      }}
+                    />
+
+                    {/* Selected Equipment List */}
+                    {equipment.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">
+                          Выбранное оборудование:
+                        </p>
+                        {equipment.map((eq) => {
+                          const isDetailsExpanded = expandedEquipment.has(
+                            eq.id,
+                          );
+                          return (
+                            <div
+                              key={eq.id}
+                              className="border rounded-lg p-3 space-y-2 bg-white"
+                            >
+                              {/* Compact view */}
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  value={eq.name}
+                                  onChange={(e) =>
+                                    updateEquipment(
+                                      room.id,
+                                      eq.id,
+                                      "name",
+                                      e.target.value,
+                                    )
+                                  }
+                                  placeholder="Название"
+                                  className="flex-1 bg-transparent outline-none shadow-none border-none font-medium text-zinc-900"
+                                />
+                                <div className="w-px h-6 bg-zinc-200" />
+                                <Input
+                                  type="number"
+                                  value={eq.quantity || 1}
+                                  onChange={(e) =>
+                                    updateEquipment(
+                                      room.id,
+                                      eq.id,
+                                      "quantity",
+                                      parseInt(e.target.value) || 1,
+                                    )
+                                  }
+                                  placeholder="Кол-во"
+                                  min="1"
+                                  className="w-12 text-center bg-transparent font-medium text-zinc-900 text-sm outline-none shadow-none border-none"
+                                />
                                 <Button
-                                  key={idx}
                                   type="button"
                                   variant="outline"
-                                  size="sm"
-                                  onClick={() => {
-                                    addEquipmentFromSuggestion(
-                                      room.id,
-                                      suggestion.name,
-                                      suggestion.category,
-                                    );
-                                  }}
-                                  className="cursor-pointer"
+                                  size="icon"
+                                  onClick={() => toggleEquipmentDetails(eq.id)}
                                 >
-                                  {suggestion.name}
+                                  <ChevronRight
+                                    size={16}
+                                    className={`transition-transform ${
+                                      isDetailsExpanded ? "rotate-90" : ""
+                                    }`}
+                                  />
                                 </Button>
-                              ),
-                            )}
-                          </div>
-                        </div>
-                      )}
+                                <DeleteIconButton
+                                  onClick={() =>
+                                    removeEquipment(room.id, eq.id)
+                                  }
+                                />
+                              </div>
 
-                      {/* Custom Equipment Input */}
-                      <Input
-                        placeholder="Добавьте предмет ..."
-                        onKeyDown={(e) => {
-                          if (
-                            e.key === "Enter" &&
-                            e.currentTarget.value.trim()
-                          ) {
-                            e.preventDefault();
-                            addEquipmentFromSuggestion(
-                              room.id,
-                              e.currentTarget.value.trim(),
-                              "Другое",
-                            );
-                            e.currentTarget.value = "";
-                          }
-                        }}
-                      />
-
-                      {/* Selected Equipment List */}
-                      {equipment.length > 0 && (
-                        <div className="space-y-2">
-                          <p className="text-sm font-medium">
-                            Выбранное оборудование:
-                          </p>
-                          {equipment.map((eq) => {
-                            const isDetailsExpanded = expandedEquipment.has(
-                              eq.id,
-                            );
-                            return (
-                              <div
-                                key={eq.id}
-                                className="border rounded-lg p-3 space-y-2 bg-white"
-                              >
-                                {/* Compact view */}
-                                <div className="flex items-center gap-2">
-                                  <Input
-                                    value={eq.name}
-                                    onChange={(e) =>
-                                      updateEquipment(
-                                        room.id,
-                                        eq.id,
-                                        "name",
-                                        e.target.value,
-                                      )
-                                    }
-                                    placeholder="Название"
-                                    className="flex-1 bg-transparent outline-none shadow-none border-none font-medium text-zinc-900"
-                                  />
-                                  <div className="w-px h-6 bg-zinc-200" />
-                                  <Input
-                                    type="number"
-                                    value={eq.quantity || 1}
-                                    onChange={(e) =>
-                                      updateEquipment(
-                                        room.id,
-                                        eq.id,
-                                        "quantity",
-                                        parseInt(e.target.value) || 1,
-                                      )
-                                    }
-                                    placeholder="Кол-во"
-                                    min="1"
-                                    className="w-12 text-center bg-transparent font-medium text-zinc-900 text-sm outline-none shadow-none border-none"
-                                  />
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="icon"
-                                    onClick={() =>
-                                      toggleEquipmentDetails(eq.id)
-                                    }
-                                  >
-                                    <ChevronRight
-                                      size={16}
-                                      className={`transition-transform ${
-                                        isDetailsExpanded ? "rotate-90" : ""
-                                      }`}
-                                    />
-                                  </Button>
-                                  <DeleteIconButton
-                                    onClick={() =>
-                                      removeEquipment(room.id, eq.id)
-                                    }
-                                  />
-                                </div>
-
-                                {/* Expandable details */}
-                                {isDetailsExpanded && (
-                                  <div className="space-y-4 pt-4 border-t">
-                                    <div className="flex gap-4">
-                                      <Input
-                                        value={eq.manufacturer || ""}
-                                        onChange={(e) =>
-                                          updateEquipment(
-                                            room.id,
-                                            eq.id,
-                                            "manufacturer",
-                                            e.target.value,
-                                          )
-                                        }
-                                        placeholder="Производитель (необязательно)"
-                                      />
-                                      <Input
-                                        value={eq.url || ""}
-                                        onChange={(e) =>
-                                          updateEquipment(
-                                            room.id,
-                                            eq.id,
-                                            "url",
-                                            e.target.value,
-                                          )
-                                        }
-                                        placeholder="Ссылка на товар (необязательно)"
-                                      />
-                                    </div>
-                                    <Textarea
-                                      value={eq.description || ""}
+                              {/* Expandable details */}
+                              {isDetailsExpanded && (
+                                <div className="space-y-4 pt-4 border-t">
+                                  <div className="flex gap-4">
+                                    <Input
+                                      value={eq.manufacturer || ""}
                                       onChange={(e) =>
                                         updateEquipment(
                                           room.id,
                                           eq.id,
-                                          "description",
+                                          "manufacturer",
                                           e.target.value,
                                         )
                                       }
-                                      placeholder="Комментарий (необязательно)"
-                                      rows={2}
+                                      placeholder="Производитель (необязательно)"
+                                    />
+                                    <Input
+                                      value={eq.url || ""}
+                                      onChange={(e) =>
+                                        updateEquipment(
+                                          room.id,
+                                          eq.id,
+                                          "url",
+                                          e.target.value,
+                                        )
+                                      }
+                                      placeholder="Ссылка на товар (необязательно)"
                                     />
                                   </div>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </SubBlockCard>
-            );
-          })}
-        </div>
+                                  <Textarea
+                                    value={eq.description || ""}
+                                    onChange={(e) =>
+                                      updateEquipment(
+                                        room.id,
+                                        eq.id,
+                                        "description",
+                                        e.target.value,
+                                      )
+                                    }
+                                    placeholder="Комментарий (необязательно)"
+                                    rows={2}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </SubBlockCard>
+          );
+        })}
+
         <FormSubmitButton
           isLoading={form.formState.isSubmitting}
           onActionSelect={setAction}

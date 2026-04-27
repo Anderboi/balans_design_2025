@@ -1,4 +1,4 @@
-import { TaskForm } from "../../components/task-form";
+import { TaskForm } from "../../../../../../features/projects/components/task-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function NewTaskPage({

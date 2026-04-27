@@ -36,7 +36,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import AddItemButton from "@/components/ui/add-item-button";
 import { completeBriefSectionAction } from "@/lib/actions/stages";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 
 interface ResidentsFormProps {
   projectId?: string;
@@ -59,6 +59,7 @@ export function ResidentsForm({ projectId, initialData }: ResidentsFormProps) {
   });
 
   const [action, setAction] = useState<"save" | "complete">("save");
+  const [isPending, startTransition] = useTransition();
 
   const {
     fields: adultsFields,
@@ -78,39 +79,49 @@ export function ResidentsForm({ projectId, initialData }: ResidentsFormProps) {
     name: "children",
   });
 
-  const handleSubmit = async (data: ResidentsFormValues) => {
+  const handleSubmit = (data: ResidentsFormValues) => {
     if (!projectId) {
       toast.error("Project ID missing");
       return;
     }
+    console.time('briefFormSubmit')
 
-    try {
-      const result = await updateProjectBriefAction(projectId, {
-        residents: data,
-      });
+    startTransition(async () => {
+      try {
+        const result = await updateProjectBriefAction(projectId, {
+          residents: data,
+        });
 
-      if (!result.success) {
-        throw new Error(result.error as string);
+        if (!result.success) {
+          throw new Error(result.error as string);
+        }
+
+        if (action === "complete") {
+          await completeBriefSectionAction(projectId, "residents", true);
+          toast.success("Раздел завершен");
+          router.push(`/projects/${projectId}/brief`);
+          return;
+        }
+
+        toast.success("Данные о проживающих сохранены");
+      } catch (error) {
+        console.error(error);
+        toast.error("Ошибка при сохранении данных");
       }
+    });
 
-      if (action === "complete") {
-        await completeBriefSectionAction(projectId, "residents", true);
-        toast.success("Раздел завершен");
-        router.push(`/projects/${projectId}/brief`);
-        return;
-      }
-
-      toast.success("Данные о проживающих сохранены");
-      router.refresh();
-    } catch (error) {
-      console.error(error);
-      toast.error("Ошибка при сохранении данных");
-    }
+    console.timeEnd("briefFormSubmit");
   };
+
+  const isFormDisabled = isPending || form.formState.isSubmitting;
+
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-10">
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className="space-y-4 sm:space-y-6"
+      >
         <SubBlockCard title="Взрослые">
           {/* Взрослые */}
           <div className="space-y-5">
@@ -133,6 +144,7 @@ export function ResidentsForm({ projectId, initialData }: ResidentsFormProps) {
                           max={280}
                           {...field}
                           onFocus={(e) => e.target.select()}
+                          disabled={isFormDisabled}
                           onChange={(e) =>
                             field.onChange(parseFloat(e.target.value))
                           }
@@ -152,6 +164,7 @@ export function ResidentsForm({ projectId, initialData }: ResidentsFormProps) {
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
+                        disabled={isFormDisabled}
                       >
                         <FormControl>
                           <SelectTrigger className="w-full">
@@ -199,6 +212,7 @@ export function ResidentsForm({ projectId, initialData }: ResidentsFormProps) {
                         <Input
                           type="number"
                           placeholder="Возраст"
+                          disabled={isFormDisabled}
                           {...field}
                           min={1}
                           max={18}
@@ -237,6 +251,7 @@ export function ResidentsForm({ projectId, initialData }: ResidentsFormProps) {
                       <Heart className="size-5" />
                     </InputGroupAddon>
                     <InputGroupTextarea
+                      disabled={isFormDisabled}
                       placeholder="Что необходимо предусмотреть для хобби (хранение лыж, мольберт, библиотека)?"
                       {...field}
                     />
@@ -260,6 +275,7 @@ export function ResidentsForm({ projectId, initialData }: ResidentsFormProps) {
                       <Activity className="size-5" />
                     </InputGroupAddon>
                     <InputGroupTextarea
+                      disabled={isFormDisabled}
                       placeholder="Аллергии, необходимость безбарьерной среды и т.д."
                       {...field}
                     />
@@ -284,6 +300,7 @@ export function ResidentsForm({ projectId, initialData }: ResidentsFormProps) {
                       <PawPrint className="size-5" />
                     </InputGroupAddon>
                     <InputGroupTextarea
+                      disabled={isFormDisabled}
                       placeholder="Вид, порода, где спят, где едят, нужно ли мыть лапы?"
                       {...field}
                     />
@@ -295,7 +312,7 @@ export function ResidentsForm({ projectId, initialData }: ResidentsFormProps) {
           />
         </SubBlockCard>
         <FormSubmitButton
-          isLoading={form.formState.isSubmitting}
+          isLoading={isFormDisabled}
           onActionSelect={setAction}
         />
       </form>

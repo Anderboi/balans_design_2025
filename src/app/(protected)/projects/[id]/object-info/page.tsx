@@ -2,11 +2,11 @@ import { projectsService } from "@/lib/services/projects";
 import { notFound } from "next/navigation";
 import PageContainer from "@/components/ui/page-container";
 import { createClient } from "@/lib/supabase/server";
-import { ObjectCardSection } from "./components/object-card-section";
-import { LocationLogisticsSection } from "./components/location-logistics-section";
-import { TechnicalConditionsSection } from "./components/technical-conditions-section";
-import { ResponsiblePersonSection } from "./components/responsible-person-section";
-import { DocumentationPlansSection } from "./components/documentation-plans-section";
+import { ObjectCardSection } from "../../../../../features/projects/components/object-info/components/object-card-section";
+import { LocationLogisticsSection } from "../../../../../features/projects/components/object-info/components/location-logistics-section";
+import { TechnicalConditionsSection } from "../../../../../features/projects/components/object-info/components/technical-conditions-section";
+import { ResponsiblePersonSection } from "../../../../../features/projects/components/object-info/components/responsible-person-section";
+import { DocumentationPlansSection } from "../../../../../features/projects/components/object-info/components/documentation-plans-section";
 import { ProjectPageHeader } from "@/components/project-page-header";
 
 export default async function ObjectInfoPage({

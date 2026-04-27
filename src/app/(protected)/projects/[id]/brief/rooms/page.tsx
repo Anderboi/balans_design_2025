@@ -1,11 +1,9 @@
-import { projectsService } from "@/lib/services/projects";
 import { notFound } from "next/navigation";
 import PageContainer from "@/components/ui/page-container";
-import MainBlockCard from "@/components/ui/main-block-card";
 import { PremisesForm } from "../components/forms/premises-form";
-import { createClient } from "@/lib/supabase/server";
-import { roomsService } from "@/lib/services/rooms";
 import { ProjectPageHeader } from "@/components/project-page-header";
+import BriefBlockWraper from "@/features/projects/components/brief-block-wraper";
+import { getCachedProjectAndBrief } from "@/features/projects/actions";
 
 export default async function BriefRoomsPage({
   params,
@@ -13,12 +11,7 @@ export default async function BriefRoomsPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const supabase = await createClient();
-
-  const [project, rooms] = await Promise.all([
-    projectsService.getProjectById(id, supabase),
-    roomsService.getRoomsByProjectId(id, supabase),
-  ]);
+  const { project, rooms } = await getCachedProjectAndBrief(id);
 
   if (!project) {
     notFound();
@@ -48,11 +41,9 @@ export default async function BriefRoomsPage({
         }}
       />
 
-      <div className="mt-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-        <MainBlockCard className="p-8 md:p-12">
-          <PremisesForm projectId={id} initialData={initialData} />
-        </MainBlockCard>
-      </div>
+      <BriefBlockWraper>
+        <PremisesForm projectId={id} initialData={initialData} />
+      </BriefBlockWraper>
     </PageContainer>
   );
 }

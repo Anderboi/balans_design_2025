@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import MediaTabLoader from "../components/media-tab-loader";
+import MediaTabLoader from "../../../../../features/projects/components/media-tab-loader";
 import { projectsService } from "@/lib/services/projects";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";

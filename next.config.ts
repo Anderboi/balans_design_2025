@@ -29,7 +29,9 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "**.supabase.co",
+        hostname: "qjzjeynwyxxphrnwramg.supabase.co",
+        port: "",
+        pathname: "/storage/v1/object/public/**", // Разрешаем все публичные бакеты
       },
     ],
     formats: ["image/avif", "image/webp"],
@@ -41,6 +43,16 @@ const nextConfig: NextConfig = {
   },
   output: "standalone",
   transpilePackages: ["@supabase/supabase-js", "motion", "lucide-react"],
+  async rewrites(){
+    return [
+      {
+        // Теперь ваши файлы доступны по адресу balans-app.com/cdn/avatars/user.jpg
+        source: "/cdn/:path*",
+        // Проксируем в бакеты Supabase
+        destination: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/:path*`,
+      },
+    ];
+  }
 };
 
 export default nextConfig;

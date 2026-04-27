@@ -2,6 +2,7 @@ import { Truck, ArrowRight, Package } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { MaterialStatus, MATERIAL_STATUS_LABELS } from "@/types";
+import Image from 'next/image';
 
 // Status priority for sorting (higher = more urgent)
 const STATUS_PRIORITY: Record<string, number> = {
@@ -112,7 +113,9 @@ export async function DeliveryWidget() {
                   <div className="size-11 bg-gray-100 rounded-xl overflow-hidden relative shrink-0">
                     {item.image_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img
+                      <Image
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         src={item.image_url}
                         alt={item.name ?? ""}
                         className="absolute inset-0 w-full h-full object-cover"

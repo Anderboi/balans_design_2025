@@ -10,12 +10,14 @@ export const getUser = cache(async () => {
     error,
   } = await supabase.auth.getUser();
 
-  if (error) {
+  if (error || !user) {
     console.error("Error fetching user:", error);
     return null;
   }
 
-  return user;
+  const {data: profile} = await supabase.from('profiles').select('*').eq('id', user.id).single();
+
+  return {...user, profile};
 });
 
 // Версия с редиректом

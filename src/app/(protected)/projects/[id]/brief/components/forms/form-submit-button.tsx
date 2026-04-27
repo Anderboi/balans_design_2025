@@ -13,7 +13,7 @@ const FormSubmitButton = ({
   isCompleted,
 }: FormSubmitButtonProps) => {
   return (
-    <div className="w-full flex justify-end gap-3 border-t pt-4">
+    <div className="w-full flex justify-end gap-3 border-t pt-2 sm:pt-4">
       {onActionSelect ? (
         <>
           <Button

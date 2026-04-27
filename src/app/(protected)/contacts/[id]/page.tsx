@@ -19,10 +19,10 @@ import {
   ChevronLeft,
 } from "lucide-react";
 import Link from "next/link";
-import AddContactDialog from "../components/add-contact-dialog";
+import AddContactDialog from "../../../../features/contacts/components/add-contact-dialog";
 import { ContactsDataTable } from "@/components/contacts-data-table";
-import { EditCompanyDialog } from "../components/edit-company-dialog";
-import PageContainer from '@/components/ui/page-container';
+import { EditCompanyDialog } from "../../../../features/contacts/components/edit-company-dialog";
+import PageContainer from "@/components/ui/page-container";
 
 export default function CompanyDetailsPage() {
   const { id } = useParams();
@@ -136,7 +136,7 @@ export default function CompanyDetailsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-1">
-          <Card className="border-0 shadow-lg shadow-zinc-300/50 rounded-4xl p-8">
+          <Card className="glass-card //border-0 shadow-lg //shadow-zinc-300/50 rounded-3xl p-4 sm:p-6">
             <CardHeader className="px-0">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">

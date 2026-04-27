@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { PlanningVariant } from "@/types/planning";
-import { PlanningVariantCard } from "./components/planning-variant-card";
-import { UploadVariantCard } from "./components/upload-variant-card";
-import { PlanningVariantDetailDialog } from "./components/planning-variant-detail-dialog";
-import { UploadVariantDialog } from "./components/upload-variant-dialog";
+import { PlanningVariantCard } from "../../../../../features/projects/components/planning/components/planning-variant-card";
+import { UploadVariantCard } from "../../../../../features/projects/components/planning/components/upload-variant-card";
+import { PlanningVariantDetailDialog } from "../../../../../features/projects/components/planning/components/planning-variant-detail-dialog";
+import { UploadVariantDialog } from "../../../../../features/projects/components/planning/components/upload-variant-dialog";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { planningVariantsService } from "@/lib/services/planning-variants";
-import { CancelApprovalDialog } from "./components/cancel-approval-dialog";
+import { CancelApprovalDialog } from "../../../../../features/projects/components/planning/components/cancel-approval-dialog";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import PageContainer from "@/components/ui/page-container";

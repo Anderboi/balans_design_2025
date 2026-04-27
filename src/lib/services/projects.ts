@@ -88,7 +88,8 @@ export const projectsService = {
 
     // Проверим, что вернуло data.
     // Если id есть в data, используем его.
-    const newProjectId = typeof data === "string" ? data : (data as { id?: string })?.id;
+    const newProjectId =
+      typeof data === "string" ? data : (data as { id?: string })?.id;
 
     if (!newProjectId) {
       throw new Error("Не удалось получить ID созданного проекта");
@@ -349,8 +350,8 @@ export const projectsService = {
     const hasTechnical =
       !!objectInfo.technicalConditions &&
       Object.keys(objectInfo.technicalConditions).length > 0;
-    const hasResponsible =
-      !!(objectInfo as unknown as ObjectInfo).responsiblePerson?.fullName;
+    const hasResponsible = !!(objectInfo as unknown as ObjectInfo)
+      .responsiblePerson?.fullName;
 
     const isCompleted =
       hasDocuments || (hasLocation && hasTechnical && hasResponsible);

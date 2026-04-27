@@ -19,9 +19,9 @@ import Link from "next/link";
 import { SlashIcon, Plus, FileText } from "lucide-react";
 import PageHeader from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
-import { DrawingCategorySection } from './components/drawing-category-section';
-import { UploadDrawingDialog } from './components/upload-drawing-dialog';
-import { PdfViewerDialog } from './components/pdf-viewer-dialog';
+import { DrawingCategorySection } from "../../../../../features/projects/components/drawings/components/drawing-category-section";
+import { UploadDrawingDialog } from "../../../../../features/projects/components/drawings/components/upload-drawing-dialog";
+import { PdfViewerDialog } from "../../../../../features/projects/components/drawings/components/pdf-viewer-dialog";
 
 interface DrawingsPageClientProps {
   initialDrawings: DrawingFile[];
@@ -123,7 +123,7 @@ export default function DrawingsPageClient({
               drawings={drawingsByCategory[cat.value] || []}
               isExpanded={expandedCategories.includes(cat.value)}
               onToggle={() => toggleCategory(cat.value)}
-              onViewPdf={(drawing:any) => setViewerDrawing(drawing)}
+              onViewPdf={(drawing: any) => setViewerDrawing(drawing)}
               onDelete={handleDelete}
               projectId={projectId}
             />
@@ -163,7 +163,7 @@ export default function DrawingsPageClient({
         <PdfViewerDialog
           drawing={viewerDrawing}
           open={!!viewerDrawing}
-          onOpenChange={(open:any) => {
+          onOpenChange={(open: any) => {
             if (!open) setViewerDrawing(null);
           }}
         />

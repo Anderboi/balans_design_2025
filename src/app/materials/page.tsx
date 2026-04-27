@@ -1,77 +1,16 @@
-import {
-  getMaterials,
-  getProjects,
-  getSuppliers,
-  getSupplierCompanies,
-} from "./actions";
-import PageErrorBoundary from "@/components/page-error-boundary";
-import { MaterialsPageClient } from "./components/materials-page-client";
+
+import { getMaterials, getProjects, getSupplierCompanies, getSuppliers } from '@/features/materials/actions';
+import { MaterialsPageClient } from '@/features/materials/components/materials-page-client';
+import DEMO_MATERIALS from '@/features/materials/constants/demo-data';
 import { getUser } from "@/lib/supabase/getuser";
-import { Material, MaterialType } from "@/types";
+import { Metadata } from 'next';
 
-export const revalidate = 0;
+export const metadata: Metadata = {
+  title: "Материалы | База данных",
+  description: "Каталог материалов, оборудования и мебели для проектов.",
+};
 
-// Demo Materials for unauthenticated users
-const DEMO_MATERIALS: Material[] = [
-  {
-    id: "demo-1",
-    name: "Итальянский керамогранит",
-    type: MaterialType.FINISH,
-    supplier: undefined,
-    price: 5200,
-    unit: "кв.м.",
-    article: "IT-KER-01",
-    product_url: "https://example.com/material-1",
-    description: "Отличный выбор для ванной комнаты.",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    user_id: "demo"
-  },
-  {
-    id: "demo-2",
-    name: "Краска Benjamin Moore",
-    type: MaterialType.FINISH,
-    supplier: undefined,
-    price: 18000,
-    unit: "шт",
-    article: "BM-Aura-Matte",
-    product_url: "https://example.com/material-2",
-    description: "Цвет: Сashmere 27, матовая.",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    user_id: "demo"
-  },
-  {
-    id: "demo-3",
-    name: "Светильник подвесной Flos",
-    type: MaterialType.LIGHTING,
-    supplier: undefined,
-    price: 45000,
-    unit: "шт",
-    article: "FLOS-IC-S1",
-    product_url: "https://example.com/material-3",
-    description: "Латунь. Идеально над обеденным столом.",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    user_id: "demo"
-  },
-  {
-    id: "demo-4",
-    name: "Инженерная доска Finex",
-    type: MaterialType.FINISH,
-    supplier: undefined,
-    price: 9000,
-    unit: "кв.м.",
-    article: "FX-OAK-NAT",
-    product_url: "https://example.com/material-4",
-    description: "Дуб натуральный, селект.",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    user_id: "demo"
-  }
-];
-
-async function MaterialsPageContent() {
+export default async function MaterialsPageContent() {
   const user = await getUser();
 
   if (!user) {
@@ -112,10 +51,3 @@ async function MaterialsPageContent() {
   );
 }
 
-export default function MaterialsPage() {
-  return (
-    <PageErrorBoundary pageName="страница материалов">
-      <MaterialsPageContent />
-    </PageErrorBoundary>
-  );
-}

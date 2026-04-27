@@ -140,76 +140,74 @@ export function EngineeringForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit, onError)}
-        className="flex h-full w-full flex-col"
+        className="space-y-4 sm:space-y-6"
       >
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold">Инженерные системы</h2>
-          {/* Показываем предупреждение если нет комнат */}
-          {roomList.length === 0 && (
-            <div className="px-3 py-1.5 bg-amber-100 text-amber-800 text-xs font-medium rounded-lg">
-              Добавьте помещения
-            </div>
-          )}
-          <EngineeringSection
-            category="heatingSystem"
-            title="Отопление"
-            icon="thermometer"
-            options={ENGINEERING_OPTIONS.heating}
-            control={form.control}
-            roomList={roomList}
-            expanded={expandedSections.has("heatingSystem")}
-            onToggleExpanded={() => toggleSection("heatingSystem")}
-            itemCount={getCategoryItemCount("heatingSystem")}
-          />
+        
+        {/* Показываем предупреждение если нет комнат */}
+        {roomList.length === 0 && (
+          <div className="px-3 py-1.5 bg-amber-100 text-amber-800 text-xs font-medium rounded-lg">
+            Добавьте помещения
+          </div>
+        )}
+        <EngineeringSection
+          category="heatingSystem"
+          title="Отопление"
+          icon="thermometer"
+          options={ENGINEERING_OPTIONS.heating}
+          control={form.control}
+          roomList={roomList}
+          expanded={expandedSections.has("heatingSystem")}
+          onToggleExpanded={() => toggleSection("heatingSystem")}
+          itemCount={getCategoryItemCount("heatingSystem")}
+        />
 
-          <EngineeringSection
-            category="warmFloorRooms"
-            title="Тёплый пол"
-            icon="thermometer"
-            options={ENGINEERING_OPTIONS.warmFloor}
-            control={form.control}
-            roomList={roomList}
-            expanded={expandedSections.has("warmFloorRooms")}
-            onToggleExpanded={() => toggleSection("warmFloorRooms")}
-            itemCount={getCategoryItemCount("warmFloorRooms")}
-          />
+        <EngineeringSection
+          category="warmFloorRooms"
+          title="Тёплый пол"
+          icon="thermometer"
+          options={ENGINEERING_OPTIONS.warmFloor}
+          control={form.control}
+          roomList={roomList}
+          expanded={expandedSections.has("warmFloorRooms")}
+          onToggleExpanded={() => toggleSection("warmFloorRooms")}
+          itemCount={getCategoryItemCount("warmFloorRooms")}
+        />
 
-          <EngineeringSection
-            category="conditioningSystem"
-            title="Кондиционирование и вентиляция"
-            icon="fan"
-            options={ENGINEERING_OPTIONS.conditioning}
-            control={form.control}
-            roomList={roomList}
-            expanded={expandedSections.has("conditioningSystem")}
-            onToggleExpanded={() => toggleSection("conditioningSystem")}
-            itemCount={getCategoryItemCount("conditioningSystem")}
-          />
+        <EngineeringSection
+          category="conditioningSystem"
+          title="Кондиционирование и вентиляция"
+          icon="fan"
+          options={ENGINEERING_OPTIONS.conditioning}
+          control={form.control}
+          roomList={roomList}
+          expanded={expandedSections.has("conditioningSystem")}
+          onToggleExpanded={() => toggleSection("conditioningSystem")}
+          itemCount={getCategoryItemCount("conditioningSystem")}
+        />
 
-          <EngineeringSection
-            category="purificationSystem"
-            title="Очистка воды"
-            icon="droplets"
-            options={ENGINEERING_OPTIONS.purification}
-            control={form.control}
-            roomList={roomList}
-            expanded={expandedSections.has("purificationSystem")}
-            onToggleExpanded={() => toggleSection("purificationSystem")}
-            itemCount={getCategoryItemCount("purificationSystem")}
-          />
+        <EngineeringSection
+          category="purificationSystem"
+          title="Очистка воды"
+          icon="droplets"
+          options={ENGINEERING_OPTIONS.purification}
+          control={form.control}
+          roomList={roomList}
+          expanded={expandedSections.has("purificationSystem")}
+          onToggleExpanded={() => toggleSection("purificationSystem")}
+          itemCount={getCategoryItemCount("purificationSystem")}
+        />
 
-          <EngineeringSection
-            category="electricSystem"
-            title="Электрика и слаботочка"
-            icon="zap"
-            options={ENGINEERING_OPTIONS.electric}
-            control={form.control}
-            roomList={roomList}
-            expanded={expandedSections.has("electricSystem")}
-            onToggleExpanded={() => toggleSection("electricSystem")}
-            itemCount={getCategoryItemCount("electricSystem")}
-          />
-        </div>
+        <EngineeringSection
+          category="electricSystem"
+          title="Электрика и слаботочка"
+          icon="zap"
+          options={ENGINEERING_OPTIONS.electric}
+          control={form.control}
+          roomList={roomList}
+          expanded={expandedSections.has("electricSystem")}
+          onToggleExpanded={() => toggleSection("electricSystem")}
+          itemCount={getCategoryItemCount("electricSystem")}
+        />
 
         <FormSubmitButton isLoading={isPending} onActionSelect={setAction} />
       </form>

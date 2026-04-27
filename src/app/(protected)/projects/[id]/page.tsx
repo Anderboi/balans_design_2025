@@ -6,24 +6,40 @@ import { Sparkles, CircleUser } from "lucide-react";
 
 // Импорты внутренней логики и компонентов
 import { projectsService } from "@/lib/services/projects";
-import { Suspense } from "react";
+import { cache, Suspense } from "react";
 import { notFound } from "next/navigation";
 import {
   ProjectStagesLoader,
   ProjectStagesSkeleton,
-} from "../components/project-stages-loader";
-import { ObjectInfoCard } from "../components/object-info-card";
-import { ProjectClientSelector } from "../components/project-client-selector";
-import { ProjectNavCards } from "../components/project-nav-cards";
-
-export const revalidate = 0;
+} from "@/features/projects/components/project-stages-loader";
+import { ObjectInfoCard } from "@/features/projects/components/object-info-card";
+import { ProjectClientSelector } from "@/features/projects/components/project-client-selector";
+import { ProjectNavCards } from "@/features/projects/components/project-nav-cards";
 
 import { createClient } from "@/lib/supabase/server";
-import BackLink from '@/components/back-link';
+import BackLink from "@/components/back-link";
+import { Metadata, ResolvingMetadata } from "next";
 
-async function getProjectData(id: string) {
+const getProjectData = cache(async (id: string) => {
   const supabase = await createClient();
   return await projectsService.getProjectById(id, supabase);
+});
+
+export async function generateMetadata(
+  { params }: { params: Promise<{ id: string }> },
+  parent: ResolvingMetadata,
+): Promise<Metadata> {
+  const { id } = await params;
+  const project = await getProjectData(id);
+
+  if (!project) {
+    return { title: "Проект не найден" };
+  }
+
+  return {
+    title: project.name, // Вкладка будет: "ЖК Сити Парк | Balans"
+    description: `Рабочая область проекта: ${project.address || "Адрес не указан"}`,
+  };
 }
 
 export default async function ProjectDetailPage({
@@ -31,15 +47,10 @@ export default async function ProjectDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const resolvedParams = await params;
-  const id = resolvedParams.id;
+  const { id } = await params;
   const project = await getProjectData(id);
 
-  if (!project) {
-    notFound();
-  }
-
-  // const address = project.address || "Адрес не указан";
+  if (!project) notFound();
 
   return (
     <div className="space-y-8">
@@ -58,10 +69,6 @@ export default async function ProjectDetailPage({
               {project.name}
             </h1>
             <p className="text-base text-zinc-500 flex items-center gap-1">
-              {/* <span className="flex items-center gap-1 bg-white/50 px-3 py-1 rounded-full border border-slate-200/60">
-                {address}
-              </span>
-              <span className="mx-2 text-zinc-500">•</span> */}
               <span className="flex items-center text-zinc-400 gap-1 bg-white/50 px-3 py-1 rounded-full border border-slate-200/60">
                 <CircleUser className="size-4  mr-1" />
                 <ProjectClientSelector
@@ -72,7 +79,10 @@ export default async function ProjectDetailPage({
             </p>
           </div>
 
-          <Button variant="outline" className="rounded-full cursor-pointer h-12 px-6 //bg-primary //hover:bg-primary/80 text-primary shadow-lg //shadow-primary/20 transition-all font-medium flex items-center gap-2">
+          <Button
+            variant="outline"
+            className="rounded-full cursor-pointer h-12 px-6 //bg-primary //hover:bg-primary/80 text-primary shadow-lg //shadow-primary/20 transition-all font-medium flex items-center gap-2"
+          >
             <Sparkles className="size-4" />
             Спросить Balans AI
           </Button>

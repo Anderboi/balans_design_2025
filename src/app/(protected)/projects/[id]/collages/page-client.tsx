@@ -2,7 +2,7 @@
 
 import { Room } from "@/types";
 import { CollageVariant } from "@/types/collages";
-import { RoomSection } from "./components/room-section";
+import { RoomSection } from "../../../../../features/projects/components/collages/components/room-section";
 import PageContainer from "@/components/ui/page-container";
 import {
   Breadcrumb,

@@ -313,7 +313,7 @@ export interface Contact {
   id: string;
   name: string;
   type: ContactType;
-  company_id?: string; // ID компании, если контакт является представителем
+  company_id?: string | null; // ID компании, если контакт является представителем
   position: string;
 
   phone: string;

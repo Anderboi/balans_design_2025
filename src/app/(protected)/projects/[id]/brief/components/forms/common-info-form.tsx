@@ -21,7 +21,7 @@ import { updateCommonInfoAction } from "@/lib/actions/brief";
 import { useRouter } from "next/navigation";
 import FormSubmitButton from "./form-submit-button";
 import { completeBriefSectionAction } from "@/lib/actions/stages";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 
 interface CommonInfoFormProps {
   projectId: string;
@@ -39,54 +39,56 @@ export function CommonInfoForm({
   onNext,
 }: CommonInfoFormProps) {
   const router = useRouter();
+  const [action, setAction] = useState<"save" | "complete">("save");
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<CommonFormValues>({
     resolver: zodResolver(CommonDataSchema),
     defaultValues: initialData,
   });
 
-  const [action, setAction] = useState<"save" | "complete">("save");
-
-  const handleSubmit = async (data: CommonFormValues) => {
+  const handleSubmit = (data: CommonFormValues) => {
     if (!projectId) {
       toast.error("Project ID missing");
       return;
     }
 
-    try {
-      const result = await updateCommonInfoAction(projectId, data, contactId);
+    startTransition(async () => {
+      try {
+        const result = await updateCommonInfoAction(projectId, data, contactId);
 
-      if (!result.success) {
-        throw new Error(result.error as string);
+        if (!result.success) {
+          throw new Error(result.error as string);
+        }
+
+        // 4. Update brief section status
+        if (action === "complete") {
+          await completeBriefSectionAction(projectId, "general", true);
+          toast.success("Раздел завершен");
+          router.push(`/projects/${projectId}/brief`);
+          return;
+        }
+
+        toast.success("Общая информация сохранена");
+
+        if (onNext) {
+          onNext(data);
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error("Ошибка при сохранении данных");
       }
-
-      // 4. Update brief section status
-      if (action === "complete") {
-        await completeBriefSectionAction(projectId, "general", true);
-        toast.success("Раздел завершен");
-        router.push(`/projects/${projectId}/brief`);
-        return;
-      }
-
-      // Update store - RESERVED for future if needed
-      // setCommonData(data);
-
-      toast.success("Общая информация сохранена");
-
-      router.refresh(); // Refresh to update progress/status UI
-
-      if (onNext) {
-        onNext(data);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error("Ошибка при сохранении данных");
-    }
+    });
   };
+
+  const isFormDisabled = isPending || form.formState.isSubmitting;
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className="space-y-4 sm:space-y-6"
+      >
         <SubBlockCard title="Клиент">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
@@ -99,7 +101,7 @@ export function CommonInfoForm({
                     <Input
                       {...field}
                       placeholder="Иван"
-                      disabled={form.formState.isSubmitting}
+                      disabled={isFormDisabled}
                     />
                   </FormControl>
                   <FormMessage />
@@ -116,7 +118,7 @@ export function CommonInfoForm({
                     <Input
                       {...field}
                       placeholder="Иванов"
-                      disabled={form.formState.isSubmitting}
+                      disabled={isFormDisabled}
                     />
                   </FormControl>
                   <FormMessage />
@@ -136,7 +138,7 @@ export function CommonInfoForm({
                     <Input
                       {...field}
                       placeholder="example@mail.com"
-                      disabled={form.formState.isSubmitting}
+                      disabled={isFormDisabled}
                     />
                   </FormControl>
                   <FormMessage />
@@ -153,7 +155,7 @@ export function CommonInfoForm({
                     <Input
                       {...field}
                       placeholder="+7 (999) 000-00-00"
-                      disabled={form.formState.isSubmitting}
+                      disabled={isFormDisabled}
                     />
                   </FormControl>
                   <FormMessage />
@@ -173,7 +175,7 @@ export function CommonInfoForm({
                   <Input
                     {...field}
                     placeholder="г. Москва, ул. Примерная, д. 1, кв. 1"
-                    disabled={form.formState.isSubmitting}
+                    disabled={isFormDisabled}
                   />
                 </FormControl>
                 <FormMessage />
@@ -196,7 +198,7 @@ export function CommonInfoForm({
                       onChange={(e) =>
                         field.onChange(parseFloat(e.target.value))
                       }
-                      disabled={form.formState.isSubmitting}
+                      disabled={isFormDisabled}
                     />
                   </FormControl>
                   <FormMessage />
@@ -213,7 +215,7 @@ export function CommonInfoForm({
                     <Input
                       {...field}
                       placeholder="№ 123-45"
-                      disabled={form.formState.isSubmitting}
+                      disabled={isFormDisabled}
                     />
                   </FormControl>
                   <FormMessage />
@@ -227,11 +229,7 @@ export function CommonInfoForm({
                 <FormItem>
                   <FormLabel>Дата начала</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      type="date"
-                      disabled={form.formState.isSubmitting}
-                    />
+                    <Input {...field} type="date" disabled={isFormDisabled} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -244,11 +242,7 @@ export function CommonInfoForm({
                 <FormItem>
                   <FormLabel>Дата завершения</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      type="date"
-                      disabled={form.formState.isSubmitting}
-                    />
+                    <Input {...field} type="date" disabled={isFormDisabled} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -257,7 +251,7 @@ export function CommonInfoForm({
           </div>
         </SubBlockCard>
         <FormSubmitButton
-          isLoading={form.formState.isSubmitting}
+          isLoading={isFormDisabled}
           onActionSelect={setAction}
         />
       </form>

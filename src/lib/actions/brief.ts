@@ -97,7 +97,6 @@ export async function updateCommonInfoAction(
           email: data.email,
           phone: data.phone,
         },
-        supabase,
       );
     }
 

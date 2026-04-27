@@ -2,7 +2,7 @@
 
 import { Room } from "@/types";
 import { VisualizationVariant } from "@/types/visualizations";
-import { RoomSection } from "./components/room-section";
+import { RoomSection } from "../../../../../features/projects/components/visualization/components/room-section";
 import PageContainer from "@/components/ui/page-container";
 import {
   Breadcrumb,

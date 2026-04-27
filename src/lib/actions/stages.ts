@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { projectsService } from "@/lib/services/projects";
 import { revalidatePath } from "next/cache";
+import { withAuth } from "@/features/contacts/actions";
 
 export async function toggleStageItemAction(
   projectId: string,
@@ -41,6 +42,20 @@ export async function completeBriefSectionAction(
   sectionId: string,
   completed: boolean,
 ) {
+  return withAuth(async (userId, supabase) => {
+    await projectsService.updateBriefSectionStatus(
+      projectId,
+      sectionId,
+      completed,
+      supabase,
+    );
+
+    revalidatePath(`/projects/${projectId}/brief`);
+    revalidatePath(`/projects/${projectId}/brief/${sectionId}`);
+
+    return true;
+  });
+
   try {
     const supabase = await createClient();
     const {
@@ -59,7 +74,7 @@ export async function completeBriefSectionAction(
     );
 
     revalidatePath(`/projects/${projectId}/brief`);
-    revalidatePath(`/projects/${projectId}`);
+    revalidatePath(`/projects/${projectId}/brief/${sectionId}`);
     return { success: true };
   } catch (error) {
     console.error("Error completing brief section:", error);

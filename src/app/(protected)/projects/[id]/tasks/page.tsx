@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import TasksBlockLoader from "../components/tasks-block-loader";
+import TasksBlockLoader from "../../../../../features/projects/components/tasks-block-loader";
 import { projectsService } from "@/lib/services/projects";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";

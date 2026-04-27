@@ -1,4 +1,4 @@
-import { KanbanBoard } from "@/app/(protected)/projects/[id]/components/kanban-board";
+import { KanbanBoard } from "@/features/projects/components/kanban-board";
 import PageContainer from "@/components/ui/page-container";
 import PageHeader from "@/components/ui/page-header";
 import { tasksService } from "@/lib/services/tasks";

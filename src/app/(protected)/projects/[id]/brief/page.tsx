@@ -1,4 +1,3 @@
-import { projectsService } from "@/lib/services/projects";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
@@ -15,7 +14,7 @@ import { BriefSectionsGrid } from "./components/brief-section-grid";
 import PageHeader from "@/components/ui/page-header";
 import PageContainer from "@/components/ui/page-container";
 
-import { createClient } from "@/lib/supabase/server";
+import { getCachedProjectAndBrief } from "@/features/projects/actions";
 
 export default async function BriefPage({
   params,
@@ -23,12 +22,7 @@ export default async function BriefPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const supabase = await createClient();
-
-  const [project, brief] = await Promise.all([
-    projectsService.getProjectById(id, supabase),
-    projectsService.getProjectBrief(id, supabase),
-  ]);
+  const { project, brief } = await getCachedProjectAndBrief(id);
 
   if (!project) {
     notFound();
@@ -37,7 +31,7 @@ export default async function BriefPage({
   return (
     <PageContainer>
       {/* Header & Breadcrumbs */}
-      <div className="space-y-8">
+      <div className="space-y-4 sm:space-y-8">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -60,22 +54,17 @@ export default async function BriefPage({
       </div>
 
       {/* Main Content Info */}
-      <div className="text-center space-y-6 max-w-2xl mx-auto pt-10">
-        <div className="space-y-2">
-          {/* <p className="text-[10px] font-bold tracking-[0.2em] text-gray-400 uppercase">
-            Техническое задание
-          </p> */}
-          <h2 className="text-5xl font-medium tracking-tight text-zinc-900">
-            Заполните анкету
-          </h2>
-        </div>
+      <div className="sm:text-center space-y-2 sm:space-y-6 max-w-2xl mx-auto pt-2 sm:pt-10">
+        <h2 className="text-2xl sm:text-5xl font-medium tracking-tight text-zinc-900">
+          Заполните анкету
+        </h2>
 
         <p className="text-gray-500 leading-relaxed max-w-lg mx-auto">
           Для создания идеального интерьера нам нужно узнать вас лучше. Вы
           можете заполнять разделы в любом порядке.
         </p>
 
-        <div className="pt-4 flex flex-col items-center gap-2">
+        <div className="sm:pt-4 flex flex-col items-center gap-2">
           <span className="text-[11px] font-bold text-gray-400">
             {brief?.sections_completed
               ? Math.round(
@@ -90,11 +79,12 @@ export default async function BriefPage({
 
       {/* Grid */}
       <BriefSectionsGrid
+        projectId={project.id}
         completedSections={(brief?.sections_completed as string[]) || []}
       />
 
       {/* Footer Action */}
-      <div className="flex justify-center pt-10">
+      <div className="flex justify-center pt-8">
         <Button
           variant="outline"
           className="rounded-full px-8 py-6 border-gray-100/80 text-gray-500 hover:text-black hover:bg-gray-50/50 shadow-sm transition-all"

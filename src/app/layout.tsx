@@ -4,15 +4,20 @@ import "./globals.css";
 import GlobalErrorBoundary from "@/components/global-error-boundary";
 import { Toaster } from "@/components/ui/sonner";
 
-const geist = Geist({ 
+const geist = Geist({
   subsets: ["latin", "cyrillic"],
-  display: 'swap',
-  variable: '--font-geist'
+  display: "swap",
+  variable: "--font-geist",
 });
 
 export const metadata: Metadata = {
-  title: "Balans Design",
+  title: { default: "Balans Design", template: "%s | Balans" },
   description: "Приложение для управления проектами для дизайнера интерьера",
+  openGraph: {
+    type: "website",
+    locale: "ru_RU",
+    siteName: "Balans App",
+  },
 };
 
 export default function RootLayout({

@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import TeamManagementLoader from "../components/team-management-loader";
+import TeamManagementLoader from "@/features/projects/components/team-management-loader";
 import { projectsService } from "@/lib/services/projects";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";

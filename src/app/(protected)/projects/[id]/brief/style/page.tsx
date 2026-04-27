@@ -1,9 +1,9 @@
-import { projectsService } from "@/lib/services/projects";
 import { notFound } from "next/navigation";
 import { StyleForm } from "../components/forms/style-form";
 import PageContainer from "@/components/ui/page-container";
-import { createClient } from "@/lib/supabase/server";
 import { ProjectPageHeader } from "@/components/project-page-header";
+import BriefBlockWraper from '@/features/projects/components/brief-block-wraper';
+import { getCachedProjectAndBrief } from '@/features/projects/actions';
 
 export default async function BriefStylePage({
   params,
@@ -11,12 +11,7 @@ export default async function BriefStylePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const supabase = await createClient();
-
-  const [project, brief] = await Promise.all([
-    projectsService.getProjectById(id, supabase),
-    projectsService.getProjectBrief(id, supabase),
-  ]);
+  const {project, brief} = await getCachedProjectAndBrief(id);
 
   if (!project) {
     notFound();
@@ -34,12 +29,16 @@ export default async function BriefStylePage({
         }}
       />
 
-      <div className="mt-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-        <StyleForm 
-          projectId={id} 
-          initialData={brief?.style as { preferences?: string; pinterestLink?: string; } | undefined} 
+      <BriefBlockWraper>
+        <StyleForm
+          projectId={id}
+          initialData={
+            brief?.style as
+              | { preferences?: string; pinterestLink?: string }
+              | undefined
+          }
         />
-      </div>
+      </BriefBlockWraper>
     </PageContainer>
   );
 }

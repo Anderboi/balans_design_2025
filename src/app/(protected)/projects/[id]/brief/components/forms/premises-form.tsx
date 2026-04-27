@@ -227,7 +227,10 @@ export function PremisesForm({ projectId, initialData }: PremisesFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className="space-y-4 sm:space-y-6"
+      >
         <SubBlockCard title="Помещения">
           {roomFields.map((room, index) => {
             return (
@@ -264,7 +267,7 @@ export function PremisesForm({ projectId, initialData }: PremisesFormProps) {
             );
           })}
         </SubBlockCard>
-        <div className="pt-4">
+        
           <AddItemButton
             onClick={() =>
               append({
@@ -276,7 +279,7 @@ export function PremisesForm({ projectId, initialData }: PremisesFormProps) {
           >
             Добавить помещение
           </AddItemButton>
-        </div>
+        
         <FormSubmitButton isLoading={isSaving} onActionSelect={setAction} />
       </form>
     </Form>

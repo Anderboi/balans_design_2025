@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { TaskDetails } from "../../../components/task-details";
+import { TaskDetails } from "../../../../../../../features/projects/components/task-details";
 import {
   Dialog,
   DialogContent,
