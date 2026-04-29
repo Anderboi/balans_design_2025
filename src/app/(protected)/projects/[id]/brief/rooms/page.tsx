@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import PageContainer from "@/components/ui/page-container";
 import { PremisesForm } from "../components/forms/premises-form";
 import { ProjectPageHeader } from "@/components/project-page-header";
-import BriefBlockWraper from "@/features/projects/components/brief-block-wraper";
+import BriefBlockWrapper from "@/features/projects/components/brief-block-wraper";
 import { getCachedProjectAndBrief } from "@/features/projects/actions";
 
 export default async function BriefRoomsPage({
@@ -41,9 +41,9 @@ export default async function BriefRoomsPage({
         }}
       />
 
-      <BriefBlockWraper>
+      <BriefBlockWrapper>
         <PremisesForm projectId={id} initialData={initialData} />
-      </BriefBlockWraper>
+      </BriefBlockWrapper>
     </PageContainer>
   );
 }

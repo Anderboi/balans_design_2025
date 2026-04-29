@@ -39,34 +39,29 @@ export function StageItem({
     <Link
       href={getHref()}
       key={item.id}
+      prefetch={false}
       onClick={(e) => {
         if (!isClickable) e.preventDefault();
       }}
       className={cn(
-        "flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 transition-colors group cursor-pointer",
+        "flex items-center justify-between p-3  transition-colors group cursor-pointer",
         !isClickable && "pointer-events-none",
       )}
     >
-      <div className="flex items-center gap-3 text-gray-600 group-hover:text-zinc-900 transition-colors">
-        {/* <div
-          className={cn(
-            "size-5 rounded border flex items-center justify-center transition-colors mr-3",
-            item.completed
-              ? "bg-black border-black text-white"
-              : "border-gray-300 bg-transparent"
-          )}
-        >
-          {item.completed && <Check className="size-4" />}
-        </div> */}
+      <div className="flex  items-center gap-3 text-gray-600 group-hover:text-zinc-900 transition-colors">
         <div
           className={cn(
-            "size-8 rounded-full flex items-center justify-center shrink-0 ",
+            "size-8 group-hover:bg-zinc-900 rounded-full flex items-center justify-center shrink-0 ",
             item.completed
               ? "bg-zinc-900 text-white border-0"
               : "bg-gray-100 text-gray-400",
           )}
         >
-          {item.completed ? <Check className="size-4" /> : <Icon className="size-4" />}
+          {item.completed ? (
+            <Check className="size-4" />
+          ) : (
+            <Icon className="size-4" />
+          )}
         </div>
         <span
           className={cn(

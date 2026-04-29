@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,7 @@ export function FurnishingForm({
   roomList,
 }: FurnishingFormProps) {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [expandedRooms, setExpandedRooms] = useState<Set<string>>(new Set());
   const [expandedEquipment, setExpandedEquipment] = useState<Set<string>>(
     new Set(),
@@ -132,43 +133,39 @@ export function FurnishingForm({
     }));
   };
 
-  async function onSubmit() {
-    if (!projectId) {
-      toast.error("Project ID missing");
-      return;
-    }
+  const handleSubmit = () => {
+    startTransition(async () => {
+      try {
+        const data: EquipmentBlockFormValues = {
+          rooms: roomList.map((room) => ({
+            room_id: room.id,
+            room_name: room.name,
+            equipment: roomsEquipment[room.id] || [],
+          })),
+        };
 
-    try {
-      const data: EquipmentBlockFormValues = {
-        rooms: roomList.map((room) => ({
-          room_id: room.id,
-          room_name: room.name,
-          equipment: roomsEquipment[room.id] || [],
-        })),
-      };
+        const result = await updateProjectBriefAction(projectId, {
+          equipment: data,
+        });
 
-      const result = await updateProjectBriefAction(projectId, {
-        equipment: data,
-      });
+        if (!result.success) {
+          throw new Error(result.error as string);
+        }
 
-      if (!result.success) {
-        throw new Error(result.error as string);
+        if (action === "complete") {
+          await completeBriefSectionAction(projectId, "furnishing", true);
+          toast.success("Раздел завершен");
+          router.push(`/projects/${projectId}/brief`);
+          return;
+        }
+
+        toast.success("Наполнение помещений сохранено");
+      } catch (error) {
+        console.error(error);
+        toast.error("Ошибка при попытке сохранения данных");
       }
-
-      if (action === "complete") {
-        await completeBriefSectionAction(projectId, "furnishing", true);
-        toast.success("Раздел завершен");
-        router.push(`/projects/${projectId}/brief`);
-        return;
-      }
-
-      toast.success("Наполнение помещений сохранено");
-      router.refresh();
-    } catch (error) {
-      console.error(error);
-      toast.error("Ошибка при попытке сохранения данных");
-    }
-  }
+    });
+  };
 
   // Calculate suggestions for all rooms
   const allRoomSuggestions = useMemo(() => {
@@ -180,7 +177,7 @@ export function FurnishingForm({
       const equipment = roomsEquipment[room.id] || [];
       const allSuggestions = getMemoizedEquipmentSuggestions(
         room.name,
-        room.type as "living" | "wet" | "utility" | "technical" | undefined
+        room.type as "living" | "wet" | "utility" | "technical" | undefined,
       );
       const selectedNames = new Set(equipment.map((eq) => eq.name));
       suggestionsMap[room.id] = allSuggestions.filter(
@@ -190,10 +187,12 @@ export function FurnishingForm({
     return suggestionsMap;
   }, [roomList, roomsEquipment]);
 
+  const isFormDisabled = isPending || form.formState.isSubmitting;
+
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(handleSubmit)}
         className="space-y-4 sm:space-y-6"
       >
         {roomList.map((room) => {
@@ -403,7 +402,7 @@ export function FurnishingForm({
         })}
 
         <FormSubmitButton
-          isLoading={form.formState.isSubmitting}
+          isLoading={isFormDisabled}
           onActionSelect={setAction}
         />
       </form>

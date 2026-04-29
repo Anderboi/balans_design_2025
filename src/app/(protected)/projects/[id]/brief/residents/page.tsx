@@ -3,7 +3,7 @@ import PageContainer from "@/components/ui/page-container";
 import { ResidentsForm } from "../components/forms/residents-form";
 import { ResidentsFormValues } from "@/lib/schemas/brief-schema";
 import { ProjectPageHeader } from "@/components/project-page-header";
-import BriefBlockWraper from "@/features/projects/components/brief-block-wraper";
+import BriefBlockWrapper from "@/features/projects/components/brief-block-wraper";
 import { getCachedProjectAndBrief } from "@/features/projects/actions";
 
 export default async function BriefResidentsPage({
@@ -33,9 +33,9 @@ export default async function BriefResidentsPage({
         }}
       />
 
-      <BriefBlockWraper>
+      <BriefBlockWrapper>
         <ResidentsForm projectId={id} initialData={initialData} />
-      </BriefBlockWraper>
+      </BriefBlockWrapper>
     </PageContainer>
   );
 }

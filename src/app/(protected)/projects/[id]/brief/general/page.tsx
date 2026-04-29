@@ -4,7 +4,7 @@ import { CommonInfoForm } from "@/app/(protected)/projects/[id]/brief/components
 import { CommonFormValues } from "@/lib/schemas/brief-schema";
 import { ProjectPageHeader } from "@/components/project-page-header";
 import { getCachedProjectAndBrief } from '@/features/projects/actions';
-import BriefBlockWraper from '@/features/projects/components/brief-block-wraper';
+import BriefBlockWrapper from '@/features/projects/components/brief-block-wraper';
 
 export default async function BriefGeneralPage({
   params,
@@ -50,14 +50,14 @@ export default async function BriefGeneralPage({
         }}
       />
 
-      <BriefBlockWraper>
+      <BriefBlockWrapper>
         <CommonInfoForm
           projectId={id}
           initialData={initialData}
           contactId={project.contacts?.id}
           clientId={project.client_id || undefined}
         />
-      </BriefBlockWraper>
+      </BriefBlockWrapper>
     </PageContainer>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -33,6 +33,7 @@ interface StyleFormProps {
 
 export function StyleForm({ projectId, initialData }: StyleFormProps) {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [action, setAction] = useState<"save" | "complete">("save");
 
   const form = useForm<StyleFormValues>({
@@ -43,35 +44,37 @@ export function StyleForm({ projectId, initialData }: StyleFormProps) {
     },
   });
 
-  async function onSubmit(data: StyleFormValues) {
-    try {
-      const result = await updateProjectBriefAction(projectId, {
-        style: data,
-      });
+  const handleSubmit = (data: StyleFormValues) => {
+    startTransition(async () => {
+      try {
+        const result = await updateProjectBriefAction(projectId, {
+          style: data,
+        });
 
-      if (!result.success) {
-        throw new Error(result.error as string);
+        if (!result.success) {
+          throw new Error(result.error as string);
+        }
+
+        if (action === "complete") {
+          await completeBriefSectionAction(projectId, "style", true);
+          toast.success("Раздел завершен");
+          router.push(`/projects/${projectId}/brief`);
+          return;
+        }
+
+        toast.success("Стилевые предпочтения сохранены");
+      } catch (error) {
+        console.error(error);
+        toast.error("Ошибка при сохранении данных");
       }
-
-      if (action === "complete") {
-        await completeBriefSectionAction(projectId, "style", true);
-        toast.success("Раздел завершен");
-        router.push(`/projects/${projectId}/brief`);
-        return;
-      }
-
-      toast.success("Стилевые предпочтения сохранены");
-      router.refresh();
-    } catch (error) {
-      console.error(error);
-      toast.error("Ошибка при сохранении данных");
-    }
-  }
+    });
+  };
+  const isFormDisabled = isPending || form.formState.isSubmitting;
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(handleSubmit)}
         className="space-y-4 sm:space-y-6"
       >
         <SubBlockCard>
@@ -120,7 +123,7 @@ export function StyleForm({ projectId, initialData }: StyleFormProps) {
           </div>
         </SubBlockCard>
         <FormSubmitButton
-          isLoading={form.formState.isSubmitting}
+          isLoading={isFormDisabled}
           onActionSelect={setAction}
         />
       </form>

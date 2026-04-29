@@ -6,11 +6,10 @@ import { Sparkles, CircleUser } from "lucide-react";
 
 // Импорты внутренней логики и компонентов
 import { projectsService } from "@/lib/services/projects";
-import { cache, Suspense } from "react";
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import {
   ProjectStagesLoader,
-  ProjectStagesSkeleton,
 } from "@/features/projects/components/project-stages-loader";
 import { ObjectInfoCard } from "@/features/projects/components/object-info-card";
 import { ProjectClientSelector } from "@/features/projects/components/project-client-selector";
@@ -100,13 +99,10 @@ export default async function ProjectDetailPage({
 
         {/* Quick Access Cards */}
         <ProjectNavCards projectId={id} />
-
-        <Suspense fallback={<ProjectStagesSkeleton />}>
           <ProjectStagesLoader
             projectId={id}
             isStrictMode={project.is_strict_mode ?? true}
           />
-        </Suspense>
       </div>
     </div>
   );

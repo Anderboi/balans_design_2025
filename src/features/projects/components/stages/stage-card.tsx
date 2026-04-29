@@ -32,7 +32,7 @@ export function StageCard({
       {/* Expandable Content */}
       {!isLocked && isExpanded && (
         <div className="px-1 pb-1 pt-0 space-y-2 animate-in slide-in-from-top-2 duration-200 ">
-          <div className="space-y-2 bg-zinc-100/50 rounded-[20px]">
+          <div className="space-y-2 bg-zinc-100/50 rounded-[28px]">
             {stage.items.map((item) => (
               <StageItem
                 key={item.id}

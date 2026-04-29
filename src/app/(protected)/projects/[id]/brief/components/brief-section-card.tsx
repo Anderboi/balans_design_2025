@@ -20,7 +20,7 @@ export function BriefSectionCard({
     <div
       onClick={onClick}
       className={cn(
-        "group relative flex flex-col p-8 bg-background rounded-[32px] border border-gray-100/80 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer hover:-translate-y-1",
+        "group relative flex flex-col p-8 bg-background rounded-4xl border border-gray-100/80 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer hover:-translate-y-1",
         completed &&
           "bg-emerald-50/50 border-emerald-200 hover:border-emerald-300 hover:shadow-emerald-50",
       )}

@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { StyleForm } from "../components/forms/style-form";
 import PageContainer from "@/components/ui/page-container";
 import { ProjectPageHeader } from "@/components/project-page-header";
-import BriefBlockWraper from '@/features/projects/components/brief-block-wraper';
+import BriefBlockWrapper from '@/features/projects/components/brief-block-wraper';
 import { getCachedProjectAndBrief } from '@/features/projects/actions';
 
 export default async function BriefStylePage({
@@ -29,7 +29,7 @@ export default async function BriefStylePage({
         }}
       />
 
-      <BriefBlockWraper>
+      <BriefBlockWrapper>
         <StyleForm
           projectId={id}
           initialData={
@@ -38,7 +38,7 @@ export default async function BriefStylePage({
               | undefined
           }
         />
-      </BriefBlockWraper>
+      </BriefBlockWrapper>
     </PageContainer>
   );
 }

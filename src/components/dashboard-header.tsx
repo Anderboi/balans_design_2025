@@ -1,16 +1,25 @@
-import { Search } from "lucide-react";
+import { Bell, Search } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/server";
 import { NotificationsPopover } from "@/components/notifications-popover";
 import { UserMenu } from "@/components/user-menu";
 import { notificationsService } from "@/lib/services/notifications";
+import { cache, Suspense } from 'react';
+import { getUser } from '@/lib/supabase/getuser';
+import { Notification } from '@/types/notifications';
+
+const getCachedNotifications = cache(async (userId: string) => {
+  const supabase = await createClient();
+  return await notificationsService.getNotifications(
+    userId,
+    { limit: 50 },
+    supabase,
+  );
+});
 
 export default async function DashboardHeader() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
 
   // Fetch initial notifications for SSR
   let initialNotifications: Awaited<
@@ -18,15 +27,12 @@ export default async function DashboardHeader() {
   > = [];
 
   if (user) {
-    try {
-      initialNotifications = await notificationsService.getNotifications(
-        user.id,
-        { limit: 50 },
-        supabase,
-      );
-    } catch (error) {
-      console.error("Failed to fetch notifications for header:", error);
-    }
+   try {
+     // 3. Вызываем закэшированную функцию
+     initialNotifications = await getCachedNotifications(user.id);
+   } catch (error) {
+     console.error("Failed to fetch notifications for header:", error);
+   }
   }
 
   return (
@@ -44,15 +50,48 @@ export default async function DashboardHeader() {
       </div>
 
       <div className="flex items-center gap-2">
-        <NotificationsPopover
-          initialNotifications={initialNotifications}
-          userId={user?.id ?? ""}
-        />
-
+        <Suspense fallback={<BellFallback />}>
+          <NotificationsServer
+            initialNotifications={initialNotifications}
+            userId={user?.id ?? ""}
+          />
+        </Suspense>
         <div className="h-8 w-px bg-gray-100 mx-1" />
 
         <UserMenu userEmail={user?.email ?? null} />
       </div>
     </header>
+  );
+}
+
+async function NotificationsServer({
+  userId,
+  initialNotifications,
+}: {
+  userId: string;
+  initialNotifications: Notification[];
+}) {
+  if (!userId)
+    return (
+      <NotificationsPopover
+        initialNotifications={initialNotifications}
+        userId=""
+      />
+    );
+
+  const notifications = await getCachedNotifications(userId);
+  return (
+    <NotificationsPopover
+      initialNotifications={notifications}
+      userId={userId}
+    />
+  );
+}
+
+function BellFallback() {
+  return (
+    <button className="relative p-2 text-gray-500 rounded-full">
+      <Bell className="size-5" />
+    </button>
   );
 }

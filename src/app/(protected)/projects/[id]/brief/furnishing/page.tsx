@@ -3,7 +3,7 @@ import PageContainer from "@/components/ui/page-container";
 import { FurnishingForm } from "../components/forms/furnishing-form";
 import { EquipmentBlockFormValues } from "@/lib/schemas/brief-schema";
 import { ProjectPageHeader } from "@/components/project-page-header";
-import BriefBlockWraper from "@/features/projects/components/brief-block-wraper";
+import BriefBlockWrapper from "@/features/projects/components/brief-block-wraper";
 import { getCachedProjectAndBrief } from "@/features/projects/actions";
 
 export default async function BriefFurnishingPage({
@@ -33,13 +33,13 @@ export default async function BriefFurnishingPage({
         }}
       />
 
-      <BriefBlockWraper>
+      <BriefBlockWrapper>
         <FurnishingForm
           projectId={id}
           initialData={initialData}
           roomList={rooms}
         />
-      </BriefBlockWraper>
+      </BriefBlockWrapper>
     </PageContainer>
   );
 }

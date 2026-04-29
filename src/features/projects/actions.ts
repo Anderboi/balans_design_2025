@@ -1,10 +1,10 @@
 import { projectsService } from "@/lib/services/projects";
-import { roomsService } from '@/lib/services/rooms';
+import { roomsService } from "@/lib/services/rooms";
 
 import { createClient } from "@/lib/supabase/server";
-import { cache } from 'react';
+import { cache } from "react";
 
-export async function getProjects() {
+export const getProjects = cache(async () => {
   try {
     const supabase = await createClient();
     return await projectsService.getProjects(supabase);
@@ -12,7 +12,7 @@ export async function getProjects() {
     console.error("Ошибка при загрузке проектов:", error);
     throw error;
   }
-}
+});
 
 export const getCachedProjectAndBrief = cache(async (id: string) => {
   const supabase = await createClient();

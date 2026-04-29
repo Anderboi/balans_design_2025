@@ -3,7 +3,7 @@ import PageContainer from "@/components/ui/page-container";
 import { DemolitionForm } from "../components/forms/demolition-form";
 import { DemolitionType } from "@/lib/schemas/brief-schema";
 import { ProjectPageHeader } from "@/components/project-page-header";
-import BriefBlockWraper from '@/features/projects/components/brief-block-wraper';
+import BriefBlockWrapper from '@/features/projects/components/brief-block-wraper';
 import { getCachedProjectAndBrief } from '@/features/projects/actions';
 
 export default async function BriefDemolitionPage({
@@ -12,7 +12,7 @@ export default async function BriefDemolitionPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
- const { project, brief } = await getCachedProjectAndBrief(id);
+  const { project, brief } = await getCachedProjectAndBrief(id);
 
   if (!project) {
     notFound();
@@ -33,9 +33,9 @@ export default async function BriefDemolitionPage({
         }}
       />
 
-      <BriefBlockWraper>
+      <BriefBlockWrapper>
         <DemolitionForm projectId={id} initialData={initialData} />
-      </BriefBlockWraper>
+      </BriefBlockWrapper>
     </PageContainer>
   );
 }

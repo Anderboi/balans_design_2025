@@ -79,7 +79,7 @@ export function EngineeringForm({
     return sections?.filter((s) => s?.system).length || 0;
   };
 
-  async function onSubmit(data: EngineeringSystemsType) {
+  const handleSubmit = (data: EngineeringSystemsType) =>{
     startTransition(async () => {
       try {
         // Фильтруем пустые секции
@@ -113,7 +113,7 @@ export function EngineeringForm({
 
         toast.success("Инженерные системы сохранены");
         router.push(`/projects/${projectId}/brief`);
-        router.refresh();
+        
       } catch (error) {
         console.error("Error saving engineering data:", error);
         toast.error("Ошибка при попытке сохранения данных");
@@ -136,13 +136,15 @@ export function EngineeringForm({
     }
   }
 
+  const isFormDisabled = isPending || form.formState.isSubmitting;
+  
+
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit, onError)}
+        onSubmit={form.handleSubmit(handleSubmit, onError)}
         className="space-y-4 sm:space-y-6"
       >
-        
         {/* Показываем предупреждение если нет комнат */}
         {roomList.length === 0 && (
           <div className="px-3 py-1.5 bg-amber-100 text-amber-800 text-xs font-medium rounded-lg">
@@ -209,7 +211,10 @@ export function EngineeringForm({
           itemCount={getCategoryItemCount("electricSystem")}
         />
 
-        <FormSubmitButton isLoading={isPending} onActionSelect={setAction} />
+        <FormSubmitButton
+          isLoading={isFormDisabled}
+          onActionSelect={setAction}
+        />
       </form>
     </Form>
   );

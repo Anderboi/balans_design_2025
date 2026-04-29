@@ -2,61 +2,26 @@
 
 import { useState } from "react";
 import { DragDropContext, DropResult } from "@hello-pangea/dnd";
-import { Task, TaskStatus, TASK_STATUS_LABELS } from "@/types";
+import { Task } from "@/types";
 import { KanbanColumn } from "./kanban-column";
 import { tasksService } from "@/lib/services/tasks";
-import { profilesService } from "@/lib/services/profiles";
 import { toast } from "sonner";
-import { useEffect } from "react";
 import { Participant } from "@/types";
+import { COLUMNS } from "@/config/tasks";
 
 interface KanbanBoardProps {
   initialTasks: Task[];
+  members: Participant[];
   projectId?: string;
 }
 
-const COLUMNS = [
-  {
-    id: "TODO",
-    status: TaskStatus.TODO,
-    title: TASK_STATUS_LABELS[TaskStatus.TODO],
-    color: "bg-zinc-100",
-  },
-  {
-    id: "IN_PROGRESS",
-    status: TaskStatus.IN_PROGRESS,
-    title: TASK_STATUS_LABELS[TaskStatus.IN_PROGRESS],
-    color: "bg-blue-50/50",
-  },
-  {
-    id: "REVIEW",
-    status: TaskStatus.REVIEW,
-    title: TASK_STATUS_LABELS[TaskStatus.REVIEW],
-    color: "bg-purple-50/50",
-  },
-  {
-    id: "DONE",
-    status: TaskStatus.DONE,
-    title: TASK_STATUS_LABELS[TaskStatus.DONE],
-    color: "bg-green-50/50",
-  },
-];
+export const KanbanBoard = ({
+  initialTasks,
+  projectId,
+  members,
+}: KanbanBoardProps) => {
 
-export const KanbanBoard = ({ initialTasks, projectId }: KanbanBoardProps) => {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
-  const [members, setMembers] = useState<Participant[]>([]);
-
-  useEffect(() => {
-    const fetchMembers = async () => {
-      try {
-        const data = await profilesService.getProfiles();
-        setMembers(data);
-      } catch (error) {
-        console.error("Failed to fetch profiles", error);
-      }
-    };
-    fetchMembers();
-  }, []);
 
   const onTaskCreated = (newTask: Task) => {
     setTasks((prev) => [...prev, newTask]);
@@ -82,15 +47,17 @@ export const KanbanBoard = ({ initialTasks, projectId }: KanbanBoardProps) => {
 
     // Optimistic update
     const updatedTasks = tasks.map((task) =>
-      task.id === draggableId ? { ...task, status: newStatus } : task
+      task.id === draggableId ? { ...task, status: newStatus } : task,
     );
 
     setTasks(updatedTasks);
 
     try {
-      const updatedTask = await tasksService.updateTask(draggableId, { status: newStatus });
+      const updatedTask = await tasksService.updateTask(draggableId, {
+        status: newStatus,
+      });
       setTasks((prev) =>
-        prev.map((t) => (t.id === draggableId ? updatedTask : t))
+        prev.map((t) => (t.id === draggableId ? updatedTask : t)),
       );
       toast.success("Статус обновлен");
     } catch (error) {
@@ -103,14 +70,12 @@ export const KanbanBoard = ({ initialTasks, projectId }: KanbanBoardProps) => {
   const handleUpdateTask = async (taskId: string, updates: Partial<Task>) => {
     // Optimistic update
     setTasks((prev) =>
-      prev.map((t) => (t.id === taskId ? { ...t, ...updates } : t))
+      prev.map((t) => (t.id === taskId ? { ...t, ...updates } : t)),
     );
 
     try {
       const updatedTask = await tasksService.updateTask(taskId, updates);
-      setTasks((prev) =>
-        prev.map((t) => (t.id === taskId ? updatedTask : t))
-      );
+      setTasks((prev) => prev.map((t) => (t.id === taskId ? updatedTask : t)));
     } catch (error) {
       console.error("Failed to update task", error);
       toast.error("Не удалось сохранить изменения");

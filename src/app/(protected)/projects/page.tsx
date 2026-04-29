@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { getProjects } from "../../../features/projects/actions";
+import { getProjects } from "@/features/projects/actions";
 import PageContainer from '@/components/ui/page-container';
 import PageHeader from '@/components/ui/page-header';
 import ProjectCard from '@/features/projects/components/project-card';

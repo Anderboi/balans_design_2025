@@ -1,38 +1,12 @@
 "use server";
 
+import { withAuth } from '@/lib/actions/safe-action';
 import { companiesService } from "@/lib/services/companies";
 import { contactsService } from "@/lib/services/contacts";
 import { createClient } from "@/lib/supabase/server";
 import { Company, Contact, ContactType } from "@/types";
 import { revalidateTag } from "next/cache";
 import { cache } from "react";
-
-// Эта функция избавляет от дублирования try/catch и проверок авторизации
-export async function withAuth<T>(
-  action: (userId: string, supabase: any) => Promise<T>,
-) {
-  try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
-
-    if (error || !user) {
-      return { success: false, error: "Не авторизован" };
-    }
-
-    const result = await action(user.id, supabase);
-    return { success: true, data: result };
-  } catch (error) {
-    console.error("Action error:", error);
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : "Внутренняя ошибка сервера",
-    };
-  }
-}
 
 export const getCompanies = cache(async () => {
   const supabase = await createClient();

@@ -8,7 +8,7 @@ import {
 } from "@/lib/schemas/brief-schema";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import StyledSelect from "@/components/ui/styled-select";
 import { toast } from "sonner";
 import { CreateRoomData } from "@/lib/services/rooms";
@@ -76,7 +76,7 @@ export const roomList: Option[] = [
 
 export function PremisesForm({ projectId, initialData }: PremisesFormProps) {
   const router = useRouter();
-  const [isSaving, setIsSaving] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [action, setAction] = useState<"save" | "complete">("save");
 
   // Initialize options with custom rooms from initialData
@@ -186,44 +186,39 @@ export function PremisesForm({ projectId, initialData }: PremisesFormProps) {
   };
 
   const handleSubmit = async (data: PremisesFormValues) => {
-    if (!projectId) {
-      toast.error("ID проекта не найден");
-      return;
-    }
+    startTransition(async () => {
+      try {
+        // Mapping with ID preservation
+        const roomsToSave: CreateRoomData[] = data.rooms.map((room, index) => ({
+          id: (room as any).id, // Preserve ID if it exists in initialData
+          name: room.name,
+          order: index + 1,
+          type: room.type as any,
+          area: room.area,
+        }));
 
-    setIsSaving(true);
-    try {
-      // Mapping with ID preservation
-      const roomsToSave: CreateRoomData[] = data.rooms.map((room, index) => ({
-        id: (room as any).id, // Preserve ID if it exists in initialData
-        name: room.name,
-        order: index + 1,
-        type: room.type as any,
-        area: room.area,
-      }));
+        const result = await updateRoomsAction(projectId, roomsToSave);
 
-      const result = await updateRoomsAction(projectId, roomsToSave);
+        if (!result.success) {
+          throw new Error(result.error as string);
+        }
 
-      if (!result.success) {
-        throw new Error(result.error as string);
+        if (action === "complete") {
+          await completeBriefSectionAction(projectId, "rooms", true);
+          toast.success("Раздел завершен");
+          router.push(`/projects/${projectId}/brief`);
+          return;
+        }
+
+        toast.success("Помещения успешно сохранены");
+      } catch (error) {
+        console.error("Failed to save rooms:", error);
+        toast.error("Ошибка при сохранении помещений");
       }
-
-      if (action === "complete") {
-        await completeBriefSectionAction(projectId, "rooms", true);
-        toast.success("Раздел завершен");
-        router.push(`/projects/${projectId}/brief`);
-        return;
-      }
-
-      toast.success("Помещения успешно сохранены");
-      router.refresh();
-    } catch (error) {
-      console.error("Failed to save rooms:", error);
-      toast.error("Ошибка при сохранении помещений");
-    } finally {
-      setIsSaving(false);
-    }
+    });
   };
+
+  const isFormDisabled = isPending || form.formState.isSubmitting;
 
   return (
     <Form {...form}>
@@ -267,20 +262,23 @@ export function PremisesForm({ projectId, initialData }: PremisesFormProps) {
             );
           })}
         </SubBlockCard>
-        
-          <AddItemButton
-            onClick={() =>
-              append({
-                name: "",
-                order: roomFields.length + 1,
-                type: undefined,
-              })
-            }
-          >
-            Добавить помещение
-          </AddItemButton>
-        
-        <FormSubmitButton isLoading={isSaving} onActionSelect={setAction} />
+
+        <AddItemButton
+          onClick={() =>
+            append({
+              name: "",
+              order: roomFields.length + 1,
+              type: undefined,
+            })
+          }
+        >
+          Добавить помещение
+        </AddItemButton>
+
+        <FormSubmitButton
+          isLoading={isFormDisabled}
+          onActionSelect={setAction}
+        />
       </form>
     </Form>
   );

@@ -1,102 +1,47 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
 import { notificationsService } from "@/lib/services/notifications";
-import { Notification } from "@/types/notifications";
+import { withAuth } from "./safe-action";
 
-/**
- * Получить уведомления текущего пользователя (SSR).
- */
-export async function getNotificationsAction(): Promise<{
-  notifications: Notification[];
-  error?: string;
-}> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { notifications: [], error: "Not authenticated" };
-  }
-
-  try {
-    const notifications = await notificationsService.getNotifications(
-      user.id,
+//?  Получить уведомления текущего пользователя (SSR).
+export async function getNotificationsAction() {
+  const result = await withAuth(async (userId, supabase) => {
+    return await notificationsService.getNotifications(
+      userId,
       { limit: 50 },
       supabase,
     );
-    return { notifications };
-  } catch {
-    return { notifications: [], error: "Failed to fetch notifications" };
-  }
+  });
+
+  return {
+    notifications: result.success ? result.data : [],
+    error: result.success ? undefined : result.error,
+  };
 }
 
-/**
- * Отметить уведомление как прочитанное.
- */
-export async function markNotificationAsRead(
-  notificationId: string,
-): Promise<{ error?: string }> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { error: "Not authenticated" };
-  }
-
-  try {
+//?  Отметить уведомление как прочитанное.
+export async function markNotificationAsRead(notificationId: string) {
+  const result = await withAuth(async (_, supabase) => {
     await notificationsService.markAsRead(notificationId, supabase);
-    return {};
-  } catch {
-    return { error: "Failed to mark notification as read" };
-  }
+    return true;
+  });
+  return { error: result.success ? undefined : result.error };
 }
 
-/**
- * Отметить все уведомления как прочитанные.
- */
-export async function markAllNotificationsAsRead(): Promise<{
-  error?: string;
-}> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { error: "Not authenticated" };
-  }
-
-  try {
-    await notificationsService.markAllAsRead(user.id, supabase);
-    return {};
-  } catch {
-    return { error: "Failed to mark all notifications as read" };
-  }
+//?  Отметить все уведомления как прочитанные.
+export async function markAllNotificationsAsRead() {
+  const result = await withAuth(async (userId, supabase) => {
+    await notificationsService.markAllAsRead(userId, supabase);
+    return true;
+  });
+  return { error: result.success ? undefined : result.error };
 }
 
-/**
- * Удалить уведомление.
- */
-export async function deleteNotificationAction(
-  notificationId: string,
-): Promise<{ error?: string }> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { error: "Not authenticated" };
-  }
-
-  try {
+//?  Удалить уведомление.
+export async function deleteNotificationAction(notificationId: string) {
+  const result = await withAuth(async (_, supabase) => {
     await notificationsService.deleteNotification(notificationId, supabase);
-    return {};
-  } catch {
-    return { error: "Failed to delete notification" };
-  }
+    return true;
+  });
+  return { error: result.success ? undefined : result.error };
 }

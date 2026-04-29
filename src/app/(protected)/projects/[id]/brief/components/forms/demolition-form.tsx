@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   DemolitionSchema,
@@ -35,7 +35,7 @@ export function DemolitionForm({
   initialData,
 }: DemolitionFormProps) {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [action, setAction] = useState<"save" | "complete">("save");
 
   const form = useForm<DemolitionType>({
@@ -53,39 +53,33 @@ export function DemolitionForm({
     },
   });
 
-  const handleSubmit = async (data: DemolitionType) => {
-    if (!projectId) {
-      toast.error("Project ID missing");
-      return;
-    }
+  const handleSubmit = (data: DemolitionType) => {
+    startTransition(async () => {
+      try {
+        const result = await updateProjectBriefAction(projectId, {
+          demolition: data,
+        });
 
-    try {
-      setIsLoading(true);
+        if (!result.success) {
+          throw new Error(result.error as string);
+        }
 
-      const result = await updateProjectBriefAction(projectId, {
-        demolition: data,
-      });
+        if (action === "complete") {
+          await completeBriefSectionAction(projectId, "demolition", true);
+          toast.success("Раздел завершен");
+          router.push(`/projects/${projectId}/brief`);
+          return;
+        }
 
-      if (!result.success) {
-        throw new Error(result.error as string);
+        toast.success("Данные по демонтажу сохранены");
+      } catch (error) {
+        console.error(error);
+        toast.error("Ошибка при сохранении данных");
       }
-
-      if (action === "complete") {
-        await completeBriefSectionAction(projectId, "demolition", true);
-        toast.success("Раздел завершен");
-        router.push(`/projects/${projectId}/brief`);
-        return;
-      }
-
-      toast.success("Данные по демонтажу сохранены");
-      router.refresh();
-    } catch (error) {
-      console.error(error);
-      toast.error("Ошибка при сохранении данных");
-    } finally {
-      setIsLoading(false);
-    }
+    });
   };
+
+  const isFormDisabled = isPending || form.formState.isSubmitting
 
   return (
     <Form {...form}>
@@ -112,6 +106,7 @@ export function DemolitionForm({
                   <Switch
                     id="planChange"
                     checked={field.value}
+                    disabled={isFormDisabled}
                     onCheckedChange={field.onChange}
                   />
                 </FormControl>
@@ -128,6 +123,7 @@ export function DemolitionForm({
                   <FormLabel>Описание работ</FormLabel>
                   <FormControl>
                     <Textarea
+                      disabled={isFormDisabled}
                       placeholder="Подробная информация по необходимому демонтажу стен и перегородок..."
                       {...field}
                     />
@@ -156,6 +152,7 @@ export function DemolitionForm({
                 </div>
                 <FormControl>
                   <Switch
+                    disabled={isFormDisabled}
                     id="entranceDoorChange"
                     checked={field.value}
                     onCheckedChange={field.onChange}
@@ -175,6 +172,7 @@ export function DemolitionForm({
 
                   <FormControl>
                     <Textarea
+                      disabled={isFormDisabled}
                       placeholder="Предпочтительный тип входной двери, требования к безопасности и дизайну..."
                       {...field}
                     ></Textarea>
@@ -204,6 +202,7 @@ export function DemolitionForm({
                 </div>
                 <FormControl>
                   <Switch
+                    disabled={isFormDisabled}
                     id="windowsChange"
                     checked={field.value}
                     onCheckedChange={field.onChange}
@@ -223,6 +222,7 @@ export function DemolitionForm({
 
                   <FormControl>
                     <Textarea
+                      disabled={isFormDisabled}
                       placeholder="Материал профиля (алюминий/дерево/пластик), цвет, количество камер..."
                       {...field}
                     ></Textarea>
@@ -252,6 +252,7 @@ export function DemolitionForm({
                 </div>
                 <FormControl>
                   <Switch
+                    disabled={isFormDisabled}
                     id="furnitureDemolition"
                     checked={field.value}
                     onCheckedChange={field.onChange}
@@ -270,6 +271,7 @@ export function DemolitionForm({
                   <FormLabel>Что демонтируем?</FormLabel>
                   <FormControl>
                     <Textarea
+                      disabled={isFormDisabled}
                       placeholder="Шкафы, антресоли, кухни, которые необходимо разобрать..."
                       {...field}
                     />
@@ -280,7 +282,10 @@ export function DemolitionForm({
             />
           )}
         </SubBlockCard>
-        <FormSubmitButton isLoading={isLoading} onActionSelect={setAction} />
+        <FormSubmitButton
+          isLoading={isFormDisabled}
+          onActionSelect={setAction}
+        />
       </form>
     </Form>
   );

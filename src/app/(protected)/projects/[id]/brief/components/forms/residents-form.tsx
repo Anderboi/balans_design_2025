@@ -84,8 +84,6 @@ export function ResidentsForm({ projectId, initialData }: ResidentsFormProps) {
       toast.error("Project ID missing");
       return;
     }
-    console.time('briefFormSubmit')
-
     startTransition(async () => {
       try {
         const result = await updateProjectBriefAction(projectId, {
@@ -110,7 +108,6 @@ export function ResidentsForm({ projectId, initialData }: ResidentsFormProps) {
       }
     });
 
-    console.timeEnd("briefFormSubmit");
   };
 
   const isFormDisabled = isPending || form.formState.isSubmitting;

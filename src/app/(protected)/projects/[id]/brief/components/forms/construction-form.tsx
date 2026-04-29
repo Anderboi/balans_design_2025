@@ -61,11 +61,8 @@ export function ConstructionForm({
     return sections?.filter((s) => s?.type && s?.rooms?.length > 0).length || 0;
   };
 
-  async function onSubmit(data: ConstructionFormValues) {
-    if (!projectId) {
-      toast.error("Project ID missing");
-      return;
-    }
+  const handleSubmit = (data: ConstructionFormValues)=> {
+    
     startTransition(async () => {
       try {
         // Filter out empty sections
@@ -126,14 +123,16 @@ export function ConstructionForm({
     }
   }
 
+  const isFormDisabled = isPending || form.formState.isSubmitting;
+
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit, onError)}
+        onSubmit={form.handleSubmit(handleSubmit, onError)}
         className="flex h-full w-full flex-col"
       >
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold">Информация по монтажу</h2>
+          {/* <h2 className="text-2xl font-bold">Информация по монтажу</h2> */}
 
           <MaterialSection
             category="walls"
@@ -168,7 +167,10 @@ export function ConstructionForm({
             itemCount={getCategoryItemCount("floor")}
           />
         </div>
-        <FormSubmitButton isLoading={isPending} onActionSelect={setAction} />
+        <FormSubmitButton
+          isLoading={isFormDisabled}
+          onActionSelect={setAction}
+        />
       </form>
     </Form>
   );

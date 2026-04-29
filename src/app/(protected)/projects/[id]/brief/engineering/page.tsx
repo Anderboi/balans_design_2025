@@ -3,7 +3,7 @@ import PageContainer from "@/components/ui/page-container";
 import { EngineeringForm } from "../components/forms/engineering-form";
 import { EngineeringSystemsType } from "@/lib/schemas/brief-schema";
 import { ProjectPageHeader } from "@/components/project-page-header";
-import BriefBlockWraper from '@/features/projects/components/brief-block-wraper';
+import BriefBlockWrapper from '@/features/projects/components/brief-block-wraper';
 import { getCachedProjectAndBrief } from '@/features/projects/actions';
 
 export default async function BriefEngineeringPage({
@@ -33,13 +33,13 @@ export default async function BriefEngineeringPage({
         }}
       />
 
-      <BriefBlockWraper>
+      <BriefBlockWrapper>
         <EngineeringForm
           roomList={rooms}
           projectId={id}
           initialData={initialData}
         />
-      </BriefBlockWraper>
+      </BriefBlockWrapper>
     </PageContainer>
   );
 }

@@ -15,13 +15,12 @@ import PageHeader from "@/components/ui/page-header";
 import PageContainer from "@/components/ui/page-container";
 
 import { getCachedProjectAndBrief } from "@/features/projects/actions";
+import { Suspense } from 'react';
+import BriefLoading from './loading';
 
-export default async function BriefPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
+async function BriefContent({ id }: { id: string }) {
+  // await new Promise((resolve) => setTimeout(resolve, 2000));
+  
   const { project, brief } = await getCachedProjectAndBrief(id);
 
   if (!project) {
@@ -93,5 +92,20 @@ export default async function BriefPage({
         </Button>
       </div>
     </PageContainer>
+  );
+}
+
+export default async function BriefPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+
+  return (
+    // React немедленно покажет BriefLoading, пока BriefContent выполняет свои await
+    <Suspense fallback={<BriefLoading />}>
+      <BriefContent id={id} />
+    </Suspense>
   );
 }
