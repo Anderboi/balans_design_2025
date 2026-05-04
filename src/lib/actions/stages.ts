@@ -1,6 +1,5 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
 import { projectsService } from "@/lib/services/projects";
 import { revalidatePath } from "next/cache";
 import { withAuth } from "./safe-action";
@@ -39,6 +38,24 @@ export async function completeBriefSectionAction(
     );
     revalidatePath(`/projects/${projectId}/brief`);
 
+    return true;
+  });
+}
+
+// Приёмка стадии менеджером
+export async function acceptStageAction(
+  projectId: string,
+  stageId: string,
+) {
+  return withAuth(async (userId, supabase) => {
+    await projectsService.acceptStage(
+      projectId,
+      stageId,
+      userId,
+      supabase,
+    );
+
+    revalidatePath(`/projects/${projectId}`);
     return true;
   });
 }

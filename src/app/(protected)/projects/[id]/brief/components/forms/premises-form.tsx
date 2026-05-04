@@ -95,7 +95,7 @@ export function PremisesForm({ projectId, initialData }: PremisesFormProps) {
   const form = useForm<PremisesFormValues>({
     resolver: zodResolver(PremisesSchema),
     defaultValues: initialData || {
-      rooms: [{ name: "", order: 1, type: undefined }],
+      rooms: [{ name: "", order: 1 }],
     },
   });
 
@@ -185,16 +185,15 @@ export function PremisesForm({ projectId, initialData }: PremisesFormProps) {
     }
   };
 
-  const handleSubmit = async (data: PremisesFormValues) => {
+  const handleSubmit = (data: PremisesFormValues) => {
     startTransition(async () => {
       try {
         // Mapping with ID preservation
         const roomsToSave: CreateRoomData[] = data.rooms.map((room, index) => ({
-          id: (room as any).id, // Preserve ID if it exists in initialData
+          // id: (room as any).id || '', // Preserve ID if it exists in initialData
           name: room.name,
           order: index + 1,
-          type: room.type as any,
-          area: room.area,
+          type: (room.type || 'living'),
         }));
 
         const result = await updateRoomsAction(projectId, roomsToSave);
@@ -211,6 +210,7 @@ export function PremisesForm({ projectId, initialData }: PremisesFormProps) {
         }
 
         toast.success("Помещения успешно сохранены");
+        // router.refresh();
       } catch (error) {
         console.error("Failed to save rooms:", error);
         toast.error("Ошибка при сохранении помещений");

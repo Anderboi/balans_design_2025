@@ -19,6 +19,7 @@ export interface Project {
   tags?: string[] | null;
   owner_id?: string | null;
   project_stage_items?: ProjectStageItem[];
+  project_stages?: ProjectStageRecord[];
   is_strict_mode?: boolean | null;
 }
 
@@ -29,6 +30,18 @@ export interface ProjectStageItem {
   item_id: string;
   completed: boolean;
   completed_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// Запись из таблицы project_stages — хранит статус стадии и информацию о приёмке
+export interface ProjectStageRecord {
+  id: string;
+  project_id: string;
+  stage_id: string;
+  status: "locked" | "in_progress" | "ready" | "completed";
+  accepted_at: string | null;
+  accepted_by: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -201,8 +201,6 @@ export function ContactsPageClient({
 
         await loadCompanies();
         setIsAddCompanyOpen(false);
-      } else {
-        toast.error(result.error || "Не удалось добавить компанию");
       }
     } catch (error) {
       console.error("Ошибка при добавлении компании:", error);

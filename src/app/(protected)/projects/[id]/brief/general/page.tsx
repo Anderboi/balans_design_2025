@@ -3,8 +3,10 @@ import PageContainer from "@/components/ui/page-container";
 import { CommonInfoForm } from "@/app/(protected)/projects/[id]/brief/components/forms/common-info-form";
 import { CommonFormValues } from "@/lib/schemas/brief-schema";
 import { ProjectPageHeader } from "@/components/project-page-header";
-import { getCachedProjectAndBrief } from '@/features/projects/actions';
-import BriefBlockWrapper from '@/features/projects/components/brief-block-wraper';
+import {
+  getCachedProjectAndBrief
+} from "@/features/projects/actions";
+import BriefBlockWrapper from "@/features/projects/components/brief-block-wraper";
 
 export default async function BriefGeneralPage({
   params,
@@ -12,7 +14,7 @@ export default async function BriefGeneralPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const {project, brief} = await getCachedProjectAndBrief(id);
+  const { brief, project } = await getCachedProjectAndBrief(id);
 
   if (!project) {
     notFound();

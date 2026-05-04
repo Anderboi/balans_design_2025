@@ -4,9 +4,10 @@ import { StageItem } from "./stage-item";
 import MainBlockCard from '@/components/ui/main-block-card';
 
 interface StageCardProps {
-  stage: StageConfig;
+  stage: StageConfig & { acceptedAt?: string | null; acceptedBy?: string | null };
   isExpanded: boolean;
   onToggle: (id: string) => void;
+  onAcceptStage: (stageId: string) => void;
   projectId: string;
 }
 
@@ -14,6 +15,7 @@ export function StageCard({
   stage,
   isExpanded,
   onToggle,
+  onAcceptStage,
   projectId,
 }: StageCardProps) {
   // In a real app, status would come from props/DB, here utilizing defaultStatus
@@ -26,7 +28,9 @@ export function StageCard({
         stage={stage}
         isExpanded={isExpanded}
         onToggle={() => onToggle(stage.id)}
+        onAcceptStage={() => onAcceptStage(stage.id)}
         status={status}
+        acceptedAt={stage.acceptedAt}
       />
 
       {/* Expandable Content */}

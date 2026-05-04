@@ -32,7 +32,7 @@ export function ProjectClientSelector({
         });
 
         if (!contactRes.success || !contactRes.data) {
-          toast.error(contactRes.error || "Не удалось создать контакт");
+          toast.error(!contactRes.success || "Не удалось создать контакт");
           return;
         }
 

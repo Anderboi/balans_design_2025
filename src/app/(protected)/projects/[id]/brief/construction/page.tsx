@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { ConstructionFormValues } from "@/lib/schemas/brief-schema";
-import { getCachedProjectAndBrief } from '@/features/projects/actions';
+import { getCachedProjectAndBriefAndRooms } from "@/features/projects/actions";
 import PageContainer from '@/components/ui/page-container';
 import { ProjectPageHeader } from '@/components/project-page-header';
 import BriefBlockWrapper from '@/features/projects/components/brief-block-wraper';
@@ -12,7 +12,7 @@ export default async function BriefConstructionPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { project, brief, rooms } = await getCachedProjectAndBrief(id);
+  const { project, brief, rooms } = await getCachedProjectAndBriefAndRooms(id);
 
   if (!project) {
     notFound();

@@ -70,20 +70,34 @@ export const roomsService = {
 
     // 3. Upsert новых и измененных данных
     if (rooms.length > 0) {
-      const roomsToUpsert = rooms.map((room) => ({
-        ...(room.id ? { id: room.id } : {}),
-        project_id: projectId,
-        name: room.name,
-        order: room.order,
-        type: room.type,
-        area: room.area || 0,
-      }));
+      const toUpdate = rooms.filter((r) => r.id);
+      const toInsert = rooms.filter((r) => !r.id);
 
-      const { error: upsertError } = await supabaseClient
-        .from("rooms")
-        .upsert(roomsToUpsert);
+      if (toUpdate.length > 0) {
+        const { error } = await supabaseClient.from("rooms").upsert(
+          toUpdate.map((room) => ({
+            id: room.id,
+            project_id: projectId,
+            name: room.name,
+            order: room.order,
+            type: room.type,
+          })),
+          { onConflict: "id" },
+        );
+        if (error) throw error;
+      }
 
-      if (upsertError) throw upsertError;
+      if (toInsert.length > 0) {
+        const { error } = await supabaseClient.from("rooms").insert(
+          toInsert.map((room) => ({
+            project_id: projectId,
+            name: room.name,
+            order: room.order,
+            type: room.type,
+          })),
+        );
+        if (error) throw error;
+      }
     }
   },
 };

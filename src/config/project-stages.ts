@@ -8,7 +8,7 @@ import {
   Ruler,
 } from "lucide-react";
 
-export type StageStatus = "completed" | "in_progress" | "locked";
+export type StageStatus = "completed" | "in_progress" | "ready" | "locked";
 
 export interface StageSubItem {
   id: string;

@@ -12,7 +12,7 @@ export default async function BriefResidentsPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { project, brief } = await getCachedProjectAndBrief(id);
+  const { brief, project } = await getCachedProjectAndBrief(id);
 
   if (!project) {
     notFound();

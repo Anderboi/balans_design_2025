@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp, Lock, PencilRuler } from "lucide-react";
+import { ChevronDown, ChevronUp, Lock, PencilRuler, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { StageConfig } from "@/config/project-stages";
@@ -8,18 +8,23 @@ interface StageHeaderProps {
   stage: StageConfig;
   isExpanded: boolean;
   onToggle: () => void;
-  status: "completed" | "in_progress" | "locked";
+  onAcceptStage: () => void;
+  status: "completed" | "in_progress" | "ready" | "locked";
+  acceptedAt?: string | null;
 }
 
 export function StageHeader({
   stage,
   isExpanded,
   onToggle,
+  onAcceptStage,
   status,
+  acceptedAt,
 }: StageHeaderProps) {
   const isLocked = status === "locked";
   const isCompleted = status === "completed";
   const isInProgress = status === "in_progress";
+  const isReady = status === "ready";
   const Icon = stage.icon || PencilRuler;
 
   const handleToggle = () => {
@@ -43,13 +48,21 @@ export function StageHeader({
           className={cn(
             "flex items-center justify-center w-12 h-12 rounded-full shrink-0",
             isCompleted
-              ? "bg-zinc-900 text-white border-0 //border-green-300 "
-              : isInProgress
-                ? "bg-zinc-100 text-zinc-900 border border-zinc-200/50"
-                : "bg-gray-50 text-gray-400",
+              ? "bg-zinc-900 text-white border-0"
+              : isReady
+                ? "bg-emerald-500 text-white border-0 animate-pulse"
+                : isInProgress
+                  ? "bg-zinc-100 text-zinc-900 border border-zinc-200/50"
+                  : "bg-gray-50 text-gray-400",
           )}
         >
-          {isLocked ? <Lock className="size-5" /> : <Icon className="size-6" />}
+          {isLocked ? (
+            <Lock className="size-5" />
+          ) : isCompleted ? (
+            <CheckCircle2 className="size-6" />
+          ) : (
+            <Icon className="size-6" />
+          )}
         </div>
 
         <div>
@@ -71,6 +84,14 @@ export function StageHeader({
                 завершен
               </Badge>
             )}
+            {isReady && (
+              <Badge
+                variant="secondary"
+                className="text-amber-600 bg-amber-50 border border-amber-300 text-[10px] uppercase tracking-wide font-bold animate-in fade-in duration-500"
+              >
+                Готов к приёмке
+              </Badge>
+            )}
             {isInProgress && (
               <Badge
                 variant="secondary"
@@ -80,6 +101,11 @@ export function StageHeader({
               </Badge>
             )}
           </div>
+          {isCompleted && acceptedAt && (
+            <p className="text-sm text-gray-400 mt-0.5">
+              Принят {new Date(acceptedAt).toLocaleDateString("ru-RU")}
+            </p>
+          )}
           {isInProgress && stage.dueDate && (
             <p className="text-sm text-gray-500 mt-0.5">
               Срок: {stage.dueDate}
@@ -89,14 +115,18 @@ export function StageHeader({
       </div>
 
       <div className="flex items-center gap-4">
-        {isInProgress && stage.progress && (
+        {/* Progress bar for in_progress */}
+        {(isInProgress || isReady) && stage.progress && (
           <div className="hidden sm:flex items-center gap-3 text-xs font-medium text-gray-400 uppercase tracking-widest">
             <span>
               {stage.progress.current} из {stage.progress.total}
             </span>
             <div className="w-24 h-1 bg-gray-100 rounded-full overflow-hidden">
               <div
-                className="bg-foreground h-full rounded-full"
+                className={cn(
+                  "h-full rounded-full transition-all duration-500",
+                  isReady ? "bg-emerald-500" : "bg-foreground",
+                )}
                 style={{
                   width: `${
                     (stage.progress.current / stage.progress.total) * 100
@@ -105,6 +135,22 @@ export function StageHeader({
               />
             </div>
           </div>
+        )}
+
+        {/* Кнопка приёмки — отображается только для ready статуса */}
+        {isReady && (
+          <Button
+            variant="default"
+            size="sm"
+            className="rounded-full px-5 h-9 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold shadow-lg shadow-emerald-500/20 transition-all hover:shadow-xl hover:shadow-emerald-500/30 cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              onAcceptStage();
+            }}
+          >
+            <CheckCircle2 className="size-4 mr-1.5" />
+            Принять
+          </Button>
         )}
 
         {!isLocked && (

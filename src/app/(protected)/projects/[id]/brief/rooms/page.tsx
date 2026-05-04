@@ -3,7 +3,7 @@ import PageContainer from "@/components/ui/page-container";
 import { PremisesForm } from "../components/forms/premises-form";
 import { ProjectPageHeader } from "@/components/project-page-header";
 import BriefBlockWrapper from "@/features/projects/components/brief-block-wraper";
-import { getCachedProjectAndBrief } from "@/features/projects/actions";
+import { getCachedProjectAndBriefAndRooms } from "@/features/projects/actions";
 
 export default async function BriefRoomsPage({
   params,
@@ -11,7 +11,7 @@ export default async function BriefRoomsPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { project, rooms } = await getCachedProjectAndBrief(id);
+  const { project, rooms } = await getCachedProjectAndBriefAndRooms(id);
 
   if (!project) {
     notFound();

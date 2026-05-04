@@ -87,7 +87,7 @@ export function CreateProjectDialog({
       if (result.success) {
         setIsOpen(false);
         router.refresh();
-        router.push(`/projects/${result.projectId}`);
+        router.push(`/projects/${result.data.projectId}`);
       } else {
         console.error("Failed to create project:", result.error);
       }

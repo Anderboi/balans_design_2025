@@ -1,6 +1,9 @@
-import { supabase } from "@/lib/supabase";
+// import { supabase } from "@/lib/supabase";
 import { Notification } from "@/types/notifications";
 import { SupabaseClient } from "@supabase/supabase-js";
+import z from 'zod';
+
+const UserIdSchema = z.string().uuid("Неверный userId");
 
 export const notificationsService = {
   /**
@@ -8,25 +11,33 @@ export const notificationsService = {
    */
   async getNotifications(
     userId: string,
-    options: { limit?: number; offset?: number } = {},
-    client?: SupabaseClient,
+    options: { limit?: number; cursor?: string } = {},
+    supabase: SupabaseClient,
   ): Promise<Notification[]> {
-    const { limit = 50, offset = 0 } = options;
-    const supabaseClient = client || supabase;
+    const parsedId = UserIdSchema.safeParse(userId);
+    if (!parsedId.success) return [];
 
-    const { data, error } = await supabaseClient
+    const { limit = 50, cursor } = options;
+    const supabaseClient = supabase;
+
+    let query = supabaseClient
       .from("notifications")
       .select("*")
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
-      .range(offset, offset + limit - 1);
+      .limit(limit);
+
+       if (cursor) {
+         query = query.lt("created_at", cursor);
+       }
+       const { data, error } = await query;
 
     if (error) {
-      console.error("Ошибка при получении уведомлений:", error);
+      console.error("[notifications] getNotifications:", error.message);
       throw error;
     }
 
-    return (data as Notification[]) || [];
+    return (data as Notification[]) ?? [];
   },
 
   /**
@@ -34,13 +45,13 @@ export const notificationsService = {
    */
   async getUnreadCount(
     userId: string,
-    client?: SupabaseClient,
+    supabase: SupabaseClient,
   ): Promise<number> {
-    const supabaseClient = client || supabase;
+    if (!UserIdSchema.safeParse(userId).success) return 0;
 
-    const { count, error } = await supabaseClient
+    const { count, error } = await supabase
       .from("notifications")
-      .select("*", { count: "exact", head: true })
+      .select("id", { count: "exact", head: true })
       .eq("user_id", userId)
       .eq("read", false);
 
@@ -57,11 +68,10 @@ export const notificationsService = {
    */
   async markAsRead(
     notificationId: string,
-    client?: SupabaseClient,
+    supabase: SupabaseClient,
   ): Promise<void> {
-    const supabaseClient = client || supabase;
 
-    const { error } = await supabaseClient
+    const { error } = await supabase
       .from("notifications")
       .update({ read: true })
       .eq("id", notificationId);
@@ -75,10 +85,10 @@ export const notificationsService = {
   /**
    * Отметить все уведомления пользователя как прочитанные.
    */
-  async markAllAsRead(userId: string, client?: SupabaseClient): Promise<void> {
-    const supabaseClient = client || supabase;
+  async markAllAsRead(userId: string, supabase: SupabaseClient): Promise<void> {
+    if (!UserIdSchema.safeParse(userId).success) return;
 
-    const { error } = await supabaseClient
+    const { error } = await supabase
       .from("notifications")
       .update({ read: true })
       .eq("user_id", userId)
@@ -95,11 +105,10 @@ export const notificationsService = {
    */
   async deleteNotification(
     notificationId: string,
-    client?: SupabaseClient,
+    supabase: SupabaseClient,
   ): Promise<void> {
-    const supabaseClient = client || supabase;
 
-    const { error } = await supabaseClient
+    const { error } = await supabase
       .from("notifications")
       .delete()
       .eq("id", notificationId);

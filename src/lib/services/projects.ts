@@ -1,6 +1,13 @@
 import { BRIEF_SECTION_IDS } from "@/config/brief-sections";
+import { STAGES_CONFIG } from "@/config/project-stages";
 import { supabase } from "@/lib/supabase";
-import { Project, ProjectStageItem, Room, ObjectInfo } from "@/types";
+import {
+  Project,
+  ProjectStageItem,
+  ProjectStageRecord,
+  Room,
+  ObjectInfo,
+} from "@/types";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 export const projectsService = {
@@ -9,7 +16,7 @@ export const projectsService = {
     const supabaseClient = client || supabase;
     const { data, error } = await supabaseClient
       .from("projects")
-      .select("*, contacts(*), project_stage_items(*)")
+      .select("*, contacts(*), project_stage_items(*), project_stages(*)")
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -34,7 +41,7 @@ export const projectsService = {
     const supabaseClient = client || supabase;
     const { data, error } = await supabaseClient
       .from("projects")
-      .select("*, contacts(*), project_stage_items(*)")
+      .select("*, contacts(*), project_stage_items(*), project_stages(*)")
       .eq("id", id)
       .single();
 
@@ -126,29 +133,25 @@ export const projectsService = {
       .update(project)
       .eq("id", id)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error(`Ошибка при обновлении проекта с ID ${id}:`, error);
       throw error;
     }
 
-    return data as Project;
+    return (data ?? {}) as Project;
   },
 
   // Удаление проекта
-  async deleteProject(id: string, client?: SupabaseClient): Promise<void> {
+  async deleteProject(id: string, supabase: SupabaseClient): Promise<void> {
     // Проверка на undefined или пустой ID
     if (!id) {
       console.error("Попытка удалить проект с пустым ID");
       throw new Error("ID проекта не может быть пустым");
     }
 
-    const supabaseClient = client || supabase;
-    const { error } = await supabaseClient
-      .from("projects")
-      .delete()
-      .eq("id", id);
+    const { error } = await supabase.from("projects").delete().eq("id", id);
 
     if (error) {
       console.error(`Ошибка при удалении проекта с ID ${id}:`, error);
@@ -264,7 +267,187 @@ export const projectsService = {
       throw error;
     }
 
+    // Пересчитываем статус стадии (in_progress → ready если все подэтапы завершены)
+    await this.recalculateStageStatus(projectId, stageId, supabaseClient);
+
     return data as ProjectStageItem;
+  },
+
+  // Получение статусов стадий проекта (из таблицы project_stages)
+  async getProjectStages(
+    projectId: string,
+    client?: SupabaseClient,
+  ): Promise<ProjectStageRecord[]> {
+    if (!projectId) return [];
+
+    const supabaseClient = client || supabase;
+    const { data, error } = await supabaseClient
+      .from("project_stages")
+      .select("*")
+      .eq("project_id", projectId);
+
+    if (error) {
+      console.error(`Ошибка при получении стадий проекта ${projectId}:`, error);
+      return [];
+    }
+
+    return (data as ProjectStageRecord[]) || [];
+  },
+
+  // Приёмка стадии менеджером
+  async acceptStage(
+    projectId: string,
+    stageId: string,
+    userId: string,
+    client?: SupabaseClient,
+  ): Promise<ProjectStageRecord | null> {
+    const supabaseClient = client || supabase;
+
+    // 1. Помечаем стадию как completed
+    const { data, error } = await supabaseClient
+      .from("project_stages")
+      .update({
+        status: "completed",
+        accepted_at: new Date().toISOString(),
+        accepted_by: userId,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("project_id", projectId)
+      .eq("stage_id", stageId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Ошибка при приёмке стадии:", error);
+      throw error;
+    }
+
+    // 2. Разблокируем следующую стадию
+    const stageIndex = STAGES_CONFIG.findIndex((s) => s.id === stageId);
+    if (stageIndex >= 0 && stageIndex < STAGES_CONFIG.length - 1) {
+      const nextStageId = STAGES_CONFIG[stageIndex + 1].id;
+
+      // Проверяем, что следующая стадия заблокирована
+      const { data: nextStage } = await supabaseClient
+        .from("project_stages")
+        .select("status")
+        .eq("project_id", projectId)
+        .eq("stage_id", nextStageId)
+        .single();
+
+      if (nextStage?.status === "locked") {
+        await supabaseClient
+          .from("project_stages")
+          .update({
+            status: "in_progress",
+            updated_at: new Date().toISOString(),
+          })
+          .eq("project_id", projectId)
+          .eq("stage_id", nextStageId);
+      }
+    }
+
+    // 3. Синхронизируем поле projects.stage
+    await this.syncProjectStage(projectId, supabaseClient);
+
+    return data as ProjectStageRecord;
+  },
+
+  // Пересчёт статуса стадии: если все подэтапы завершены → ready
+  async recalculateStageStatus(
+    projectId: string,
+    stageId: string,
+    client?: SupabaseClient,
+  ) {
+    const supabaseClient = client || supabase;
+
+    // Получаем конфиг стадии
+    const stageConfig = STAGES_CONFIG.find((s) => s.id === stageId);
+    if (!stageConfig) return;
+
+    // Получаем текущий статус стадии
+    const { data: currentStage } = await supabaseClient
+      .from("project_stages")
+      .select("status")
+      .eq("project_id", projectId)
+      .eq("stage_id", stageId)
+      .single();
+
+    // Не трогаем completed или locked стадии
+    if (
+      !currentStage ||
+      currentStage.status === "completed" ||
+      currentStage.status === "locked"
+    ) {
+      return;
+    }
+
+    // Получаем все подэтапы стадии
+    const stageItems = await this.getProjectStageItems(
+      projectId,
+      supabaseClient,
+    );
+    const stageDbItems = stageItems.filter((item) => item.stage_id === stageId);
+
+    // Проверяем, все ли подэтапы завершены
+    const allCompleted = stageConfig.items.every(
+      (item) => stageDbItems.find((i) => i.item_id === item.id)?.completed,
+    );
+
+    const newStatus = allCompleted ? "ready" : "in_progress";
+
+    if (newStatus !== currentStage.status) {
+      await supabaseClient
+        .from("project_stages")
+        .update({
+          status: newStatus,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("project_id", projectId)
+        .eq("stage_id", stageId);
+    }
+  },
+
+  // Синхронизация поля projects.stage с текущим прогрессом (fire-and-forget, не бросает ошибок)
+  async syncProjectStage(projectId: string, client?: SupabaseClient) {
+    try {
+      const supabaseClient = client || supabase;
+
+      const stages = await this.getProjectStages(projectId, supabaseClient);
+
+      // Определяем текущую активную стадию
+      let currentStageTitle = STAGES_CONFIG[0].title;
+
+      for (const stageConfig of STAGES_CONFIG) {
+        const stageRecord = stages.find((s) => s.stage_id === stageConfig.id);
+        if (stageRecord?.status === "completed") {
+          const nextIndex = STAGES_CONFIG.indexOf(stageConfig) + 1;
+          if (nextIndex < STAGES_CONFIG.length) {
+            currentStageTitle = STAGES_CONFIG[nextIndex].title;
+          } else {
+            currentStageTitle = "Завершён";
+          }
+        } else {
+          currentStageTitle = stageConfig.title;
+          break;
+        }
+      }
+
+      // Прямое обновление без .single() — не бросает при RLS-ограничениях
+      await supabaseClient
+        .from("projects")
+        .update({
+          stage: currentStageTitle,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", projectId);
+    } catch (err) {
+      // Логируем, но не прерываем основной поток
+      console.warn(
+        "syncProjectStage: не удалось синхронизировать стадию проекта:",
+        err,
+      );
+    }
   },
 
   // Получение брифа проекта
@@ -317,29 +500,45 @@ export const projectsService = {
 
     // Автоматическая синхронизация статуса "Информация по объекту", если она была обновлена
     if (data.object_info) {
-      await this.syncObjectInfoStatus(projectId, supabaseClient);
+      await this.syncObjectInfoStatus(
+        projectId,
+        supabaseClient,
+        data.object_info as Record<string, unknown>,
+      );
     }
 
     return result;
   },
 
   // Синхронизация статуса информации по объекту
-  async syncObjectInfoStatus(projectId: string, client?: SupabaseClient) {
+  async syncObjectInfoStatus(
+    projectId: string,
+    client?: SupabaseClient,
+    objectInfoData?: Record<string, unknown>,
+  ) {
     const supabaseClient = client || supabase;
 
-    // Получаем бриф для проверки заполненности object_info
-    const { data: brief, error: fetchError } = await supabaseClient
-      .from("project_briefs")
-      .select("object_info")
-      .eq("project_id", projectId)
-      .single();
+    let objectInfo = objectInfoData || ({} as Record<string, unknown>);
 
-    if (fetchError) {
-      console.error("Error fetching brief for object_info sync:", fetchError);
-      return;
+    // Получаем бриф для проверки заполненности object_info
+    if (!objectInfo) {
+      const { data: brief, error: fetchError } = await supabaseClient
+        .from("project_briefs")
+        .select("object_info")
+        .eq("project_id", projectId)
+        .single();
+
+      objectInfo =
+        (brief?.object_info as Record<string, unknown>) ||
+        ({} as Record<string, unknown>);
+
+      if (fetchError) {
+        console.error("Error fetching brief for object_info sync:", fetchError);
+        return;
+      }
     }
 
-    const objectInfo = (brief?.object_info as Record<string, unknown>) || {};
+    // const objectInfo = (brief?.object_info as Record<string, unknown>) || {};
 
     // Считаем информацию по объекту заполненной, если загружены документы
     // или заполнены основные разделы (локация, тех. условия, ответственное лицо)

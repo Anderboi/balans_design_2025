@@ -18,6 +18,7 @@ import { ProjectNavCards } from "@/features/projects/components/project-nav-card
 import { createClient } from "@/lib/supabase/server";
 import BackLink from "@/components/back-link";
 import { Metadata, ResolvingMetadata } from "next";
+import { DeleteProjectDialog } from '@/features/projects/components/delete-project-dialog';
 
 const getProjectData = cache(async (id: string) => {
   const supabase = await createClient();
@@ -85,6 +86,7 @@ export default async function ProjectDetailPage({
             <Sparkles className="size-4" />
             Спросить Balans AI
           </Button>
+          <DeleteProjectDialog projectId={id} projectName={project.name} />
         </div>
       </div>
 
@@ -99,10 +101,10 @@ export default async function ProjectDetailPage({
 
         {/* Quick Access Cards */}
         <ProjectNavCards projectId={id} />
-          <ProjectStagesLoader
-            projectId={id}
-            isStrictMode={project.is_strict_mode ?? true}
-          />
+        <ProjectStagesLoader
+          projectId={id}
+          isStrictMode={project.is_strict_mode ?? true}
+        />
       </div>
     </div>
   );

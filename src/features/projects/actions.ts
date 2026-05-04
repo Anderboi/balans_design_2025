@@ -14,12 +14,33 @@ export const getProjects = cache(async () => {
   }
 });
 
+export const getCachedProjectAndBriefAndRooms = cache(async (id: string) => {
+  const supabase = await createClient();
+
+  try {
+    const project = await projectsService.getProjectById(id, supabase);
+    const brief = await projectsService.getProjectBrief(id, supabase);
+    const rooms = await roomsService.getRoomsByProjectId(id, supabase);
+
+    return { project, brief, rooms };
+  } catch (error) {
+    console.error("Ошибка при получении данных проекта:", error);
+    // В случае ошибки возвращаем null для проекта, чтобы страница показала notFound()
+    return { project: null, brief: null, rooms: [] };
+  }
+});
+
 export const getCachedProjectAndBrief = cache(async (id: string) => {
   const supabase = await createClient();
-  const [project, brief, rooms] = await Promise.all([
-    projectsService.getProjectById(id, supabase),
-    projectsService.getProjectBrief(id, supabase),
-    roomsService.getRoomsByProjectId(id, supabase),
-  ]);
-  return { project, brief, rooms };
+
+  try {
+    const project = await projectsService.getProjectById(id, supabase);
+    const brief = await projectsService.getProjectBrief(id, supabase);
+
+    return { project, brief };
+  } catch (error) {
+    console.error("Ошибка при получении данных проекта:", error);
+    // В случае ошибки возвращаем null для проекта, чтобы страница показала notFound()
+    return { project: null, brief: null };
+  }
 });

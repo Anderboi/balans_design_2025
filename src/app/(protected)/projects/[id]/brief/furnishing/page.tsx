@@ -4,7 +4,7 @@ import { FurnishingForm } from "../components/forms/furnishing-form";
 import { EquipmentBlockFormValues } from "@/lib/schemas/brief-schema";
 import { ProjectPageHeader } from "@/components/project-page-header";
 import BriefBlockWrapper from "@/features/projects/components/brief-block-wraper";
-import { getCachedProjectAndBrief } from "@/features/projects/actions";
+import { getCachedProjectAndBriefAndRooms } from "@/features/projects/actions";
 
 export default async function BriefFurnishingPage({
   params,
@@ -12,7 +12,7 @@ export default async function BriefFurnishingPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { project, brief, rooms } = await getCachedProjectAndBrief(id);
+  const { project, brief, rooms } = await getCachedProjectAndBriefAndRooms(id);
 
   if (!project) {
     notFound();

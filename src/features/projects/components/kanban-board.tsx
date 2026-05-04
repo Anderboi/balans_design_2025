@@ -44,7 +44,7 @@ export const KanbanBoard = ({
     if (!column) return;
 
     const newStatus = column.status;
-
+    const previousTasks = tasks; 
     // Optimistic update
     const updatedTasks = tasks.map((task) =>
       task.id === draggableId ? { ...task, status: newStatus } : task,
@@ -63,7 +63,7 @@ export const KanbanBoard = ({
     } catch (error) {
       console.error("Failed to update task status", error);
       toast.error("Не удалось обновить статус задачи");
-      setTasks(tasks); // Revert on error
+      setTasks(previousTasks); // Revert on error
     }
   };
 

@@ -15,13 +15,13 @@ import PageHeader from "@/components/ui/page-header";
 import PageContainer from "@/components/ui/page-container";
 
 import { getCachedProjectAndBrief } from "@/features/projects/actions";
-import { Suspense } from 'react';
-import BriefLoading from './loading';
+import { Suspense } from "react";
+import BriefLoading from "./loading";
 
 async function BriefContent({ id }: { id: string }) {
   // await new Promise((resolve) => setTimeout(resolve, 2000));
-  
-  const { project, brief } = await getCachedProjectAndBrief(id);
+
+  const { brief, project } = await getCachedProjectAndBrief(id);
 
   if (!project) {
     notFound();

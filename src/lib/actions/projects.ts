@@ -1,9 +1,9 @@
 "use server";
 
 import { Project } from "@/types";
-import { createClient } from "@/lib/supabase/server";
 import { projectsService } from "@/lib/services/projects";
 import { revalidatePath } from "next/cache";
+import { withAuth } from "./safe-action";
 
 interface CreateProjectFormData {
   name: string;
@@ -18,19 +18,7 @@ interface CreateProjectFormData {
 }
 
 export async function createProjectAction(formData: CreateProjectFormData) {
-  // 1. Auth check
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError || !user) {
-    return { success: false, error: "Unauthorized" };
-  }
-
-  try {
-    // 2. Service call
+  return withAuth(async (userId, supabase) => {
     const newProject = await projectsService.createProject(
       {
         name: formData.name,
@@ -46,38 +34,25 @@ export async function createProjectAction(formData: CreateProjectFormData) {
       supabase,
     );
 
-    // 3. Revalidate
     revalidatePath("/projects");
     return { success: true, projectId: newProject.id };
-  } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error
-        ? error.message
-        : "Произошла непредвиденная ошибка";
-    console.error("Unexpected error:", error);
-    return { success: false, error: errorMessage };
-  }
+  });
 }
 
 export async function updateProjectAction(id: string, data: Partial<Project>) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError || !user) {
-    return { success: false, error: "Unauthorized" };
-  }
-
-  try {
+  return withAuth(async (userId, supabase) => {
     await projectsService.updateProject(id, data, supabase);
     revalidatePath(`/projects/${id}`);
     revalidatePath("/projects");
-    return { success: true };
-  } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Ошибка при обновлении проекта";
-    return { success: false, error: errorMessage };
-  }
+    return { projectId: id };
+  });
+}
+
+export async function deleteProjectAction(id: string) {
+  return withAuth(async (userId, supabase) => {
+    await projectsService.deleteProject(id, supabase);
+    revalidatePath(`/projects/${id}`);
+    revalidatePath("/projects");
+    return { projectId: id };
+  });
 }

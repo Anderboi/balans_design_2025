@@ -12,12 +12,16 @@ export async function ProjectStagesLoader({
   isStrictMode = true,
 }: ProjectStagesLoaderProps) {
   const supabase = await createClient();
-  const stageItems = await projectsService.getProjectStageItems(
-    projectId,
-    supabase,
-  );
+  const [stageItems, stageRecords] = await Promise.all([
+    projectsService.getProjectStageItems(projectId, supabase),
+    projectsService.getProjectStages(projectId, supabase),
+  ]);
 
   return (
-    <ProjectStages initialStageItems={stageItems} isStrictMode={isStrictMode} />
+    <ProjectStages
+      initialStageItems={stageItems}
+      initialStageRecords={stageRecords}
+      isStrictMode={isStrictMode}
+    />
   );
 }
